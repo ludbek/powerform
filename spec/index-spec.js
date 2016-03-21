@@ -234,7 +234,7 @@ describe("FormModel", function () {
       })
     })
 
-  describe(".values()", function () {
+  describe(".data()", function () {
     var aform
     beforeAll(function () {
       aform = FormModel(
@@ -243,7 +243,7 @@ describe("FormModel", function () {
       })
 
     it("returns the dict with key:value pair for each form field", function () {
-      expect(aform.values()).toEqual({username: 'ausername', password: 'apassword'})
+      expect(aform.data()).toEqual({username: 'ausername', password: 'apassword'})
       })
     })
 

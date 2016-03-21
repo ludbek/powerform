@@ -76,7 +76,7 @@ module.exports =  function (config) {
         });
       },
 
-    values: function () {
+    data: function () {
       var dict = {}
       var self = this
       _.forEach(this._config, function (avalue, akey) {
