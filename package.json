@@ -1,0 +1,19 @@
+{
+  "name": "mithril-form",
+  "version": "1.0.0",
+  "description": "Form model for Mithril.js",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "ludbek",
+  "license": "ISC",
+  "dependencies": {
+    "lodash": "^4.6.1",
+    "validate.js": "^0.9.0"
+  },
+  "devDependencies": {
+    "jasmine": "^2.4.1",
+    "jspm": "^0.16.31"
+  }
+}
