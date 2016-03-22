@@ -1,5 +1,5 @@
 # Introduction
-A form model for mithril.
+A form model for [Mithril.js](https://github.com/lhorie/mithril.js/). Used to be part of [mithril-ui](https://github.com/ludbek/mithril-ui).
 
 # Installation
 npm install mithril-form
