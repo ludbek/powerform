@@ -4,8 +4,23 @@
   "description": "Form model for Mithril.js",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jasmine"
   },
+  "files": [
+    "index.js"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ludbek/mithril-form.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ludbek/mithril-form/issues"
+  },
+  "homepage": "https://github.com/ludbek/mithril-form#readme",
+  "keywords": [
+    "mithril",
+    "form"
+  ],
   "author": "ludbek",
   "license": "ISC",
   "dependencies": {
