@@ -12,7 +12,7 @@ npm install mithril-form
 > import Form from "mithril-form"
 
 // create form
-> let form = Form({
+> let form = new Form({
 .. "username": {presence: true},
 .. "password": {presence: true},
 .. "confirmPassword": {equality: "password"}})
@@ -42,11 +42,11 @@ false
 # API
 ## Creating new form
 ```javascript
-let form = Form({name: {presence: true}})
+let form = new Form({name: {presence: true}})
 ```
 ## Set default value
 ```javascript
-let form = Form({name: {presence: true, default: "aname"}})
+let form = new Form({name: {presence: true, default: "aname"}})
 form.name() // "aname"
 ```
 ## Form methods

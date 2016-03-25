@@ -1,12 +1,12 @@
-var FormModel = require("../index.js")
+var Form = require("../index.js")
 
-describe("FormModel", function () {
+describe("Form", function () {
   var formModel
   var config = {
     username: {default: 'batman', presence: true},
     password: {}}
   beforeEach(function () {
-    formModel = FormModel(config)
+    formModel = new Form(config)
     })
 
   it("constructs an object", function () {
@@ -37,7 +37,7 @@ describe("FormModel", function () {
   describe(".aProp", function () {
     var aform
     beforeEach(function () {
-      aform = FormModel({
+      aform = new Form({
         username: {presence: true},
         password: {}})})
 
@@ -45,7 +45,7 @@ describe("FormModel", function () {
       expect(aform.username()).toEqual('')})
 
     it("sets default value", function () {
-      var aform = FormModel({username: {default: "batman"}})
+      var aform = new Form({username: {default: "batman"}})
       expect(aform.username()).toEqual("batman")})
 
     it("is a getter and setter", function () {
@@ -53,7 +53,7 @@ describe("FormModel", function () {
       expect(aform.username()).toEqual('superman')})
 
     describe(".isDirty()", function () {
-      var aform = FormModel({username: {default: 'ausername', presence: true}})
+      var aform = new Form({username: {default: 'ausername', presence: true}})
 
       it("returns false if the value has not been altered", function () {
         expect(aform.username.isDirty()).toEqual(false)
@@ -79,7 +79,7 @@ describe("FormModel", function () {
         })
 
       it("validates against dependent field if equality is set", function () {
-        var form = FormModel({
+        var form = new Form({
           password: {presence: true},
           confirmPassword: {equality: "password"}})
 
@@ -115,7 +115,7 @@ describe("FormModel", function () {
     describe(".setAndValidate()", function () {
       var aform
       beforeEach(function () {
-        aform = FormModel({username: {presence: true}})
+        aform = new Form({username: {presence: true}})
       })
 
       it("sets the value", function () {
@@ -132,7 +132,7 @@ describe("FormModel", function () {
     describe(".reset()", function () {
       var aform
       beforeEach(function () {
-        aform = FormModel({username: {presence: true, default: "baba"}})
+        aform = new Form({username: {presence: true, default: "baba"}})
       })
 
       it("resets the value", function () {
@@ -153,7 +153,7 @@ describe("FormModel", function () {
     describe(".errors()", function () {
       var aform
       beforeEach(function () {
-        aform = FormModel({username: {presence: true}})
+        aform = new Form({username: {presence: true}})
       })
 
       it("gets/sets the errors", function () {
@@ -171,7 +171,7 @@ describe("FormModel", function () {
   describe(".isValid()", function () {
     var aform
     beforeEach(function () {
-      aform = FormModel({
+      aform = new Form({
         username: {presence: true},
         password: {presence: true}})
     })
@@ -222,7 +222,7 @@ describe("FormModel", function () {
   })
 
   describe(".isDirty()", function () {
-    var aform = FormModel({username: {presence: true, default: 'ausername'}})
+    var aform = new Form({username: {presence: true, default: 'ausername'}})
 
     it("returns false if form has not been altered", function () {
       expect(aform.isDirty()).toEqual(false)
@@ -237,7 +237,7 @@ describe("FormModel", function () {
   describe(".data()", function () {
     var aform
     beforeAll(function () {
-      aform = FormModel(
+      aform = new Form(
         {username: {default: 'ausername'},
         password: {default: 'apassword'}})
       })
@@ -250,7 +250,7 @@ describe("FormModel", function () {
   describe(".errors()", function () {
     var aform
     beforeAll(function () {
-      aform = FormModel(
+      aform = new Form(
         {username: {default: 'ausername'},
         password: {default: 'apassword'}})
       })
@@ -271,7 +271,7 @@ describe("FormModel", function () {
   describe(".reset()", function () {
     var aform
     beforeEach(function () {
-      aform = FormModel({
+      aform = new Form({
         username: {presence: true, default: "ausername"},
         password: {presence: true, default: "apassword"}})
     })
