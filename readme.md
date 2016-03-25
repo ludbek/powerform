@@ -34,7 +34,7 @@ false
 > form.isValid()
 false
 > form.errors()
-{ username: [ 'Username can\'t be blank' ],
+{ username: undefined,
   password: undefined,
   confirmPassword: [ 'Confirm password is not equal to password' ] }
 ```
@@ -70,8 +70,11 @@ Resets all the fields.
 
 ### .errors()
 Gets or sets errors on fields.
-One should either call call `.isValid()` or `.setAndValidate()` to set errors.
+One should either call `.isValid()` or `.setAndValidate()` to set errors.
 ```javascript
+form.name("")
+form.isValid() // false
+form.errors() // {name: ['Name can\'t be blank]}
 form.errors({name: ["a error"]})
 form.errors() // {name: ["a error"]}
 ```
@@ -98,7 +101,7 @@ Same as `form.reset()`
 Gets or sets errors.
 ```javascript
 form.name("")
-form.isValid() // false
+form.name.isValid() // false
 form.name.errors() // ['Name can\'t be blank]
 form.name.errors(['a error'])
 form.name.errors() // ['a error']
