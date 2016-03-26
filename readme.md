@@ -143,14 +143,14 @@ let signup = {
         return m("p.error", error)}),
       m("input", {
         placeholder: "Password",
-        onkeypress: m.withAttr("value", ctrl.form.username),
-        onchange: ctrl.form.username.isValid}),
+        onkeypress: m.withAttr("value", ctrl.form.password),
+        onchange: ctrl.form.password.isValid}),
       _.map(ctrl.form.password.errors(), (error) => {
         return m("p.error", error)}),
       m("input", {
         placeholder: "Confirm Password",
-        onkeypress: m.withAttr("value", ctrl.form.username),
-        onchange: ctrl.form.username.isValid}),
+        onkeypress: m.withAttr("value", ctrl.form.confirmPassword),
+        onchange: ctrl.form.confirmPassword.isValid}),
       _.map(ctrl.form.confirmPassword.errors(), (error) => {
         return m("p.error", error)}),
       m("button", {
