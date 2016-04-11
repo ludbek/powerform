@@ -1,5 +1,11 @@
-var _ = require('lodash')
 var validate = require('validate.js')
+var _ = {
+  some: require('lodash/some.js'),
+  every: require('lodash/every.js'),
+  keys: require('lodash/keys.js'),
+  omit: require('lodash/omit.js'),
+  forEach: require('lodash/forEach.js')
+}
 
 function prop(model, field, defaultValue) {
   var initialState = defaultValue || ""
