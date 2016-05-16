@@ -1,0 +1,21 @@
+{
+  "name": "mithril-form",
+  "description": "Form model for Mithril.js",
+  "main": "index.js",
+  "authors": [
+    "ludbek"
+  ],
+  "license": "ISC",
+  "keywords": [
+    "mithril",
+    "form"
+  ],
+  "homepage": "https://github.com/ludbek/mithril-form",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
