@@ -7,19 +7,23 @@ var _ = {
   forEach: require('lodash/forEach.js')
 };
 
+function getValue() {
+
+}
+
 function prop(model, field, defaultValue) {
   var initialState = defaultValue || "";
   var previousState = initialState;
-  var state = model._config[field].decorator
-      ? model._config[field].decorator(initialState, previousState)
+  var state = model._config[field].modifier
+      ? model._config[field].modifier(initialState, previousState)
       : initialState;
 
   var aclosure = function (value) {
     if(arguments.length === 0)  return state;
 
     previousState = state;
-    state = model._config[field].decorator
-      ? model._config[field].decorator(value, previousState )
+    state = model._config[field].modifier
+      ? model._config[field].modifier(value, previousState )
       : value;
   };
 
@@ -35,14 +39,18 @@ function prop(model, field, defaultValue) {
   aclosure.isValid = function (attach_errors) {
     var errors;
     var constrains = {};
-    constrains[field] = _.omit(model._config[field], ['default', 'decorator', 'cleaner']);
+    constrains[field] = _.omit(model._config[field], ['default', 'modifier', 'cleaner']);
     var values = {};
-    values[field] = aclosure();
+    var cleaner = model._config[field].cleaner;
+    values[field] = cleaner? cleaner(aclosure()): aclosure();
 
     // for equality
     if (model._config[field].equality) {
       var equalAgainst = model._config[field].equality;
-      values[equalAgainst] = model[equalAgainst]();
+      var equalAgainstCleaner = model._config[equalAgainst].cleaner;
+      values[equalAgainst] = equalAgainstCleaner
+        ? equalAgainstCleaner(model[equalAgainst]())
+        : model[equalAgainst]();
       }
 
     errors = validate(values, constrains);

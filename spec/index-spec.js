@@ -56,10 +56,10 @@ describe("Form", function () {
       expect(aform.username()).toEqual('superman');
     });
 
-    it("calls decorator with new and old values", function () {
+    it("calls modifier with new and old values", function () {
       var newValue, oldValue;
       var aform = new Form({username: {default: "batman",
-                                       decorator: function (newState, oldState) {
+                                       modifier: function (newState, oldState) {
                                          newValue = newState;
                                          oldValue = oldState;
                                          return newState;
@@ -126,6 +126,15 @@ describe("Form", function () {
         formModel.username("");
         formModel.username.isValid(false);
         expect(formModel.username.errors()).not.toBeDefined();
+      });
+
+      it("cleans the value before validation", function () {
+        var form = new Form({username: {default: "ausername",
+                                        format: /[^a][a-z]{1,8}/,
+                                        cleaner: function (data) {
+                                          return data.replace("a", "");
+                                        }}});
+        expect(form.username.isValid()).toEqual(true);
       });
     });
 

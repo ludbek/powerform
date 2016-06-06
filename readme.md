@@ -117,6 +117,30 @@ form.name.setAndValidate("")
 form.errors() // ['Name can\'t be blank]
 ```
 
+## Modifier and Cleaner
+Use `modifier` and `cleaner` to decorate and clean input data respectively.
+Modifier come handy in situations like automatically inserting `-`(dash) inbetween credit card input,
+capitaling user's name, etc. Cleaner is used for cleaning modified data if necessary.
+
+`isValid` uses `cleaner` before validating the fields.
+
+### Uage
+```javascript
+var form = new Form({fullName: {modifier: function (newValue, oldValue) {
+                                  ...
+                                  return modifiedValue;
+                                },
+                                cleaner: function (value) {
+                                  ...
+                                  return cleanedValue;
+                                }}});
+
+form.fullName("super man")
+form.fullName() // modified name
+form.data() // {fullName: cleaned name}
+```
+
+
 # Using it with Mithril.js
 ```javascript
 let signup = {
