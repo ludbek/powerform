@@ -1,2 +1,4 @@
 .brofile
 node_modules/
+.tern-port
+.tern-project
