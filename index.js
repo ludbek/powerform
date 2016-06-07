@@ -13,7 +13,7 @@ function getValue() {
 
 function prop(model, field, defaultValue) {
   var initialState = defaultValue || "";
-  var previousState = initialState;
+  var previousState = "";
   var state = model._config[field].modifier
       ? model._config[field].modifier(initialState, previousState)
       : initialState;

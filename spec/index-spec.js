@@ -64,6 +64,9 @@ describe("Form", function () {
                                          oldValue = oldState;
                                          return newState;
                                        }}});
+      expect(newValue).toEqual("batman");
+      expect(oldValue).toEqual("");
+
       aform.username("superman");
       expect(newValue).toEqual("superman");
       expect(oldValue).toEqual("batman");
