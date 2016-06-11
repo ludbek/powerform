@@ -2,7 +2,7 @@
 A form model for [Mithril.js](https://github.com/lhorie/mithril.js/). Used to be part of [mithril-ui](https://github.com/ludbek/mithril-ui).
 
 # Installation
-## Webpack
+## npm
 `npm install mithril-form`
 ## Bower
 `bower install mithril-form`
