@@ -1,4 +1,3 @@
-var validate = require('validate.js');
 var _ = {
   some: require('lodash/some.js'),
   every: require('lodash/every.js'),
@@ -7,8 +6,8 @@ var _ = {
   forEach: require('lodash/forEach.js')
 };
 
-function getValue() {
-
+function isFunction(data) {
+  return typeof data === "function";
 }
 
 function prop(model, field, defaultValue) {
@@ -37,25 +36,13 @@ function prop(model, field, defaultValue) {
   };
 
   aclosure.isValid = function (attach_errors) {
-    var errors;
-    var constrains = {};
-    constrains[field] = _.omit(model._config[field], ['default', 'modifier', 'cleaner']);
-    var values = {};
-    var cleaner = model._config[field].cleaner;
-    values[field] = cleaner? cleaner(aclosure()): aclosure();
+    var errors, cleaner, value;
+    cleaner = model._config[field].cleaner;
+    value = cleaner? cleaner(aclosure()): aclosure();
 
-    // for equality
-    if (model._config[field].equality) {
-      var equalAgainst = model._config[field].equality;
-      var equalAgainstCleaner = model._config[equalAgainst].cleaner;
-      values[equalAgainst] = equalAgainstCleaner
-        ? equalAgainstCleaner(model[equalAgainst]())
-        : model[equalAgainst]();
-      }
-
-    errors = validate(values, constrains);
+    errors = model._config[field].validator(value);
     if(attach_errors !== false) {
-      aclosure.errors(errors? errors[field]: undefined);
+      aclosure.errors(errors? errors: undefined);
     }
 
     return errors === undefined;
@@ -133,6 +120,7 @@ module.exports =  function (config) {
   };
 
   _.forEach(config, function (avalue, akey) {
+    if (!isFunction(avalue.validator)) throw Error("'" + akey + "' needs a validator.");
     formModel[akey] = prop(formModel, akey, avalue.default);
   });
 
