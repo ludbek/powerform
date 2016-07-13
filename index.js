@@ -1,10 +1,8 @@
-var _ = {
-  some: require('lodash/some.js'),
-  every: require('lodash/every.js'),
-  keys: require('lodash/keys.js'),
-  omit: require('lodash/omit.js'),
-  forEach: require('lodash/forEach.js')
-};
+var some = require("lodash.some");
+var every = require("lodash.every");
+var keys = require("lodash.keys");
+var foreach = require("lodash.foreach");
+
 
 function isFunction(data) {
   return typeof data === "function";
@@ -35,29 +33,29 @@ function prop(model, field, defaultValue) {
     aclosure.isValid();
   };
 
-  aclosure.isValid = function (attach_errors) {
-    var errors, cleaner, value;
+  aclosure.isValid = function (attach_error) {
+    var error, cleaner, value;
     cleaner = model._config[field].cleaner;
     value = cleaner? cleaner(aclosure()): aclosure();
 
-    errors = model._config[field].validator(value);
-    if(attach_errors !== false) {
-      aclosure.errors(errors? errors: undefined);
+    error = model._config[field].validator(value);
+    if(attach_error !== false) {
+      aclosure.error(error? error: undefined);
     }
 
-    return errors === undefined;
+    return error === undefined;
   };
 
   aclosure.reset = function () {
     aclosure(initialState);
-    aclosure.errors(undefined);
+    aclosure.error(undefined);
   };
 
-  aclosure.errors = function () {
+  aclosure.error = function () {
     var state;
-    return function (errors) {
+    return function (error) {
       if (arguments.length === 0) return state;
-      state = errors;
+      state = error;
     };
   }();
 
@@ -67,19 +65,19 @@ function prop(model, field, defaultValue) {
 module.exports =  function (config) {
   var formModel = {
     _config: config,
-    isValid: function (attach_errors) {
+    isValid: function (attach_error) {
       var self = this;
       var truthPool = [];
-      _.forEach(config, function (avalue, akey) {
-        truthPool.push(self[akey].isValid(attach_errors));
+      foreach(config, function (avalue, akey) {
+        truthPool.push(self[akey].isValid(attach_error));
       });
 
-      return _.every(truthPool, function (value) { return value === true;});
+      return every(truthPool, function (value) { return value === true;});
     },
 
     isDirty: function () {
       var self = this;
-      return _.some(_.keys(this._config), function (akey) {
+      return some(keys(this._config), function (akey) {
         return self[akey].isDirty();
       });
     },
@@ -87,40 +85,40 @@ module.exports =  function (config) {
     data: function () {
       var dict = {};
       var self = this;
-      _.forEach(this._config, function (avalue, akey) {
+      foreach(this._config, function (avalue, akey) {
         dict[akey] = avalue.cleaner? avalue.cleaner(self[akey]()): self[akey]();
       });
 
       return dict;
     },
 
-    errors: function (supplied_errors) {
+    error: function (supplied_error) {
       var dict = {};
       var self = this;
 
       if (arguments.length === 0) {
-        _.forEach(config, function (avalue, akey) {
-          dict[akey] = self[akey].errors();
+        foreach(config, function (avalue, akey) {
+          dict[akey] = self[akey].error();
         });
         return dict;
       }
       else {
-        _.forEach(config, function (avalue, akey) {
-          self[akey].errors(supplied_errors[akey]? supplied_errors[akey]: undefined);
+        foreach(config, function (avalue, akey) {
+          self[akey].error(supplied_error[akey]? supplied_error[akey]: undefined);
         });
       };
     },
 
     reset: function () {
-      _.forEach(config, function (avalue, akey) {
+      foreach(config, function (avalue, akey) {
         formModel[akey].reset();
-        formModel[akey].errors(undefined);
+        formModel[akey].error(undefined);
       });
     }
   };
 
-  _.forEach(config, function (avalue, akey) {
-    if (!isFunction(avalue.validator)) throw Error("'" + akey + "' needs a validator.");
+  foreach(config, function (avalue, akey) {
+    if (!isFunction(avalue.validator)) throw error("'" + akey + "' needs a validator.");
     formModel[akey] = prop(formModel, akey, avalue.default);
   });
 

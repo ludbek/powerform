@@ -104,16 +104,16 @@ describe("Form", function () {
         aform = form(config);
       });
 
-      it("assigns errors to .errors attribute of itself too", function () {
+      it("assigns error to .error attribute of itself too", function () {
         aform.username("");
         aform.username.isValid();
-        expect(aform.username.errors).toBeDefined();
+        expect(aform.username.error).toBeDefined();
       });
 
       it("empties the error field if valid value is supplied", function() {
         aform.username('spiderman');
         aform.username.isValid();
-        expect(aform.errors.username).not.toBeDefined();
+        expect(aform.error.username).not.toBeDefined();
       });
 
       it("returns true if the property is valid", function () {
@@ -126,12 +126,12 @@ describe("Form", function () {
         expect(aform.username.isValid()).toEqual(false);
       });
 
-      it("does not set the errors if 'false' is passed", function () {
+      it("does not set the error if 'false' is passed", function () {
         aform.username("batman");
         aform.username.isValid();
         aform.username("");
         aform.username.isValid(false);
-        expect(aform.username.errors()).not.toBeDefined();
+        expect(aform.username.error()).not.toBeDefined();
       });
 
       it("cleans the value before validation", function () {
@@ -161,7 +161,7 @@ describe("Form", function () {
 
       it("validates the value", function () {
         aform.username.setAndValidate("");
-        expect(aform.username.errors).toBeDefined();
+        expect(aform.username.error).toBeDefined();
       });
     });
 
@@ -177,29 +177,29 @@ describe("Form", function () {
         expect(aform.username()).toEqual("baba");
       });
 
-      it("empties its errors", function () {
+      it("empties its error", function () {
         aform.username("");
         aform.username.isValid();
-        expect(aform.username.errors()).toBeDefined();
+        expect(aform.username.error()).toBeDefined();
         aform.username.reset();
-        expect(aform.username.errors()).not.toBeDefined();
+        expect(aform.username.error()).not.toBeDefined();
       });
     });
 
-    describe(".errors()", function () {
+    describe(".error()", function () {
       var aform;
       beforeEach(function () {
         aform = form({username: {validator: present}});
       });
 
-      it("gets/sets the errors", function () {
-        aform.username.errors("a error");
-        expect(aform.username.errors()).toEqual("a error");
+      it("gets/sets the error", function () {
+        aform.username.error("a error");
+        expect(aform.username.error()).toEqual("a error");
       });
 
       it("can set 'undefined' as an error", function () {
-        aform.username.errors(undefined);
-        expect(aform.username.errors()).toEqual(undefined);
+        aform.username.error(undefined);
+        expect(aform.username.error()).toEqual(undefined);
       });
     });
   });
@@ -228,36 +228,36 @@ describe("Form", function () {
       expect(aform.isValid()).toEqual(false);
     });
 
-    it("sets errors if nothing is passed", function () {
+    it("sets error if nothing is passed", function () {
       aform.username("");
       aform.password("apassword");
       aform.isValid();
-      expect(aform.errors()["username"]).toBeDefined();
-      expect(aform.errors()["password"]).not.toBeDefined();
+      expect(aform.error()["username"]).toBeDefined();
+      expect(aform.error()["password"]).not.toBeDefined();
     });
 
-    it("does not change errors if 'false' is passed", function () {
+    it("does not change error if 'false' is passed", function () {
       aform.username("");
       aform.password("");
       aform.isValid(false);
-      expect(aform.errors()["username"]).not.toBeDefined();
-      expect(aform.errors()["password"]).not.toBeDefined();
+      expect(aform.error()["username"]).not.toBeDefined();
+      expect(aform.error()["password"]).not.toBeDefined();
     });
 
-    it("sets each property's errors to undefined if form validates", function () {
+    it("sets each property's error to undefined if form validates", function () {
       aform.username("ausername");
       aform.username("apassword");
       aform.isValid();
-      expect(aform.errors()["username"]).not.toBeDefined();
-      expect(aform.errors()["apassword"]).not.toBeDefined();
+      expect(aform.error()["username"]).not.toBeDefined();
+      expect(aform.error()["apassword"]).not.toBeDefined();
     });
 
-    it("it sets errors on individual properties", function () {
+    it("it sets error on individual properties", function () {
       aform.username("");
       aform.password("hello");
       aform.isValid();
-      expect(aform.username.errors()).toBeDefined();
-      expect(aform.password.errors()).not.toBeDefined();
+      expect(aform.username.error()).toBeDefined();
+      expect(aform.password.error()).not.toBeDefined();
     });
   });
 
@@ -300,23 +300,23 @@ describe("Form", function () {
     });
   });
 
-  describe(".errors()", function () {
+  describe(".error()", function () {
     var aform;
     beforeAll(function () {
       aform = form({username: {default: 'ausername', validator: noop},
                     password: {default: 'apassword', validator: noop}});
     });
 
-    it("sets errors on each property", function () {
-      aform.errors({username: "a error"});
-      expect(aform.username.errors()).toEqual("a error");
-      expect(aform.password.errors()).not.toBeDefined();
+    it("sets error on each property", function () {
+      aform.error({username: "a error"});
+      expect(aform.username.error()).toEqual("a error");
+      expect(aform.password.error()).not.toBeDefined();
     });
 
     it("returns the error of each property", function () {
-      var errors = {username: "a error", password: "a error"};
-      aform.errors(errors);
-      expect(aform.errors()).toEqual(errors);
+      var error = {username: "a error", password: "a error"};
+      aform.error(error);
+      expect(aform.error()).toEqual(error);
     });
   });
 
@@ -335,12 +335,12 @@ describe("Form", function () {
       expect(aform.password()).toEqual("apassword");
     });
 
-    it("empties errors on each property", function () {
-      aform.username.errors("a error");
-      aform.password.errors("b password");
+    it("empties error on each property", function () {
+      aform.username.error("a error");
+      aform.password.error("b password");
       aform.reset();
-      expect(aform.username.errors()).not.toBeDefined();
-      expect(aform.password.errors()).not.toBeDefined();
+      expect(aform.username.error()).not.toBeDefined();
+      expect(aform.password.error()).not.toBeDefined();
     });
   });
 });

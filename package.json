@@ -25,11 +25,13 @@
   "author": "ludbek",
   "license": "ISC",
   "dependencies": {
-    "lodash": "^4.6.1",
+    "lodash.every": "^4.4.0",
+    "lodash.foreach": "^4.3.0",
+    "lodash.keys": "^4.0.7",
+    "lodash.some": "^4.4.0"
   },
   "devDependencies": {
     "jasmine": "^2.4.1",
-    "webpack": "^1.12.14",
-    "validate.js": "^0.9.0"
+    "webpack": "^1.12.14"
   }
 }
