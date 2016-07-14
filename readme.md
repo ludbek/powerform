@@ -1,22 +1,28 @@
 # Introduction
-A form model for [Mithril.js](https://github.com/lhorie/mithril.js/). Used to be part of [mithril-ui](https://github.com/ludbek/mithril-ui).
+A form model which can be used in apps with or without frameworks like Mithril, React, etc.
 
 # Installation
 ## npm
-`npm install mithril-form`
+`npm install powerform`
 ## Bower
-`bower install mithril-form`
-
-# Validation
-`mithril-form` uses [validate.js](https://validatejs.org/) for validation.
+`bower install powerform`
 
 # Quick walk-through
 ```javascript
-> import Form from "mithril-form"
+// es6
+> import form from "powerform"
+
+// node
+var form = require("powerform")
+
+// If using bower form is available as global variable
 
 // create form
-> let form = new Form({
-.. "username": {presence: true},
+> let form = form({
+.. "username": {
+.... validator: function (value) {
+.... }
+....},
 .. "password": {presence: true},
 .. "confirmPassword": {equality: "password"}})
 
@@ -139,51 +145,3 @@ form.fullName("super man")
 form.fullName() // modified name
 form.data() // {fullName: cleaned name}
 ```
-
-
-# Using it with Mithril.js
-```javascript
-let signup = {
-  controller: function () {
-    return {
-      form: new Form({
-        username: {presence: true},
-        password: {presence: true},
-        confirmPassword: {presence: true, equality: "password"}}),
-      submit: function () {
-        if(!this.form.isValid()) return
-        SignupAPI(this.form.data())
-          .then((res) => {
-            m.route("/login/")})
-          ["catch"]((errors) => {
-            this.form.errors(errors)})
-          .then(()=> m.redraw())}
-    }
-  },
-  view: function (ctrl) {
-    return m("form",
-      m("input", {
-        placeholder: "Username",
-        onkeypress: m.withAttr("value", ctrl.form.username),
-        onchange: ctrl.form.username.isValid}),
-      _.map(ctrl.form.username.errors(), (error) => {
-        return m("p.error", error)}),
-      m("input", {
-        placeholder: "Password",
-        onkeypress: m.withAttr("value", ctrl.form.password),
-        onchange: ctrl.form.password.isValid}),
-      _.map(ctrl.form.password.errors(), (error) => {
-        return m("p.error", error)}),
-      m("input", {
-        placeholder: "Confirm Password",
-        onkeypress: m.withAttr("value", ctrl.form.confirmPassword),
-        onchange: ctrl.form.confirmPassword.isValid}),
-      _.map(ctrl.form.confirmPassword.errors(), (error) => {
-        return m("p.error", error)}),
-      m("button", {
-        disabled: !ctrl.form.isValid(false),
-        onclick: ctrl.submit.bind(ctrl)}, "Submit"))
-  }
-}
-```
-

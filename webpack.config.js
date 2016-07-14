@@ -6,13 +6,11 @@ module.exports = {
   entry: './index.js',
   output: {
     path: __dirname + '/dist/',
-    filename: 'mithril.form.js',
-    library: 'Form',
+    filename: 'powerform.min.js',
+    library: 'powerform',
     libraryTarget: 'var'
   },
   externals: {
-    lodash: "_",
-    "validate.js": "validate"
   },
   plugins: [
     new UglifyJsPlugin()
