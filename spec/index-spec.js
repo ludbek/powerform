@@ -3,7 +3,7 @@ var form = require("../index.js");
 var noop = function () {};
 var present = function (value) {
   return !value? "This field is required.": undefined;
-}
+};
 
 describe("Form", function () {
   var aform;
@@ -145,6 +145,23 @@ describe("Form", function () {
                                     }
                         });
         expect(aform.username.isValid()).toEqual(true);
+      });
+
+      it("passes the value and entire form to .validator", function () {
+        var xvalue, xform;
+        var aform = form({
+          username: {
+            validator: function (value, form) {
+              xvalue = value;
+              xform = form;
+            }
+          }
+        });
+
+        aform.username("flash");
+        aform.username.isValid();
+        expect(xvalue).toEqual("flash");
+        expect(xform).toEqual(aform);
       });
     });
 

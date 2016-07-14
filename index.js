@@ -38,7 +38,7 @@ function prop(model, field, defaultValue) {
     cleaner = model._config[field].cleaner;
     value = cleaner? cleaner(aclosure()): aclosure();
 
-    error = model._config[field].validator(value);
+    error = model._config[field].validator(value, model);
     if(attach_error !== false) {
       aclosure.error(error? error: undefined);
     }
