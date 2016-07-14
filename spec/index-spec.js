@@ -33,7 +33,7 @@ describe("Form", function () {
     expect(aform.username()).toEqual('batman');
   });
 
-  it("throws if validate function is absent in a key", function () {
+  it("throws if validator is absent in a key", function () {
     var schema = {username: {validator: function () {}},
                   password: {}};
     expect(form.bind(form, schema)).toThrowError(Error);
@@ -121,7 +121,7 @@ describe("Form", function () {
         expect(aform.username.isValid()).toEqual(true);
       });
 
-      it("returns false if the proerty is invalid", function () {
+      it("returns false if the property is invalid", function () {
         aform.username("");
         expect(aform.username.isValid()).toEqual(false);
       });
@@ -162,6 +162,19 @@ describe("Form", function () {
         aform.username.isValid();
         expect(xvalue).toEqual("flash");
         expect(xform).toEqual(aform);
+      });
+
+      it("works even without validator key.", function () {
+        var aform = form({
+          username: function (value) {
+            if (!value) return "This field is required.";
+          }});
+
+        aform.username("auername");
+        expect(aform.username.isValid()).toEqual(true);
+
+        aform.username("");
+        expect(aform.username.isValid()).toEqual(false);
       });
     });
 

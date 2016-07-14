@@ -38,7 +38,12 @@ function prop(model, field, defaultValue) {
     cleaner = model._config[field].cleaner;
     value = cleaner? cleaner(aclosure()): aclosure();
 
-    error = model._config[field].validator(value, model);
+    if (isFunction(model._config[field])) {
+      error = model._config[field](value, model);
+    }
+    else {
+      error = model._config[field].validator(value, model);
+    }
     if(attach_error !== false) {
       aclosure.error(error? error: undefined);
     }
@@ -118,7 +123,9 @@ module.exports =  function (config) {
   };
 
   foreach(config, function (avalue, akey) {
-    if (!isFunction(avalue.validator)) throw error("'" + akey + "' needs a validator.");
+    if (!isFunction(avalue) && !isFunction(avalue.validator)) {
+      throw error("'" + akey + "' needs a validator.");
+    }
     formModel[akey] = prop(formModel, akey, avalue.default);
   });
 
