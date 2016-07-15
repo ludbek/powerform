@@ -1,21 +1,21 @@
 {
-  "name": "mithril-form",
-  "description": "Form model for Mithril.js",
+  "name": "powerform",
+  "description": "A powerful form model.",
   "main": "index.js",
   "authors": [
     "ludbek"
   ],
   "license": "ISC",
   "keywords": [
-    "mithril",
     "form"
   ],
-  "homepage": "https://github.com/ludbek/mithril-form",
+  "homepage": "https://github.com/ludbek/powerform",
   "ignore": [
     "**/.*",
     "node_modules",
     "bower_components",
     "test",
-    "tests"
+    "tests",
+    "spec"
   ]
 }

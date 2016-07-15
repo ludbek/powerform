@@ -15,16 +15,20 @@ A form model which can be used in apps with or without frameworks like Mithril, 
 // node
 var form = require("powerform")
 
-// If using bower form is available as global variable
+// If using bower powerform is available as global variable
 
 // create form
-> let form = form({
-.. "username": {
-.... validator: function (value) {
-.... }
-....},
-.. "password": {presence: true},
-.. "confirmPassword": {equality: "password"}})
+var form = powerform({
+	username: function (value) {
+  	if(!value) return "This field is required"
+  },
+  password: function (value) {
+  	if(value.length < 8) return "This field must be at least 8 characters long."
+  },
+  confirmPassword: function (value, dform) {
+  	if (value !== dform.password) return "Password and confirmation does not match."
+  }
+})
 
 // assign values to fields
 > form.username("ausername")
@@ -34,10 +38,12 @@ var form = require("powerform")
 // per field validation
 > form.username.isValid()
 true
+> form.password.isValid()
+true
 > form.confirmPassword.isValid()
 false
 > form.confirmPassword.errors()
-[ 'Confirm password is not equal to password' ]
+"Password and confirmation does not match."
 
 // validate all the fields at once
 > form.isValid()
@@ -45,17 +51,29 @@ false
 > form.errors()
 { username: undefined,
   password: undefined,
-  confirmPassword: [ 'Confirm password is not equal to password' ] }
+  confirmPassword: "Password and confirmation does not match." }
 ```
 
 # API
 ## Creating new form
 ```javascript
-let form = new Form({name: {presence: true}})
+var form = powerform({
+  name: function (value) {
+    if (!value) return "This field is required."
+  }
+})
 ```
 ## Set default value
 ```javascript
-let form = new Form({name: {presence: true, default: "aname"}})
+var form = powerform({
+  name: {
+    default: "aname",
+    validator: function (value) {
+      if(!value) return "This field is required."
+    }
+  }
+})
+
 form.name() // "aname"
 ```
 ## Form methods
@@ -65,11 +83,11 @@ form.name("")
 
 // check validity without setting errors
 form.isValid(false) // false
-form.errors() // {name: ""}
+form.errors() // {name: undefined}
 
 // check validity and set errors
 form.isValid()
-form.errors() // {name: ['Name can\'t be blank]}
+form.errors() // {name: "This field is required."}
 ```
 ### .isDirty()
 Returns `true` if form has been modified else returns `false`.
@@ -83,9 +101,9 @@ One should either call `.isValid()` or `.setAndValidate()` to set errors.
 ```javascript
 form.name("")
 form.isValid() // false
-form.errors() // {name: ['Name can\'t be blank]}
-form.errors({name: ["a error"]})
-form.errors() // {name: ["a error"]}
+form.errors() // {name: "This field is required."}
+form.errors({name: "a error"})
+form.errors() // {name: "a error"}
 ```
 ### .data()
 Returns the key-value paris of fields and their respective values.
@@ -111,16 +129,16 @@ Gets or sets errors.
 ```javascript
 form.name("")
 form.name.isValid() // false
-form.name.errors() // ['Name can\'t be blank]
-form.name.errors(['a error'])
-form.name.errors() // ['a error']
+form.name.errors() // "This field is required."
+form.name.errors('a error')
+form.name.errors() // 'a error'
 ```
 
 ### .setAndValidate()
 It sets the value as well as validates the field.
 ```javascript
 form.name.setAndValidate("")
-form.errors() // ['Name can\'t be blank]
+form.errors() // "This field is required."
 ```
 
 ## Modifier and Cleaner
