@@ -24,10 +24,7 @@
   "author": "ludbek",
   "license": "ISC",
   "dependencies": {
-    "lodash.every": "^4.4.0",
-    "lodash.foreach": "^4.3.0",
-    "lodash.keys": "^4.0.7",
-    "lodash.some": "^4.4.0"
+    "lodash": "^4.13.1"
   },
   "devDependencies": {
     "jasmine": "^2.4.1",

@@ -1,7 +1,13 @@
-var some = require("lodash.some");
-var every = require("lodash.every");
-var keys = require("lodash.keys");
-var foreach = require("lodash.foreach");
+//var some = require("lodash.some");
+//var every = require("lodash.every");
+//var keys = require("lodash.keys");
+//var foreach = require("lodash.foreach");
+var _ = {
+  some : require("lodash/some.js"),
+  every : require("lodash/every.js"),
+  keys : require("lodash/keys.js"),
+  forEach : require("lodash/forEach.js")
+};
 
 
 function isFunction(data) {
@@ -73,16 +79,16 @@ module.exports =  function (config) {
     isValid: function (attach_error) {
       var self = this;
       var truthPool = [];
-      foreach(config, function (avalue, akey) {
+      _.forEach(config, function (avalue, akey) {
         truthPool.push(self[akey].isValid(attach_error));
       });
 
-      return every(truthPool, function (value) { return value === true;});
+      return _.every(truthPool, function (value) { return value === true;});
     },
 
     isDirty: function () {
       var self = this;
-      return some(keys(this._config), function (akey) {
+      return _.some(_.keys(this._config), function (akey) {
         return self[akey].isDirty();
       });
     },
@@ -90,7 +96,7 @@ module.exports =  function (config) {
     data: function () {
       var dict = {};
       var self = this;
-      foreach(this._config, function (avalue, akey) {
+      _.forEach(this._config, function (avalue, akey) {
         dict[akey] = avalue.cleaner? avalue.cleaner(self[akey]()): self[akey]();
       });
 
@@ -102,27 +108,27 @@ module.exports =  function (config) {
       var self = this;
 
       if (arguments.length === 0) {
-        foreach(config, function (avalue, akey) {
+        _.forEach(config, function (avalue, akey) {
           dict[akey] = self[akey].error();
         });
         return dict;
       }
       else {
-        foreach(config, function (avalue, akey) {
+        _.forEach(config, function (avalue, akey) {
           self[akey].error(supplied_error[akey]? supplied_error[akey]: undefined);
         });
       };
     },
 
     reset: function () {
-      foreach(config, function (avalue, akey) {
+      _.forEach(config, function (avalue, akey) {
         formModel[akey].reset();
         formModel[akey].error(undefined);
       });
     }
   };
 
-  foreach(config, function (avalue, akey) {
+  _.forEach(config, function (avalue, akey) {
     if (!isFunction(avalue) && !isFunction(avalue.validator)) {
       throw error("'" + akey + "' needs a validator.");
     }

@@ -42,13 +42,13 @@ true
 true
 > form.confirmPassword.isValid()
 false
-> form.confirmPassword.errors()
+> form.confirmPassword.error()
 "Password and confirmation does not match."
 
 // validate all the fields at once
 > form.isValid()
 false
-> form.errors()
+> form.error()
 { username: undefined,
   password: undefined,
   confirmPassword: "Password and confirmation does not match." }
@@ -83,11 +83,11 @@ form.name("")
 
 // check validity without setting errors
 form.isValid(false) // false
-form.errors() // {name: undefined}
+form.error() // {name: undefined}
 
 // check validity and set errors
 form.isValid()
-form.errors() // {name: "This field is required."}
+form.error() // {name: "This field is required."}
 ```
 ### .isDirty()
 Returns `true` if form has been modified else returns `false`.
@@ -95,15 +95,15 @@ Returns `true` if form has been modified else returns `false`.
 ### .reset()
 Resets all the fields.
 
-### .errors()
+### .error()
 Gets or sets errors on fields.
 One should either call `.isValid()` or `.setAndValidate()` to set errors.
 ```javascript
 form.name("")
 form.isValid() // false
-form.errors() // {name: "This field is required."}
-form.errors({name: "a error"})
-form.errors() // {name: "a error"}
+form.error() // {name: "This field is required."}
+form.error({name: "a error"})
+form.error() // {name: "a error"}
 ```
 ### .data()
 Returns the key-value paris of fields and their respective values.
@@ -124,42 +124,52 @@ Same as `form.isDirty()`
 ### .reset()
 Same as `form.reset()`
 
-### .errors()
+### .error()
 Gets or sets errors.
 ```javascript
 form.name("")
 form.name.isValid() // false
-form.name.errors() // "This field is required."
-form.name.errors('a error')
-form.name.errors() // 'a error'
+form.name.error() // "This field is required."
+form.name.error('a error')
+form.name.error() // 'a error'
 ```
 
 ### .setAndValidate()
 It sets the value as well as validates the field.
 ```javascript
 form.name.setAndValidate("")
-form.errors() // "This field is required."
+form.error() // "This field is required."
 ```
 
-## Modifier and Cleaner
-Use `modifier` and `cleaner` to decorate and clean input data respectively.
-Modifier come handy in situations like automatically inserting `-`(dash) inbetween credit card input,
-capitaling user's name, etc. Cleaner is used for cleaning modified data if necessary.
+## Modifier
+Use `modifier` to decorate input data. It comes handy in situations like capitaling user's name,
+inserting `-`(dash) inbetween credit card input, etc.
 
-`isValid` uses `cleaner` before validating the fields.
-
-### Uage
 ```javascript
-var form = new Form({fullName: {modifier: function (newValue, oldValue) {
-                                  ...
-                                  return modifiedValue;
-                                },
-                                cleaner: function (value) {
-                                  ...
-                                  return cleanedValue;
-                                }}});
+var form = powerform({
+	fullName: {
+  	validator: function (value) {
+    	if(!value) return "This field is required."
+    },
+    modifier: function (newValue, oldValue) {
+    	return newValue.replace(
+      	/(?:^|\s)\S/g,
+      	function(s) {
+      		return s.toUpperCase()
+      })
+    }
+  }
+})
 
-form.fullName("super man")
-form.fullName() // modified name
-form.data() // {fullName: cleaned name}
+form.fullName("first last")
+form.fullName() // First Last
+```
+
+## Cleaner
+Cleaner is used for cleaning modified data if necessary.
+`.isValid()` uses `cleaner` before validating the fields.
+`.data()` also uses `cleaner` before returning the data.
+
+```javascript
+
 ```
