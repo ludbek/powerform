@@ -20,14 +20,14 @@ var powerform = require("powerform")
 
 // create form
 var form = powerform({
-	username: function (value) {
-  	if(!value) return "This field is required"
+  username: function (value) {
+    if(!value) return "This field is required"
   },
   password: function (value) {
-  	if(value.length < 8) return "This field must be at least 8 characters long."
+    if(value.length < 8) return "This field must be at least 8 characters long."
   },
   confirmPassword: function (value, dform) {
-  	if (value !== dform.password()) return "Password and confirmation does not match."
+    if (value !== dform.password()) return "Password and confirmation does not match."
   }
 })
 
@@ -149,14 +149,14 @@ inserting `-`(dash) inbetween credit card input, etc.
 ```javascript
 var form = powerform({
 	fullName: {
-  	validator: function (value) {
-    	if(!value) return "This field is required."
+    validator: function (value) {
+      if(!value) return "This field is required."
     },
     modifier: function (newValue, oldValue) {
-    	return newValue.replace(
-      	/(?:^|\s)\S/g,
-      	function(s) {
-      		return s.toUpperCase()
+      return newValue.replace(
+        /(?:^|\s)\S/g,
+        function(s) {
+          return s.toUpperCase()
       })
     }
   }
@@ -173,15 +173,15 @@ Cleaner is used for cleaning modified data if necessary.
 
 ```javascript
 var aform = powerform({
-	card: {
-  	validator: function (card) {
-    	if (!card) return "This field is required."
+  card: {
+    validator: function (card) {
+      if (!card) return "This field is required."
     },
     modifier: function (newCard, oldCard) {
-    	if (newCard.length === 16) { // change this for actual form input
+      if (newCard.length === 16) { // change this for actual form input
 				return newCard.split("-").join("").replace(/(\d{4})/g, "$1-").replace(/(.)$/, "");
 			}
-    	return newCard.split("-").join("").replace(/(\d{4})/g, "$1-")
+      return newCard.split("-").join("").replace(/(\d{4})/g, "$1-")
     },
     cleaner: function (card) {
     	return card.split("-").join("")
