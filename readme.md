@@ -149,17 +149,17 @@ inserting `-`(dash) inbetween credit card input, etc.
 ```javascript
 var form = powerform({
 	fullName: {
-    validator: function (value) {
-      if(!value) return "This field is required."
-    },
-    modifier: function (newValue, oldValue) {
-      return newValue.replace(
-        /(?:^|\s)\S/g,
-        function(s) {
-          return s.toUpperCase()
-      })
-    }
-  }
+		validator: function (value) {
+			if(!value) return "This field is required."
+		},
+		modifier: function (newValue, oldValue) {
+			return newValue.replace(
+				/(?:^|\s)\S/g,
+				function(s) {
+					return s.toUpperCase()
+				})
+		}
+	}
 })
 
 form.fullName("first last")
