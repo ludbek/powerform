@@ -10,12 +10,13 @@ A form model which can be used in apps with or without frameworks like Mithril, 
 # Quick walk-through
 ```javascript
 // es6
-> import form from "powerform"
+> import powerform from "powerform"
 
 // node
-var form = require("powerform")
+var powerform = require("powerform")
 
-// If using bower powerform is available as global variable
+// browser
+// Include /dist/powerform.min.js at script tag.
 
 // create form
 var form = powerform({
@@ -26,7 +27,7 @@ var form = powerform({
   	if(value.length < 8) return "This field must be at least 8 characters long."
   },
   confirmPassword: function (value, dform) {
-  	if (value !== dform.password) return "Password and confirmation does not match."
+  	if (value !== dform.password()) return "Password and confirmation does not match."
   }
 })
 
@@ -106,7 +107,7 @@ form.error({name: "a error"})
 form.error() // {name: "a error"}
 ```
 ### .data()
-Returns the key-value paris of fields and their respective values.
+Returns the key-value pairs of fields and their respective values.
 
 ## Per field methods
 Field itself is getter/setter.
@@ -167,9 +168,28 @@ form.fullName() // First Last
 
 ## Cleaner
 Cleaner is used for cleaning modified data if necessary.
-`.isValid()` uses `cleaner` before validating the fields.
-`.data()` also uses `cleaner` before returning the data.
+`.isValid()` applies `cleaner` before validating the fields.
+`.data()` also applies `cleaner` to each fields before returning the key-value pairs.
 
 ```javascript
+var aform = powerform({
+	card: {
+  	validator: function (card) {
+    	if (!card) return "This field is required."
+    },
+    modifier: function (newCard, oldCard) {
+    	if (newCard.length === 16) { // change this for actual form input
+				return newCard.split("-").join("").replace(/(\d{4})/g, "$1-").replace(/(.)$/, "");
+			}
+    	return newCard.split("-").join("").replace(/(\d{4})/g, "$1-")
+    },
+    cleaner: function (card) {
+    	return card.split("-").join("")
+    }
+  }
+})
 
+aform.card("1111222233334444")
+aform.card() // "1111-2222-3333-4444"
+aform.data() // {card: "1111222233334444"}
 ```
