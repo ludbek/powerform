@@ -11,13 +11,13 @@ let isFunction = (data) => {
 };
 
 function prop(model, field, defaultValue) {
-  var initialState = defaultValue || "";
-  var previousState = "";
-  var state = model._config[field].modifier
+  let initialState = defaultValue || "";
+  let previousState = "";
+  let state = model._config[field].modifier
       ? model._config[field].modifier(initialState, previousState)
       : initialState;
 
-  var aclosure = function (value) {
+  let aclosure = function (value) {
     if(arguments.length === 0)  return state;
 
     previousState = state;
@@ -26,17 +26,17 @@ function prop(model, field, defaultValue) {
       : value;
   };
 
-  aclosure.isDirty = function() {
+  aclosure.isDirty = () => {
     return initialState !== state;
   };
 
-  aclosure.setAndValidate = function (value) {
+  aclosure.setAndValidate = (value) => {
     aclosure(value);
     aclosure.isValid();
   };
 
-  aclosure.isValid = function (attach_error) {
-    var error, cleaner, value;
+  aclosure.isValid = (attach_error) => {
+    let error, cleaner, value;
     cleaner = model._config[field].cleaner;
     value = cleaner? cleaner(aclosure()): aclosure();
 
@@ -53,7 +53,7 @@ function prop(model, field, defaultValue) {
     return error === undefined;
   };
 
-  aclosure.reset = function () {
+  aclosure.reset = () => {
     aclosure(initialState);
     aclosure.error(undefined);
   };
