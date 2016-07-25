@@ -4,3 +4,4 @@ node_modules/
 .tern-project
 npm-debug.log
 bower_components/
+lib/

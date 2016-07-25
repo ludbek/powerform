@@ -2,9 +2,11 @@
   "name": "powerform",
   "version": "1.0.1",
   "description": "A powerful form model.",
-  "main": "index.js",
+  "main": "lib/index.js",
   "scripts": {
-    "test": "jasmine"
+    "test": "mocha --compilers js:babel-register spec/*",
+    "build": "babel --plugins transform-es2015-modules-commonjs index.js --out-dir lib",
+    "prepublish": "npm run test && npm run build"
   },
   "files": [
     "index.js",
@@ -19,7 +21,9 @@
   },
   "homepage": "https://github.com/ludbek/powerform#readme",
   "keywords": [
-    "form"
+    "form",
+    "mithril",
+    "react"
   ],
   "author": "ludbek",
   "license": "ISC",
@@ -27,7 +31,12 @@
     "lodash": "^4.13.1"
   },
   "devDependencies": {
-    "jasmine": "^2.4.1",
+    "babel-cli": "^6.11.4",
+    "babel-plugin-transform-es2015-modules-commonjs": "^6.11.5",
+    "babel-preset-es2015": "^6.9.0",
+    "babel-register": "^6.11.5",
+    "chai": "^3.5.0",
+    "mocha": "^2.5.3",
     "webpack": "^1.12.14"
   }
 }
