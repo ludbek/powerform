@@ -12,6 +12,11 @@ module.exports = {
   },
   externals: {
   },
+  module: {
+    loaders: [
+      {test: /\.js/, loader: "babel", include: __dirname + "/index.js"}
+    ]
+  },
   plugins: [
     new UglifyJsPlugin()
   ]
