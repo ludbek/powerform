@@ -179,6 +179,20 @@ describe("Form", function () {
         aform.username("");
         expect(aform.username.isValid()).to.equal(false);
       });
+
+      it("skips validation if required is false and value is null like", () => {
+        var aform = form({
+          username: {
+            validator: function (value) {
+              if(!value) return "This field is required.";
+            },
+            required: false
+          }
+        });
+
+        aform.username(null);
+        expect(aform.username.isValid()).to.equal(true);
+      });
     });
 
     describe(".setAndValidate()", function () {

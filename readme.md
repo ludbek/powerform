@@ -77,6 +77,22 @@ var form = powerform({
 
 form.name() // "aname"
 ```
+
+## Optional fields
+```javascript
+var form = powerform({
+  name: {
+    required: false,
+    validator: function (value) {
+      if(!value) return "This field is required."
+    }
+  }
+})
+
+form.name("");
+form.name.isValid() // true
+```
+
 ## Form methods
 ### .isValid()
 ```javascript

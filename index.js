@@ -40,6 +40,10 @@ function prop(model, field, defaultValue) {
     cleaner = model._config[field].cleaner;
     value = cleaner? cleaner(aclosure()): aclosure();
 
+    if (model._config[field].required === false && !value) {
+      return true;
+    }
+
     if (isFunction(model._config[field])) {
       error = model._config[field](value, model);
     }
