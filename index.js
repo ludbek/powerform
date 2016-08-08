@@ -122,7 +122,7 @@ module.exports =  function (config) {
 
   _.forEach(config, (avalue, akey) => {
     if (!isFunction(avalue) && !isFunction(avalue.validator)) {
-      throw error("'" + akey + "' needs a validator.");
+      throw Error("'" + akey + "' needs a validator.");
     }
     formModel[akey] = prop(formModel, akey, avalue.default);
   });
