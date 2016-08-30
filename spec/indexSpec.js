@@ -42,6 +42,8 @@ describe("Form", function () {
     expect(form.bind(form, schema)).to.throw(Error);
   });
 
+  it("throws if validator is neither a function nor an array.");
+
   describe(".aProp", function () {
     var aform;
     beforeEach(function () {
@@ -248,6 +250,10 @@ describe("Form", function () {
         aform.username.error(undefined);
         expect(aform.username.error()).to.equal(undefined);
       });
+
+      it("returns single error by default.");
+
+      it("returns multiple errors if multipleError flag is set to true.");
     });
   });
 
