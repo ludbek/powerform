@@ -11,6 +11,7 @@ module.exports = {
     libraryTarget: 'var'
   },
   externals: {
+    validatex: "validatex"
   },
   module: {
     loaders: [

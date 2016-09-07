@@ -2,15 +2,22 @@ import some from "lodash/some.js";
 import every from "lodash/every.js";
 import keys from "lodash/keys.js";
 import forEach from "lodash/forEach.js";
-
-var _ = {some, every, keys, forEach};
+import {validateSingle} from "validatex";
 
 
 let isFunction = (data) => {
   return typeof data === "function";
 };
 
-function prop(model, field, defaultValue) {
+let isArray = (data) => {
+  return data instanceof Array;
+};
+
+let isValidValidator = (validator) => {
+  return isFunction(validator) || isArray(validator);
+};
+
+function prop(model, field, defaultValue, multipleErrors) {
   let initialState = defaultValue || "";
   let previousState = "";
   let state = model._config[field].modifier
@@ -37,19 +44,16 @@ function prop(model, field, defaultValue) {
 
   aclosure.isValid = (attach_error) => {
     let error, cleaner, value;
-    cleaner = model._config[field].cleaner;
+    let config = model._config[field];
+    cleaner = config.cleaner;
     value = cleaner? cleaner(aclosure()): aclosure();
 
-    if (model._config[field].required === false && !value) {
-      return true;
-    }
+    let validator = isFunction(config) || isArray(config)
+      ? config
+      : config.validator
 
-    if (isFunction(model._config[field])) {
-      error = model._config[field](value, model);
-    }
-    else {
-      error = model._config[field].validator(value, model);
-    }
+    error = validateSingle(value, validator, multipleErrors, model.data(), field);
+
     if(attach_error !== false) {
       aclosure.error(error? error: undefined);
     }
@@ -73,27 +77,27 @@ function prop(model, field, defaultValue) {
   return aclosure;
 }
 
-module.exports =  function (config) {
+module.exports =  function (config, multipleErrors = false) {
   let formModel = {
     _config: config,
     isValid (attach_error) {
       var truthPool = [];
-      _.forEach(config, (avalue, akey) => {
+      forEach(config, (avalue, akey) => {
         truthPool.push(this[akey].isValid(attach_error));
       });
 
-      return _.every(truthPool, (value) => { return value === true;});
+      return every(truthPool, (value) => { return value === true;});
     },
 
     isDirty () {
-      return _.some(_.keys(this._config), (akey) => {
+      return some(keys(this._config), (akey) => {
         return this[akey].isDirty();
       });
     },
 
     data () {
       var dict = {};
-      _.forEach(this._config, (avalue, akey) => {
+      forEach(this._config, (avalue, akey) => {
         dict[akey] = avalue.cleaner? avalue.cleaner(this[akey]()): this[akey]();
       });
 
@@ -104,31 +108,31 @@ module.exports =  function (config) {
       var dict = {};
 
       if (arguments.length === 0) {
-        _.forEach(config, (avalue, akey) => {
+        forEach(config, (avalue, akey) => {
           dict[akey] = this[akey].error();
         });
         return dict;
       }
       else {
-        _.forEach(config, (avalue, akey) => {
+        forEach(config, (avalue, akey) => {
           this[akey].error(supplied_error[akey]? supplied_error[akey]: undefined);
         });
       };
     },
 
     reset () {
-      _.forEach(config, (avalue, akey) => {
+      forEach(config, (avalue, akey) => {
         formModel[akey].reset();
         formModel[akey].error(undefined);
       });
     }
   };
 
-  _.forEach(config, (avalue, akey) => {
-    if (!isFunction(avalue) && !isFunction(avalue.validator)) {
+  forEach(config, (avalue, akey) => {
+    if (!isValidValidator(avalue) && !isValidValidator(avalue.validator)) {
       throw Error("'" + akey + "' needs a validator.");
     }
-    formModel[akey] = prop(formModel, akey, avalue.default);
+    formModel[akey] = prop(formModel, akey, avalue.default, multipleErrors);
   });
 
   return formModel;
