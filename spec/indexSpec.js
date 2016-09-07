@@ -1,18 +1,16 @@
 import form from "../index.js";
 import chai from "chai";
+import {required, ValidationError} from "validatex";
 
 let expect = chai.expect;
 
 var noop = function () {};
-var present = function (value) {
-  return !value? "This field is required.": undefined;
-};
 
 describe("Form", function () {
   var aform;
   var config = {
     username: {default: 'batman',
-               validator: present},
+               validator: required(true)},
     password: {validator: function (value) {}}};
 
   beforeEach(function () {
@@ -97,10 +95,7 @@ describe("Form", function () {
       var aform;
       var config = {
         username: {default: 'batman',
-                   validator: function (value) {
-                     return !value? "This field is required": undefined;
-                   }
-                  },
+                   validator: required(true)},
         password: {validator: function (value) {}}};
 
       beforeEach(function () {
@@ -140,7 +135,9 @@ describe("Form", function () {
       it("cleans the value before validation", function () {
         var aform = form({username: {default: "ausername",
                                      validator: function (value) {
-                                       return /^[^a][a-z]{1,8}$/.test(value)? undefined: "Error";
+                                       if (/^[^a][a-z]{1,8}$/.test(value)) {
+                                         throw ValidationError("Error");
+                                       }
                                      },
                                      cleaner: function (data) {
                                        return data.replace("a", "");
@@ -150,7 +147,7 @@ describe("Form", function () {
         expect(aform.username.isValid()).to.equal(true);
       });
 
-      it("passes the value and entire form to .validator", function () {
+      it("passes the value and entire form data to .validator", function () {
         var xvalue, xform;
         var aform = form({
           username: {
@@ -164,14 +161,13 @@ describe("Form", function () {
         aform.username("flash");
         aform.username.isValid();
         expect(xvalue).to.equal("flash");
-        expect(xform).to.equal(aform);
+        expect(xform).to.eql({username: "flash"});
       });
 
       it("works even without validator key.", function () {
         var aform = form({
-          username: function (value) {
-            if (!value) return "This field is required.";
-          }});
+          username: required(true)
+        });
 
         aform.username("auername");
         expect(aform.username.isValid()).to.equal(true);
@@ -184,7 +180,7 @@ describe("Form", function () {
     describe(".setAndValidate()", function () {
       var aform;
       beforeEach(function () {
-        aform = form({username: {validator: present}});
+        aform = form({username: {validator: required(true)}});
       });
 
       it("sets the value", function () {
@@ -201,7 +197,7 @@ describe("Form", function () {
     describe(".reset()", function () {
       var aform;
       beforeEach(function () {
-        aform = form({username: {validator: present, default: "baba"}});
+        aform = form({username: {validator: required(true), default: "baba"}});
       });
 
       it("resets the value", function () {
@@ -222,7 +218,7 @@ describe("Form", function () {
     describe(".error()", function () {
       var aform;
       beforeEach(function () {
-        aform = form({username: {validator: present}});
+        aform = form({username: {validator: required(true)}});
       });
 
       it("gets/sets the error", function () {
@@ -241,8 +237,8 @@ describe("Form", function () {
     var aform;
     beforeEach(function () {
       aform = form({
-        username: {validator: present},
-        password: {validator: present}});
+        username: {validator: required(true)},
+        password: {validator: required(true)}});
     });
 
     it("exists", function () {
@@ -295,7 +291,7 @@ describe("Form", function () {
   });
 
   describe(".isDirty()", function () {
-    var aform = form({username: {validator: present, default: 'ausername'}});
+    var aform = form({username: {validator: required(true), default: 'ausername'}});
 
     it("exists", function () {
       expect(aform.isDirty).to.exist;
@@ -322,7 +318,7 @@ describe("Form", function () {
       expect(aform.data()).to.eql({username: 'ausername', password: 'apassword'});
     });
 
-    it("cleans the data if cleaner if present", function () {
+    it("cleans the data if cleaner is present", function () {
       var cleaner = function (data) {
         return data.replace("a", "");
       };
@@ -356,8 +352,8 @@ describe("Form", function () {
   describe(".reset()", function () {
     var aform;
     beforeEach(function () {
-      aform = form({username: {validator: present, default: "ausername"},
-                    password: {validator: present, default: "apassword"}});
+      aform = form({username: {validator: required(true), default: "ausername"},
+                    password: {validator: required(true), default: "apassword"}});
     });
 
     it("resets value of each property", function () {

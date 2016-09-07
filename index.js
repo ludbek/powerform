@@ -2,6 +2,7 @@ import some from "lodash/some.js";
 import every from "lodash/every.js";
 import keys from "lodash/keys.js";
 import forEach from "lodash/forEach.js";
+import {validateSingle} from "validatex";
 
 var _ = {some, every, keys, forEach};
 
@@ -40,12 +41,12 @@ function prop(model, field, defaultValue) {
     cleaner = model._config[field].cleaner;
     value = cleaner? cleaner(aclosure()): aclosure();
 
-    if (isFunction(model._config[field])) {
-      error = model._config[field](value, model);
-    }
-    else {
-      error = model._config[field].validator(value, model);
-    }
+    let validator = isFunction(model._config[field])
+      ? model._config[field]
+      : model._config[field].validator
+
+    error = validateSingle(value, validator, false, model.data(), field);
+
     if(attach_error !== false) {
       aclosure.error(error? error: undefined);
     }

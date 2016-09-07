@@ -29,7 +29,8 @@
   "author": "ludbek",
   "license": "ISC",
   "dependencies": {
-    "lodash": "^4.13.1"
+    "lodash": "^4.13.1",
+    "validatex": "^0.1.0"
   },
   "devDependencies": {
     "babel-cli": "^6.11.4",
