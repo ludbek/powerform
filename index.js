@@ -17,7 +17,7 @@ let isValidValidator = (validator) => {
   return isFunction(validator) || isArray(validator);
 };
 
-function prop(model, field, defaultValue) {
+function prop(model, field, defaultValue, multipleErrors) {
   let initialState = defaultValue || "";
   let previousState = "";
   let state = model._config[field].modifier
@@ -52,7 +52,6 @@ function prop(model, field, defaultValue) {
       ? config
       : config.validator
 
-    let multipleErrors = config.multipleErrors? true: false;
     error = validateSingle(value, validator, multipleErrors, model.data(), field);
 
     if(attach_error !== false) {
@@ -78,7 +77,7 @@ function prop(model, field, defaultValue) {
   return aclosure;
 }
 
-module.exports =  function (config) {
+module.exports =  function (config, multipleErrors = false) {
   let formModel = {
     _config: config,
     isValid (attach_error) {
@@ -133,7 +132,7 @@ module.exports =  function (config) {
     if (!isValidValidator(avalue) && !isValidValidator(avalue.validator)) {
       throw Error("'" + akey + "' needs a validator.");
     }
-    formModel[akey] = prop(formModel, akey, avalue.default);
+    formModel[akey] = prop(formModel, akey, avalue.default, multipleErrors);
   });
 
   return formModel;

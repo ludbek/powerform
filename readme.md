@@ -94,6 +94,18 @@ var form = powerform({
 
 form.name() // "aname"
 ```
+
+## Get multiple errors
+By default `powerform` returns single error per field.
+Pass `true` as the 2nd argument to `powerform` for getting multiple errors.
+
+```javascript
+...
+```
+
+## Set multiple validators
+...
+
 ## Form methods
 ### .isValid()
 ```javascript

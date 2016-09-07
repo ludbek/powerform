@@ -201,10 +201,9 @@ describe("Form", function () {
       it("attaches multiple errors", () => {
         var aform = form({
           username: {
-            validator: [required(true), isString()],
-            multipleErrors: true
+            validator: [required(true), isString()]
           }
-        });
+        }, true);
 
         aform.username(undefined);
         aform.username.isValid();
