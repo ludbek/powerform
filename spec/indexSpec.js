@@ -197,6 +197,19 @@ describe("Form", function () {
         aform.username("1");
         expect(aform.username.isValid()).to.equal(true);
       });
+
+      it("attaches multiple errors", () => {
+        var aform = form({
+          username: {
+            validator: [required(true), isString()],
+            multipleErrors: true
+          }
+        });
+
+        aform.username(undefined);
+        aform.username.isValid();
+        expect(aform.username.error().length).to.equal(2);
+      });
     });
 
     describe(".setAndValidate()", function () {
