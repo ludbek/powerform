@@ -7,27 +7,40 @@ A form model which can be used in apps with or without frameworks like Mithril, 
 ## Bower
 `bower install powerform`
 
+# Requirement
+`powerform` internally uses [`validatex`](https://github.com/ludbek/validatex) for validation.
+
 # Quick walk-through
 ```javascript
 // es6
 > import powerform from "powerform"
+> import {ValidationError} from "validatex";
 
 // node
-var powerform = require("powerform")
+var powerform = require("powerform");
+var ValidationError = require("validatex");
 
 // browser
+// Include validatex.min.js at script tag. (from package validatex)
 // Include /dist/powerform.min.js at script tag.
+var ValidationError = validatex.ValidationError;
 
 // create form
 var form = powerform({
   username: function (value) {
-    if(!value) return "This field is required"
+    if(!value) {
+      throw new ValidationError("This field is required")
+    }
   },
   password: function (value) {
-    if(value.length < 8) return "This field must be at least 8 characters long."
+    if(value.length < 8) {
+      throw new ValidationError("This field must be at least 8 characters long.")
+    }
   },
   confirmPassword: function (value, dform) {
-    if (value !== dform.password()) return "Password and confirmation does not match."
+    if (value !== dform.password()) {
+      throw new ValidationError("Password and confirmation does not match.")
+    }
   }
 })
 
@@ -60,7 +73,9 @@ false
 ```javascript
 var form = powerform({
   name: function (value) {
-    if (!value) return "This field is required."
+    if (!value) {
+      throw new ValidationError("This field is required.")
+    }
   }
 })
 ```
@@ -70,7 +85,9 @@ var form = powerform({
   name: {
     default: "aname",
     validator: function (value) {
-      if(!value) return "This field is required."
+      if(!value) {
+        throw new ValidationError("This field is required.")
+      }
     }
   }
 })
@@ -150,7 +167,9 @@ inserting `-`(dash) inbetween credit card input, etc.
 var form = powerform({
 	fullName: {
 		validator: function (value) {
-			if(!value) return "This field is required."
+      if(!value) {
+        throw new ValidationError("This field is required.")
+      }
 		},
 		modifier: function (newValue, oldValue) {
 			return newValue.replace(
@@ -175,7 +194,9 @@ Cleaner is used for cleaning modified data if necessary.
 var aform = powerform({
   card: {
     validator: function (card) {
-      if (!card) return "This field is required."
+      if (!card) {
+        throw new ValidationError("This field is required.")
+      }
     },
     modifier: function (newCard, oldCard) {
       if (newCard.length === 16) { // change this for actual form input
