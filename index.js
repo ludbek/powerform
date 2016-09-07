@@ -11,6 +11,14 @@ let isFunction = (data) => {
   return typeof data === "function";
 };
 
+let isArray = (data) => {
+  return data instanceof Array;
+};
+
+let isValidValidator = (validator) => {
+  return isFunction(validator) || isArray(validator);
+};
+
 function prop(model, field, defaultValue) {
   let initialState = defaultValue || "";
   let previousState = "";
@@ -41,7 +49,7 @@ function prop(model, field, defaultValue) {
     cleaner = model._config[field].cleaner;
     value = cleaner? cleaner(aclosure()): aclosure();
 
-    let validator = isFunction(model._config[field])
+    let validator = isFunction(model._config[field]) || isArray(model._config[field])
       ? model._config[field]
       : model._config[field].validator
 
@@ -122,7 +130,7 @@ module.exports =  function (config) {
   };
 
   _.forEach(config, (avalue, akey) => {
-    if (!isFunction(avalue) && !isFunction(avalue.validator)) {
+    if (!isValidValidator(avalue) && !isValidValidator(avalue.validator)) {
       throw Error("'" + akey + "' needs a validator.");
     }
     formModel[akey] = prop(formModel, akey, avalue.default);

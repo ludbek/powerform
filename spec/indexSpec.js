@@ -1,6 +1,6 @@
 import form from "../index.js";
 import chai from "chai";
-import {required, ValidationError} from "validatex";
+import {required, isString, ValidationError} from "validatex";
 
 let expect = chai.expect;
 
@@ -174,6 +174,28 @@ describe("Form", function () {
 
         aform.username("");
         expect(aform.username.isValid()).to.equal(false);
+      });
+
+      it("works with multiple validators", () => {
+        var aform = form({
+          username: [required(true), isString()]
+        });
+
+        aform.username(1);
+        expect(aform.username.isValid()).to.equal(false);
+        aform.username("1");
+        expect(aform.username.isValid()).to.equal(true);
+
+        aform = form({
+          username: {
+            validator: [required(true), isString()]
+          }
+        });
+
+        aform.username(1);
+        expect(aform.username.isValid()).to.equal(false);
+        aform.username("1");
+        expect(aform.username.isValid()).to.equal(true);
       });
     });
 
