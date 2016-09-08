@@ -1,10 +1,19 @@
 # Introduction
-A form model which can be used in apps with or without frameworks like Mithril, React, etc.
+A tiny (5.93kb gzip) form model which can be used in apps with or without frameworks like Mithril, React, etc.
+
+## Features
+- Each field can have multiple validators
+- Allows to toggle between single and multiple errors
+- Per field validation
+- Decorate data, imagine inserting dashes while filling credit card
+- Reset form or single field
+- Check if fields have been modified
 
 # Installation
 ## npm
 `npm install powerform`
 ## Bower
+`bower install validatex`
 `bower install powerform`
 
 # Requirement
@@ -95,16 +104,54 @@ var form = powerform({
 form.name() // "aname"
 ```
 
+## Set multiple validators
+Powerform now allows multiple validators per field.
+
+```javascript
+import {required, minLength} from "validating";
+
+var form = powerform({
+  username: [required(true), minLength(6)]
+}, true);
+
+
+form.isValid()
+=> false
+
+form.error()
+=>
+// {
+//   username: "This field is required"
+// }
+
+```
+
+
 ## Get multiple errors
 By default `powerform` returns single error per field.
 Pass `true` as the 2nd argument to `powerform` for getting multiple errors.
 
 ```javascript
-...
-```
+import {required, minLength} from "validating";
 
-## Set multiple validators
-...
+var form = powerform({
+  username: [required(true), minLength(6)]
+}, true);
+
+
+form.isValid()
+=> false
+
+form.error()
+=>
+// {
+//   username:
+//     [
+//       "This field is required.",
+//       "It must be at least 6 characters long."
+//     ]
+// }
+```
 
 ## Form methods
 ### .isValid()
