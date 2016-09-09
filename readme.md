@@ -14,6 +14,7 @@ A tiny (5.93kb gzip) form model which can be used in apps with or without framew
 `npm install powerform`
 ## Bower
 `bower install validatex`
+
 `bower install powerform`
 
 # Requirement
