@@ -48,7 +48,7 @@ var form = powerform({
     }
   },
   confirmPassword: function (value, dform) {
-    if (value !== dform.password()) {
+    if (value !== dform.password) {
       throw new ValidationError("Password and confirmation does not match.")
     }
   }
