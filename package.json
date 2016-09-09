@@ -1,6 +1,6 @@
 {
   "name": "powerform",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "A powerful form model.",
   "main": "lib/index.js",
   "scripts": {
@@ -30,7 +30,7 @@
   "license": "ISC",
   "dependencies": {
     "lodash": "^4.13.1",
-    "validatex": "^0.1.0"
+    "validatex": "^0.2.0"
   },
   "devDependencies": {
     "babel-cli": "^6.11.4",
