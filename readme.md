@@ -14,6 +14,7 @@ A tiny (5.93kb gzip) form model which can be used in apps with or without framew
 `npm install powerform`
 ## Bower
 `bower install validatex`
+
 `bower install powerform`
 
 # Requirement
@@ -27,7 +28,7 @@ A tiny (5.93kb gzip) form model which can be used in apps with or without framew
 
 // node
 var powerform = require("powerform");
-var ValidationError = require("validatex");
+var ValidationError = require("validatex").ValidationError;
 
 // browser
 // Include validatex.min.js at script tag. (from package validatex)
@@ -47,7 +48,7 @@ var form = powerform({
     }
   },
   confirmPassword: function (value, dform) {
-    if (value !== dform.password()) {
+    if (value !== dform.password) {
       throw new ValidationError("Password and confirmation does not match.")
     }
   }
