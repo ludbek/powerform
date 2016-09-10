@@ -30,7 +30,7 @@
   "license": "ISC",
   "dependencies": {
     "lodash": "^4.13.1",
-    "validatex": "^0.1.0"
+    "validatex": "^0.1.1"
   },
   "devDependencies": {
     "babel-cli": "^6.11.4",
