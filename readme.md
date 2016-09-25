@@ -9,6 +9,15 @@ A tiny (5.93kb gzip) form model which can be used in apps with or without framew
 - Reset form or single field
 - Check if fields have been modified
 
+# Updates
+- v2.2.0 [breaking changes]
+
+  - validatex@0.3.x
+  
+    - it requires validators to return error message instead of throwing them
+    - it requires validators to throw SkipValidation to short curcuit the validation
+    - [visit validatex for more detail](https://github.com/ludbek/validatex#updates)
+
 # Installation
 ## npm
 `npm install powerform`
@@ -24,32 +33,29 @@ A tiny (5.93kb gzip) form model which can be used in apps with or without framew
 ```javascript
 // es6
 > import powerform from "powerform"
-> import {ValidationError} from "validatex";
 
 // node
 var powerform = require("powerform");
-var ValidationError = require("validatex").ValidationError;
 
 // browser
 // Include validatex.min.js at script tag. (from package validatex)
 // Include /dist/powerform.min.js at script tag.
-var ValidationError = validatex.ValidationError;
 
 // create form
 var form = powerform({
   username: function (value) {
     if(!value) {
-      throw new ValidationError("This field is required")
+      return "This field is required"
     }
   },
   password: function (value) {
     if(value.length < 8) {
-      throw new ValidationError("This field must be at least 8 characters long.")
+      return "This field must be at least 8 characters long."
     }
   },
   confirmPassword: function (value, dform) {
     if (value !== dform.password) {
-      throw new ValidationError("Password and confirmation does not match.")
+      return "Password and confirmation does not match."
     }
   }
 })
@@ -84,7 +90,7 @@ false
 var form = powerform({
   name: function (value) {
     if (!value) {
-      throw new ValidationError("This field is required.")
+      return "This field is required."
     }
   }
 })
@@ -96,7 +102,7 @@ var form = powerform({
     default: "aname",
     validator: function (value) {
       if(!value) {
-        throw new ValidationError("This field is required.")
+        return "This field is required.")
       }
     }
   }
@@ -228,7 +234,7 @@ var form = powerform({
 	fullName: {
 		validator: function (value) {
       if(!value) {
-        throw new ValidationError("This field is required.")
+        return "This field is required.")
       }
 		},
 		modifier: function (newValue, oldValue) {
@@ -255,7 +261,7 @@ var aform = powerform({
   card: {
     validator: function (card) {
       if (!card) {
-        throw new ValidationError("This field is required.")
+        return "This field is required.")
       }
     },
     modifier: function (newCard, oldCard) {
