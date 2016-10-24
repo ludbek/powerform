@@ -205,8 +205,7 @@ let aform = powerform({
 
 aform.data(init);
 
-aform.task(); // "Meow meow"
-aform.resolved(); // true
+aform.data(); // {task: "Meow meow !!!", resolved: true}
 ```
 
 ## Per field methods
