@@ -190,7 +190,24 @@ form.error({name: "a error"})
 form.error() // {name: "a error"}
 ```
 ### .data()
-Returns the key-value pairs of fields and their respective values.
+Sets/gets the key-value pairs of fields and their respective values.
+
+```javascript
+let init = {
+  task: "Meow meow !!!",
+  resolved: true
+};
+
+let aform = powerform({
+  task: required(true),
+  resolved: required(true)
+});
+
+aform.data(init);
+
+aform.task(); // "Meow meow"
+aform.resolved(); // true
+```
 
 ## Per field methods
 Field itself is getter/setter.
