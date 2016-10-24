@@ -1,8 +1,7 @@
-.brofile
+.brotasks
 node_modules/
 .tern-port
 .tern-project
 npm-debug.log
 bower_components/
 lib/
-.brofile
