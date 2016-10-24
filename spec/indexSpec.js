@@ -373,6 +373,23 @@ describe("Form", function () {
                         password: {default: 'apassword', cleaner: cleaner, validator: noop}});
       expect(aform.data()).to.eql({username: 'username', password: 'password'});
     });
+
+    it("bulk assigns value", function () {
+      var init = {
+        task: "Meow meow",
+        resolved: true
+      };
+
+      var aform = form({
+        task () {},
+        resolved () {}
+      });
+
+      aform.data(init);
+
+      expect(aform.task()).to.equal(init.task);
+      expect(aform.resolved()).to.equal(init.resolved);
+    });
   });
 
   describe(".error()", function () {

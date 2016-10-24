@@ -95,13 +95,22 @@ module.exports =  function (config, multipleErrors = false) {
       });
     },
 
-    data () {
-      var dict = {};
-      forEach(this._config, (avalue, akey) => {
-        dict[akey] = avalue.cleaner? avalue.cleaner(this[akey]()): this[akey]();
-      });
+    data (init) {
+      if (init) {
+        forEach(init, (value, key) => {
+          if (this[key]) {
+            this[key](value);
+          }
+        });
+      }
+      else {
+        var dict = {};
+        forEach(this._config, (avalue, akey) => {
+          dict[akey] = avalue.cleaner? avalue.cleaner(this[akey]()): this[akey]();
+        });
 
-      return dict;
+        return dict;
+      }
     },
 
     error (supplied_error) {

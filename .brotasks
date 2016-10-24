@@ -1,0 +1,61 @@
+#!/bin/sh
+# please do not edit codes below
+project=$1
+task=$2
+shift
+full_cmd=$@
+# please do not edit codes above
+
+case $task in
+  setup)
+    # Edit this section for setting up a project.
+    # Commands here are executed only during project creation.
+    # 'bro create <project>' executes commands here.
+
+    # git
+    # git init
+    # echo ".brofile" >> .gitignore
+
+    # for node
+    #   npm init
+
+    # for python
+    #   virtulenv .env
+
+    # boot project
+    bro boot
+    ;;
+  boot)
+    # Edit this section to launch necessary tools for a project.
+    # Commands here are the first to be executed during project startup.
+    # 'bro [project] boot' executes commands here.
+
+    bro default
+
+    # launch necessary tools
+    # subl &
+    # firefox &
+    # nemo &
+    ;;
+  default)
+    # Edit this section to set appropriate environment for the project."
+    # Commands here are to be executed for every new terminals.
+    # 'bro [project] default' executes commands here.
+
+    # for node
+    #   nvm use v0.10.38
+
+    # for python
+    #   source .env/bin/activate
+    ;;
+  publish)
+    webpack
+    git add --all
+    git commit -m "minified"
+    git push --all
+    git push --tags
+    npm publish
+    ;;
+  *)
+    bro_task_usage
+ esac
