@@ -10,6 +10,9 @@ A tiny (5.93kb gzip) form model which can be used in apps with or without framew
 - Check if fields have been modified
 
 # Updates
+- v2.3.0
+  - bulk assign
+  - data change projector
 - v2.2.0 [breaking changes]
 
   - validatex@0.3.x
@@ -158,6 +161,23 @@ form.error()
 //       "It must be at least 6 characters long."
 //     ]
 // }
+```
+
+## Project changes
+Sometime it is desirable to project changes in form to external world, such a store.
+Powerform take 3rd argument called `projector` which will be called everytime form data changes.
+
+```javascript
+var store;
+
+var projector = (data) => {
+  store = data;
+};
+
+var aform = form({username: required(true)}, false, projector);
+aform.username("aname");
+
+expect(store).to.eql({username: "aname"});
 ```
 
 ## Form methods
