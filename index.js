@@ -17,7 +17,7 @@ let isValidValidator = (validator) => {
   return isFunction(validator) || isArray(validator);
 };
 
-function prop(model, field, defaultValue, multipleErrors) {
+function prop(model, field, defaultValue, multipleErrors, projector) {
   let initialState = defaultValue || "";
   let previousState = "";
   let state = model._config[field].modifier
@@ -25,12 +25,18 @@ function prop(model, field, defaultValue, multipleErrors) {
       : initialState;
 
   let aclosure = function (value) {
-    if(arguments.length === 0)  return state;
+    if(arguments.length === 0) return state;
+
+    var stateChanged = previousState !== value;
 
     previousState = state;
     state = model._config[field].modifier
-      ? model._config[field].modifier(value, previousState )
+      ? model._config[field].modifier(value, previousState)
       : value;
+
+    if (projector && stateChanged) {
+      projector(model.data());
+    }
   };
 
   aclosure.isDirty = () => {
@@ -77,7 +83,7 @@ function prop(model, field, defaultValue, multipleErrors) {
   return aclosure;
 }
 
-module.exports =  function (config, multipleErrors = false) {
+module.exports =  function (config, multipleErrors = false, projector) {
   let formModel = {
     _config: config,
     isValid (attach_error) {
@@ -95,13 +101,22 @@ module.exports =  function (config, multipleErrors = false) {
       });
     },
 
-    data () {
-      var dict = {};
-      forEach(this._config, (avalue, akey) => {
-        dict[akey] = avalue.cleaner? avalue.cleaner(this[akey]()): this[akey]();
-      });
+    data (init) {
+      if (init) {
+        forEach(init, (value, key) => {
+          if (this[key]) {
+            this[key](value);
+          }
+        });
+      }
+      else {
+        var dict = {};
+        forEach(this._config, (avalue, akey) => {
+          dict[akey] = avalue.cleaner? avalue.cleaner(this[akey]()): this[akey]();
+        });
 
-      return dict;
+        return dict;
+      }
     },
 
     error (supplied_error) {
@@ -132,7 +147,7 @@ module.exports =  function (config, multipleErrors = false) {
     if (!isValidValidator(avalue) && !isValidValidator(avalue.validator)) {
       throw Error("'" + akey + "' needs a validator.");
     }
-    formModel[akey] = prop(formModel, akey, avalue.default, multipleErrors);
+    formModel[akey] = prop(formModel, akey, avalue.default, multipleErrors, projector);
   });
 
   return formModel;

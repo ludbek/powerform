@@ -52,6 +52,19 @@ describe("Form", function () {
     expect(form.bind(form, schema)).to.throw(Error);
   });
 
+  it("projects changes in data", () => {
+    var store;
+
+    var projector = (data) => {
+      store = data;
+    };
+
+    var aform = form({username: required(true)}, false, projector);
+    aform.username("aname");
+    
+    expect(store).to.eql({username: "aname"});
+  });
+
   describe(".aProp", function () {
     var aform;
     beforeEach(function () {
@@ -372,6 +385,23 @@ describe("Form", function () {
       var aform = form({username: {default: 'ausername', cleaner: cleaner, validator: noop},
                         password: {default: 'apassword', cleaner: cleaner, validator: noop}});
       expect(aform.data()).to.eql({username: 'username', password: 'password'});
+    });
+
+    it("bulk assigns value", function () {
+      var init = {
+        task: "Meow meow",
+        resolved: true
+      };
+
+      var aform = form({
+        task () {},
+        resolved () {}
+      });
+
+      aform.data(init);
+
+      expect(aform.task()).to.equal(init.task);
+      expect(aform.resolved()).to.equal(init.resolved);
     });
   });
 

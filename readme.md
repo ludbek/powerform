@@ -9,11 +9,24 @@ A tiny (5.93kb gzip) form model which can be used in apps with or without framew
 - Reset form or single field
 - Check if fields have been modified
 
+# Updates
+- v2.3.0
+  - bulk assign
+  - data change projector
+- v2.2.0 [breaking changes]
+
+  - validatex@0.3.x
+  
+    - it requires validators to return error message instead of throwing them
+    - it requires validators to throw SkipValidation to short curcuit the validation
+    - [visit validatex for more detail](https://github.com/ludbek/validatex#updates)
+
 # Installation
 ## npm
 `npm install powerform`
 ## Bower
 `bower install validatex`
+
 `bower install powerform`
 
 # Requirement
@@ -23,32 +36,29 @@ A tiny (5.93kb gzip) form model which can be used in apps with or without framew
 ```javascript
 // es6
 > import powerform from "powerform"
-> import {ValidationError} from "validatex";
 
 // node
 var powerform = require("powerform");
-var ValidationError = require("validatex");
 
 // browser
 // Include validatex.min.js at script tag. (from package validatex)
 // Include /dist/powerform.min.js at script tag.
-var ValidationError = validatex.ValidationError;
 
 // create form
 var form = powerform({
   username: function (value) {
     if(!value) {
-      throw new ValidationError("This field is required")
+      return "This field is required"
     }
   },
   password: function (value) {
     if(value.length < 8) {
-      throw new ValidationError("This field must be at least 8 characters long.")
+      return "This field must be at least 8 characters long."
     }
   },
   confirmPassword: function (value, dform) {
-    if (value !== dform.password()) {
-      throw new ValidationError("Password and confirmation does not match.")
+    if (value !== dform.password) {
+      return "Password and confirmation does not match."
     }
   }
 })
@@ -83,7 +93,7 @@ false
 var form = powerform({
   name: function (value) {
     if (!value) {
-      throw new ValidationError("This field is required.")
+      return "This field is required."
     }
   }
 })
@@ -95,7 +105,7 @@ var form = powerform({
     default: "aname",
     validator: function (value) {
       if(!value) {
-        throw new ValidationError("This field is required.")
+        return "This field is required.")
       }
     }
   }
@@ -153,6 +163,23 @@ form.error()
 // }
 ```
 
+## Project changes
+Sometime it is desirable to project changes in form to external world, such a store.
+Powerform take 3rd argument called `projector` which will be called everytime form data changes.
+
+```javascript
+var store;
+
+var projector = (data) => {
+  store = data;
+};
+
+var aform = form({username: required(true)}, false, projector);
+aform.username("aname");
+
+expect(store).to.eql({username: "aname"});
+```
+
 ## Form methods
 ### .isValid()
 ```javascript
@@ -183,7 +210,23 @@ form.error({name: "a error"})
 form.error() // {name: "a error"}
 ```
 ### .data()
-Returns the key-value pairs of fields and their respective values.
+Sets/gets the key-value pairs of fields and their respective values.
+
+```javascript
+let init = {
+  task: "Meow meow !!!",
+  resolved: true
+};
+
+let aform = powerform({
+  task: required(true),
+  resolved: required(true)
+});
+
+aform.data(init);
+
+aform.data(); // {task: "Meow meow !!!", resolved: true}
+```
 
 ## Per field methods
 Field itself is getter/setter.
@@ -227,7 +270,7 @@ var form = powerform({
 	fullName: {
 		validator: function (value) {
       if(!value) {
-        throw new ValidationError("This field is required.")
+        return "This field is required.")
       }
 		},
 		modifier: function (newValue, oldValue) {
@@ -254,7 +297,7 @@ var aform = powerform({
   card: {
     validator: function (card) {
       if (!card) {
-        throw new ValidationError("This field is required.")
+        return "This field is required.")
       }
     },
     modifier: function (newCard, oldCard) {
