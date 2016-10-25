@@ -27,7 +27,7 @@ function prop(model, field, defaultValue, multipleErrors, projector) {
   let aclosure = function (value) {
     if(arguments.length === 0) return state;
 
-    var stateChanged = previousState !== value;
+    var stateChanged = state !== value;
 
     previousState = state;
     state = model._config[field].modifier

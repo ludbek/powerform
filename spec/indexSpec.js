@@ -63,6 +63,9 @@ describe("Form", function () {
     aform.username("aname");
     
     expect(store).to.eql({username: "aname"});
+
+    aform.username("");
+    expect(store).to.eql({username: ""});
   });
 
   describe(".aProp", function () {
