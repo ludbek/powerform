@@ -24,7 +24,7 @@ function prop(model, field, defaultValue, multipleErrors, projector) {
       ? model._config[field].modifier(initialState, previousState)
       : initialState;
 
-  let aclosure = function (value) {
+  let aclosure = function (value, doProject) {
     if(arguments.length === 0) return state;
 
     var stateChanged = state !== value;
@@ -34,7 +34,7 @@ function prop(model, field, defaultValue, multipleErrors, projector) {
       ? model._config[field].modifier(value, previousState)
       : value;
 
-    if (projector && stateChanged) {
+    if (projector && stateChanged && doProject !== false) {
       projector(model.data());
     }
   };
@@ -67,8 +67,8 @@ function prop(model, field, defaultValue, multipleErrors, projector) {
     return error === undefined;
   };
 
-  aclosure.reset = () => {
-    aclosure(initialState);
+  aclosure.reset = (doProject) => {
+    doProject === false? aclosure(initialState, false): aclosure(initialState);
     aclosure.error(undefined);
   };
 
@@ -105,9 +105,11 @@ module.exports =  function (config, multipleErrors = false, projector) {
       if (init) {
         forEach(init, (value, key) => {
           if (this[key]) {
-            this[key](value);
+            this[key](value, false);
           }
         });
+
+        projector && projector(this.data());
       }
       else {
         var dict = {};
@@ -137,9 +139,11 @@ module.exports =  function (config, multipleErrors = false, projector) {
 
     reset () {
       forEach(config, (avalue, akey) => {
-        formModel[akey].reset();
+        formModel[akey].reset(false);
         formModel[akey].error(undefined);
       });
+
+      projector && projector(this.data());
     }
   };
 

@@ -52,22 +52,6 @@ describe("Form", function () {
     expect(form.bind(form, schema)).to.throw(Error);
   });
 
-  it("projects changes in data", () => {
-    var store;
-
-    var projector = (data) => {
-      store = data;
-    };
-
-    var aform = form({username: required(true)}, false, projector);
-    aform.username("aname");
-    
-    expect(store).to.eql({username: "aname"});
-
-    aform.username("");
-    expect(store).to.eql({username: ""});
-  });
-
   describe(".aProp", function () {
     var aform;
     beforeEach(function () {
@@ -104,6 +88,32 @@ describe("Form", function () {
       aform.username("superman");
       expect(newValue).to.equal("superman");
       expect(oldValue).to.equal("batman");
+    });
+
+    it("projects changes in data", () => {
+      var store;
+
+      var projector = (data) => {
+        store = data;
+      };
+
+      var aform = form({username: required(true)}, false, projector);
+      aform.username("aname");
+      
+      expect(store).to.eql({username: "aname"});
+    });
+
+    it("does not project changes in data", () => {
+      var store;
+
+      var projector = (data) => {
+        store = data;
+      };
+
+      var aform = form({username: required(true)}, false, projector);
+      aform.username("aname", false);
+      
+      expect(store).to.eql(undefined);
     });
 
     describe(".isDirty()", function () {
@@ -274,6 +284,20 @@ describe("Form", function () {
         expect(aform.username.error()).to.exist;
         aform.username.reset();
         expect(aform.username.error()).not.to.exist;
+      });
+
+      it("projects changes", () => {
+        var store;
+
+        var projector = (data) => {
+          store = data;
+        };
+
+        var bform = form({username: {validator: required(true), default: "baba"}}, false, projector);
+        bform.username("mama");
+
+        bform.reset();
+        expect(store).to.eql({username: "baba"});
       });
     });
 
