@@ -80,6 +80,10 @@ function prop(model, field, defaultValue, multipleErrors, projector) {
     };
   }();
 
+  aclosure.setInitialValue = function (value) {
+    initialState = value;
+  };
+
   return aclosure;
 }
 
@@ -101,11 +105,12 @@ module.exports =  function (config, multipleErrors = false, projector) {
       });
     },
 
-    data (init) {
+    data (init, setAsInitialValue) {
       if (init) {
         forEach(init, (value, key) => {
           if (this[key]) {
             this[key](value, false);
+            setAsInitialValue && this[key].setInitialValue(value);
           }
         });
 

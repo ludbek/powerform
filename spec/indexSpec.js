@@ -430,6 +430,18 @@ describe("Form", function () {
       expect(aform.task()).to.equal(init.task);
       expect(aform.resolved()).to.equal(init.resolved);
     });
+
+    it("sets new data as initial value of the form", () => {
+      let newInitialData = {
+        username: "busername",
+        password: "bpassword"
+      };
+
+      aform.data(newInitialData, true);
+
+      expect(aform.username.isDirty()).to.equal(false);
+      expect(aform.isDirty()).to.equal(false);
+    });
   });
 
   describe(".error()", function () {
