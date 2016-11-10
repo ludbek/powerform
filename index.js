@@ -80,7 +80,7 @@ function prop(model, field, defaultValue, multipleErrors, projector) {
     };
   }();
 
-  aclosure.setInitialValue = function (value) {
+  aclosure.setInitialState = function (value) {
     initialState = value;
   };
 
@@ -110,7 +110,7 @@ module.exports =  function (config, multipleErrors = false, projector) {
         forEach(init, (value, key) => {
           if (this[key]) {
             this[key](value, false);
-            setAsInitialValue && this[key].setInitialValue(value);
+            setAsInitialValue && this[key].setInitialState(value);
           }
         });
 
@@ -124,6 +124,12 @@ module.exports =  function (config, multipleErrors = false, projector) {
 
         return dict;
       }
+    },
+
+    setInitialState (data) {
+      forEach(this._config, (value, key) => {
+        this[key].setInitialState(data[key]);
+      })
     },
 
     error (supplied_error) {

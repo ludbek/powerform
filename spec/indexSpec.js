@@ -393,6 +393,20 @@ describe("Form", function () {
     });
   });
 
+  describe(".setInitialState", () => {
+    it("sets initial state", () => {
+      var aform = form({username: {default: "ausername", validator: required(true)}});
+      expect(aform.username.isDirty()).to.equal(false);
+
+      aform.username.setInitialState("busername");
+      expect(aform.username.isDirty()).to.equal(true);
+
+      aform.username("ausername");
+      aform.reset();
+      expect(aform.username()).to.equal("busername");
+    });
+  });
+
   describe(".data()", function () {
     var aform;
     before(function () {
@@ -485,6 +499,23 @@ describe("Form", function () {
       aform.reset();
       expect(aform.username.error()).not.to.exist;
       expect(aform.password.error()).not.to.exist;
+    });
+  });
+
+  describe(".setInitialState", () => {
+    it("sets initial state of every field", () => {
+      var aform = form({
+        username: required(true),
+        password: required(true)
+      });
+      expect(aform.isDirty()).to.equal(false);
+
+      aform.setInitialState({username: "ausername", password: "apassword"});
+      expect(aform.isDirty()).to.equal(true);
+
+      aform.data({username: "busername", password: "bpassword"});
+      aform.reset();
+      expect(aform.data()).to.eql({username: "ausername", password: "apassword"});
     });
   });
 });
