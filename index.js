@@ -108,7 +108,7 @@ module.exports =  function (config, multipleErrors = false, projector) {
     data (init, setAsInitialValue) {
       if (init) {
         forEach(init, (value, key) => {
-          if (this[key]) {
+          if (this._config[key]) {
             this[key](value, false);
             setAsInitialValue && this[key].setInitialState(value);
           }
