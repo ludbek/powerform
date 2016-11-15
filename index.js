@@ -34,6 +34,11 @@ function prop(model, field, defaultValue, multipleErrors, projector) {
       ? model._config[field].modifier(value, previousState)
       : value;
 
+    let field_projector = model._config[field].projector;
+    if (field_projector && stateChanged && doProject !== false) {
+      field_projector(value, model.data());
+    }
+
     if (projector && stateChanged && doProject !== false) {
       projector(model.data());
     }

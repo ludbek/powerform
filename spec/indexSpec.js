@@ -90,6 +90,27 @@ describe("Form", function () {
       expect(oldValue).to.equal("batman");
     });
 
+    it("projects changes specific to the field.", () => {
+      var fieldValue, modelData;
+
+      var projector = (field, all) => {
+        fieldValue = field;
+        modelData = all;
+      };
+
+      var aform = form({
+        username: {validator: required(true), projector: projector},
+        password: required(true)
+      });
+
+      aform.password("apassword");
+      expect(fieldValue).to.equal(undefined);
+
+      aform.username("ausername");
+      expect(fieldValue).to.equal("ausername");
+      expect(modelData).to.eql({username: "ausername", password: "apassword"});
+    });
+
     it("projects changes in data", () => {
       var store;
 
