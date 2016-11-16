@@ -165,6 +165,35 @@ form.error()
 
 ## Project changes
 Sometime it is desirable to project changes in form to external world, such a store.
+
+### Field specific projector
+Each field takes a key `projector` which will be called everytime the field value changes.
+
+```javascript
+var store;
+var projector = (fieldValue, allValue) => {
+  store = fieldValue;
+}
+
+var aform = powerform({
+  username: {
+    validator: required(true),
+    projector: projector
+  },
+  password: required(true)
+});
+
+
+aform.password("apassword");
+console.log(store);
+=> undefined
+
+aform.username("ausername");
+console.log(store);
+=> "ausername"
+```
+
+### Global projector
 Powerform take 3rd argument called `projector` which will be called everytime form data changes.
 
 ```javascript
@@ -174,7 +203,7 @@ var projector = (data) => {
   store = data;
 };
 
-var aform = form({username: required(true)}, false, projector);
+var aform = powerform({username: required(true)}, false, projector);
 aform.username("aname");
 
 expect(store).to.eql({username: "aname"});
@@ -228,6 +257,48 @@ aform.data(init);
 aform.data(); // {task: "Meow meow !!!", resolved: true}
 ```
 
+If the second argument to '.data' is true, the data is set as the initial value.
+
+```javascript
+let init = {
+  task: "Meow meow !!!",
+  resolved: true
+};
+
+let aform = powerform({
+  task: required(true),
+  resolved: required(true)
+});
+
+aform.data(init);
+aform.isDirty() // true
+
+aform.data(init, true);
+aform.isDirty() // false, since form's current data and initial data are same
+```
+
+### .setInitialValue()
+Sets given key-value pairs as the initial value.
+Useful in the situation where one has to update the form and set the changes as initial value.
+
+```javascript
+let aform = powerform({
+  username: {default: "ausername", validator: required(true)},
+  password: {default: "apassword", required(true)}
+});
+
+let updates = {
+  username: "busername",
+  password: "bpassword"
+};
+
+aform.data(updates);
+aform.isDirty(); // true
+
+aform.setInitialValue(updates);
+aform.isDirty(); // false
+```
+
 ## Per field methods
 Field itself is getter/setter.
 ```javascript
@@ -259,6 +330,21 @@ It sets the value as well as validates the field.
 ```javascript
 form.name.setAndValidate("")
 form.error() // "This field is required."
+```
+
+### .setInitialValue()
+Sets the given value as the field's initial.
+
+```javascript
+let form = powerform({
+  name: required(true)
+});
+
+form.name("aname");
+form.name.isDirty(); // true
+
+form.name.setInitialValue("aname");
+form.name.isDirty(); // false
 ```
 
 ## Modifier
