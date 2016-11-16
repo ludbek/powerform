@@ -39,7 +39,7 @@ function prop(model, field, defaultValue, multipleErrors, projector) {
       field_projector(value, model.data());
     }
 
-    if (projector && stateChanged && doProject !== false) {
+    if (!field_projector && projector && stateChanged && doProject !== false) {
       projector(model.data());
     }
   };
