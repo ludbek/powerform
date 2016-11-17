@@ -414,12 +414,12 @@ describe("Form", function () {
     });
   });
 
-  describe(".setInitialState", () => {
+  describe(".setInitialValue", () => {
     it("sets initial state", () => {
       var aform = form({username: {default: "ausername", validator: required(true)}});
       expect(aform.username.isDirty()).to.equal(false);
 
-      aform.username.setInitialState("busername");
+      aform.username.setInitialValue("busername");
       expect(aform.username.isDirty()).to.equal(true);
 
       aform.username("ausername");
@@ -523,7 +523,7 @@ describe("Form", function () {
     });
   });
 
-  describe(".setInitialState", () => {
+  describe(".setInitialValue", () => {
     it("sets initial state of every field", () => {
       var aform = form({
         username: required(true),
@@ -531,7 +531,7 @@ describe("Form", function () {
       });
       expect(aform.isDirty()).to.equal(false);
 
-      aform.setInitialState({username: "ausername", password: "apassword"});
+      aform.setInitialValue({username: "ausername", password: "apassword"});
       expect(aform.isDirty()).to.equal(true);
 
       aform.data({username: "busername", password: "bpassword"});
