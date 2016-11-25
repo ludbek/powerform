@@ -160,6 +160,17 @@ module.exports =  function (config, multipleErrors = false, projector) {
       });
 
       projector && projector(this.data());
+    },
+
+    getUpdates () {
+      var dict = {};
+      forEach(this._config, (avalue, akey) => {
+        if (this[akey].isDirty()) {
+          dict[akey] = avalue.cleaner? avalue.cleaner(this[akey]()): this[akey]();
+        }
+      });
+
+      return dict;
     }
   };
 
