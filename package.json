@@ -29,7 +29,6 @@
   "author": "ludbek",
   "license": "ISC",
   "dependencies": {
-    "lodash": "^4.13.1",
     "validatex": "^0.3.1"
   },
   "devDependencies": {
