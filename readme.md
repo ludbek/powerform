@@ -32,6 +32,9 @@ A tiny (5.93kb gzip) form model which can be used in apps with or without framew
 # Requirement
 `powerform` internally uses [`validatex`](https://github.com/ludbek/validatex) for validation.
 
+# Compatibility
+`mithril-componentx` works with all the modern browsers. For old ones please use shim like [this](https://github.com/es-shims/es5-shim).
+
 # Quick walk-through
 ```javascript
 // es6
