@@ -539,4 +539,20 @@ describe("Form", function () {
       expect(aform.data()).to.eql({username: "ausername", password: "apassword"});
     });
   });
+  
+  describe("getUpdates", () => {
+    it("returns updated key-value pairs", () => {
+      var aform = form({
+        username: required(true),
+        password: required(true)
+      });
+
+      aform.data({username: "ausername", password: "apassword"}, true);
+
+      expect(aform.getUpdates()).to.eql({});
+
+      aform.username("busername");
+      expect(aform.getUpdates()).to.eql({username: "busername"});
+    });
+  });
 });

@@ -1,7 +1,3 @@
-import some from "lodash/some.js";
-import every from "lodash/every.js";
-import keys from "lodash/keys.js";
-import forEach from "lodash/forEach.js";
 import {validateSingle} from "validatex";
 
 
@@ -96,78 +92,93 @@ module.exports =  function (config, multipleErrors = false, projector) {
   let formModel = {
     _config: config,
     isValid (attach_error) {
-      var truthPool = [];
-      forEach(config, (avalue, akey) => {
-        truthPool.push(this[akey].isValid(attach_error));
-      });
+      let truthPool = Object.keys(config).reduce((pool, key) => {
+        pool.push(this[key].isValid(attach_error));
+        return pool;
+      }, []);
 
-      return every(truthPool, (value) => { return value === true;});
+      return truthPool.every((value) => { return value === true;});
     },
 
     isDirty () {
-      return some(keys(this._config), (akey) => {
+      return Object.keys(config).some((akey) => {
         return this[akey].isDirty();
       });
     },
 
     data (init, setAsInitialValue) {
       if (init) {
-        forEach(init, (value, key) => {
-          if (this._config[key]) {
-            this[key](value, false);
-            setAsInitialValue && this[key].setInitialValue(value);
+        Object.keys(init).forEach((key) => {
+          let value = init[key];
+          if (config[key]) {
+            let field = this[key];
+            field(value, false);
+            setAsInitialValue && field.setInitialValue(value);
           }
         });
 
         projector && projector(this.data());
       }
       else {
-        var dict = {};
-        forEach(this._config, (avalue, akey) => {
-          dict[akey] = avalue.cleaner? avalue.cleaner(this[akey]()): this[akey]();
-        });
-
-        return dict;
+        return Object.keys(config).reduce((data, key) => {
+          let cleaner = config[key].cleaner;
+          let value = this[key]();
+          data[key] = cleaner? cleaner(value): value;
+          return data;
+        }, {});
       }
     },
 
     setInitialValue (data) {
-      forEach(this._config, (value, key) => {
+      Object.keys(config).forEach((key) => {
         this[key].setInitialValue(data[key]);
-      })
+      });
     },
 
     error (supplied_error) {
       var dict = {};
 
       if (arguments.length === 0) {
-        forEach(config, (avalue, akey) => {
-          dict[akey] = this[akey].error();
-        });
-        return dict;
+        return Object.keys(config).reduce((error, key) => {
+          error[key] = this[key].error();
+          return error;
+        }, {});
       }
       else {
-        forEach(config, (avalue, akey) => {
-          this[akey].error(supplied_error[akey]? supplied_error[akey]: undefined);
+        Object.keys(config).forEach((key) => {
+          this[key].error(supplied_error[key]? supplied_error[key]: undefined);
         });
       };
     },
 
     reset () {
-      forEach(config, (avalue, akey) => {
-        formModel[akey].reset(false);
-        formModel[akey].error(undefined);
+      Object.keys(config).forEach((key) => {
+        this[key].reset(false);
+        this[key].error(undefined);
       });
 
       projector && projector(this.data());
+    },
+
+    getUpdates () {
+      return Object.keys(config).reduce((updates, key) => {
+        if (this[key].isDirty()) {
+          let cleaner = config[key].cleaner;
+          let value = this[key]();
+
+          updates[key] = cleaner? cleaner(value): value;
+        }
+        return updates;
+      }, {});
     }
   };
 
-  forEach(config, (avalue, akey) => {
-    if (!isValidValidator(avalue) && !isValidValidator(avalue.validator)) {
-      throw Error("'" + akey + "' needs a validator.");
+  Object.keys(config).forEach((key) => {
+    let field = config[key];
+    if (!isValidValidator(field) && !isValidValidator(field.validator)) {
+      throw Error("'" + key + "' needs a validator.");
     }
-    formModel[akey] = prop(formModel, akey, avalue.default, multipleErrors, projector);
+    formModel[key] = prop(formModel, key, field.default, multipleErrors, projector);
   });
 
   return formModel;
