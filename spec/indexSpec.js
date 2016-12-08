@@ -60,7 +60,7 @@ describe("Form", function () {
     });
 
     it("sets '' as default value", function () {
-      expect(aform.username()).to.equal('');
+      expect(aform.username()).to.equal(null);
     });
 
     it("sets default value", function () {
@@ -83,7 +83,7 @@ describe("Form", function () {
                                      return newState;
                                    }}});
       expect(newValue).to.equal("batman");
-      expect(oldValue).to.equal("");
+      expect(oldValue).to.equal(null);
 
       aform.username("superman");
       expect(newValue).to.equal("superman");

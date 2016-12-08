@@ -14,8 +14,8 @@ let isValidValidator = (validator) => {
 };
 
 function prop(model, field, defaultValue, multipleErrors, projector) {
-  let initialState = defaultValue || "";
-  let previousState = "";
+  let initialState = defaultValue || null;
+  let previousState = null;
   let state = model._config[field].modifier
       ? model._config[field].modifier(initialState, previousState)
       : initialState;
