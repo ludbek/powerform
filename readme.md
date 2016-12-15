@@ -405,3 +405,52 @@ aform.card("1111222233334444")
 aform.card() // "1111-2222-3333-4444"
 aform.data() // {card: "1111222233334444"}
 ```
+
+# Examples
+## Using with Mithril
+
+```javascript
+let signup = {
+  controller: function () {
+    return {
+      form: powerform({
+        username: required(true)],
+        password: required(true),
+        confirmPassword: [required(true), equals("password"]
+        }, true),
+      submit: function () {
+        if(!this.form.isValid()) return
+        SignupAPI(this.form.data())
+          .then((res) => {
+            m.route("/login/")})
+          ["catch"]((errors) => {
+            this.form.error(errors)})
+          .then(()=> m.redraw())}
+    }
+  },
+  view: function (ctrl) {
+    return m("form",
+      m("input", {
+        placeholder: "Username",
+        onkeypress: m.withAttr("value", ctrl.form.username),
+        onchange: ctrl.form.username.isValid}),
+      _.map(ctrl.form.username.error(), (error) => {
+        return m("p.error", error)}),
+      m("input", {
+        placeholder: "Password",
+        onkeypress: m.withAttr("value", ctrl.form.password),
+        onchange: ctrl.form.password.isValid}),
+      _.map(ctrl.form.password.error(), (error) => {
+        return m("p.error", error)}),
+      m("input", {
+        placeholder: "Confirm Password",
+        onkeypress: m.withAttr("value", ctrl.form.confirmPassword),
+        onchange: ctrl.form.confirmPassword.isValid}),
+      _.map(ctrl.form.confirmPassword.error(), (error) => {
+        return m("p.error", error)}),
+      m("button", {
+        disabled: !ctrl.form.isValid(false),
+        onclick: ctrl.submit.bind(ctrl)}, "Submit"))
+  }
+}
+```
