@@ -121,7 +121,7 @@ form.name() // "aname"
 Powerform now allows multiple validators per field.
 
 ```javascript
-import {required, minLength} from "validating";
+import {required, minLength} from "validatex";
 
 var form = powerform({
   username: [required(true), minLength(6)]
