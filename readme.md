@@ -145,7 +145,7 @@ By default `powerform` returns single error per field.
 Pass `true` as the 2nd argument to `powerform` for getting multiple errors.
 
 ```javascript
-import {required, minLength} from "validating";
+import {required, minLength} from "validatex";
 
 var form = powerform({
   username: [required(true), minLength(6)]
