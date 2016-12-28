@@ -1,6 +1,6 @@
 {
   "name": "powerform",
-  "version": "2.6.4",
+  "version": "2.6.5",
   "description": "A powerful form model.",
   "main": "lib/index.js",
   "scripts": {
