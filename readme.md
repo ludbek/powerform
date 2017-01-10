@@ -416,7 +416,7 @@ let signup = {
       form: powerform({
         username: required(true)],
         password: required(true),
-        confirmPassword: [required(true), equals("password"]
+        confirmPassword: [required(true), equalsTo("password"]
         }, true),
       submit: function () {
         if(!this.form.isValid()) return
