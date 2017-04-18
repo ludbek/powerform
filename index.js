@@ -65,7 +65,7 @@ function prop(model, field, defaultValue = null, multipleErrors, projector) {
       aclosure.error(error? error: undefined);
     }
 
-    return error === undefined;
+    return error === undefined || (multipleErrors && error.length === 0);
   };
 
   aclosure.reset = (doProject) => {

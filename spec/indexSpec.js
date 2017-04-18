@@ -142,7 +142,7 @@ describe("Form", () => {
 
       var aform = form({username: required(true)}, false, projector);
       aform.username("aname");
-      
+
       expect(store).to.eql({username: "aname"});
     });
 
@@ -155,7 +155,7 @@ describe("Form", () => {
 
       var aform = form({username: required(true)}, false, projector);
       aform.username("aname", false);
-      
+
       expect(store).to.eql(undefined);
     });
 
@@ -289,6 +289,17 @@ describe("Form", () => {
         aform.username(undefined);
         aform.username.isValid();
         expect(aform.username.error().length).to.equal(2);
+      });
+
+      it("return true if error is empty when multiple errors is turned on", () => {
+        var aform = form({
+          username: {
+            validator: [required(true), isString()]
+          }
+        }, true);
+
+        aform.username("a username");
+        expect(aform.username.isValid()).to.equal(true);
       });
     });
 
@@ -561,7 +572,7 @@ describe("Form", () => {
       expect(aform.data()).to.eql({username: "ausername", password: "apassword"});
     });
   });
-  
+
   describe("getUpdates", () => {
     it("returns updated key-value pairs", () => {
       var aform = form({
