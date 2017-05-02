@@ -1,5 +1,5 @@
 # Introduction
-A tiny form model which can be used in apps with or without frameworks like [Mithril](https://github.com/lhorie/mithril.js/), [React](https://github.com/facebook/react), etc.
+A tiny form model which can be used in apps with or without frameworks like [Mithril](https://github.com/MithrilJS/mithril.js/), [React](https://github.com/facebook/react), etc.
 
 ## Features
 - Each field can have multiple validators
