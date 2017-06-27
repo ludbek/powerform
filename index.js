@@ -13,8 +13,13 @@ let isValidValidator = (validator) => {
   return isFunction(validator) || isArray(validator);
 };
 
+let clone = (data) => {
+  return JSON.parse(JSON.stringify(data));
+};
+
 function prop(model, field, defaultValue = null, multipleErrors, projector) {
-  let initialState = defaultValue;
+  defaultValue = typeof(defaultValue) === 'undefined' ? null : defaultValue;
+  let initialState = clone(defaultValue);
   let previousState = null;
   let state = model._config[field].modifier
       ? model._config[field].modifier(initialState, previousState)
