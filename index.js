@@ -19,11 +19,11 @@ let clone = (data) => {
 
 function prop(model, field, defaultValue = null, multipleErrors, projector) {
   defaultValue = typeof(defaultValue) === 'undefined' ? null : defaultValue;
-  let initialState = clone(defaultValue);
+  let initialState = defaultValue;
   let previousState = null;
   let state = model._config[field].modifier
-      ? model._config[field].modifier(initialState, previousState)
-      : initialState;
+      ? model._config[field].modifier(clone(initialState), previousState)
+      : clone(initialState);
 
   let aclosure = function (value, doProject) {
     if(arguments.length === 0) return state;

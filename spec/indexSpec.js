@@ -353,6 +353,17 @@ describe("Form", () => {
         bform.reset();
         expect(store).to.eql({username: "baba"});
       });
+
+      it("resets array", () => {
+      	var data = [];
+      	var aform = form({userList: {validator: required(true), default: []}});
+      	data = aform.userList() || [];
+      	data.push({name: "user"});
+      	aform.userList(data);
+
+      	aform.reset();
+      	expect(aform.userList()).to.eql([]);
+      });
     });
 
     describe(".error()", () => {
