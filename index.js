@@ -82,7 +82,12 @@ function prop(model, field, defaultValue = null, multipleErrors, projector) {
     var state;
     return function (error) {
       if (arguments.length === 0) return state;
-      state = error;
+      if (!multipleErrors && isArray(error) && error.length > 0) {
+        state = error[0];
+      }
+      else {
+        state = error;
+      }
     };
   }();
 

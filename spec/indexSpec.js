@@ -536,6 +536,12 @@ describe("Form", () => {
       expect(aform.password.error()).not.to.exist;
     });
 
+    it("sets single error if multiple error if false", () => {
+      aform.error({username: ["a error"]});
+      expect(aform.username.error()).to.equal("a error");
+      expect(aform.password.error()).not.to.exist;
+    });
+
     it("returns the error of each property", () => {
       var error = {username: "a error", password: "a error"};
       aform.error(error);
