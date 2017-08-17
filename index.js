@@ -46,7 +46,7 @@ function prop(model, field, defaultValue = null, multipleErrors, projector) {
   };
 
   aclosure.isDirty = () => {
-    return initialState !== state;
+    return JSON.stringify(initialState) !== JSON.stringify(state);
   };
 
   aclosure.setAndValidate = (value) => {
