@@ -92,7 +92,7 @@ function prop(model, field, defaultValue = null, multipleErrors, projector) {
   }();
 
   aclosure.setInitialValue = function (value) {
-    initialState = value;
+    initialState = clone(value);
   };
 
   return aclosure;

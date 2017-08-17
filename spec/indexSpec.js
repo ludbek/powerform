@@ -480,6 +480,17 @@ describe("Form", () => {
       aform.reset();
       expect(aform.username()).to.equal("busername");
     });
+
+    it("works with array", () => {
+      var aform = form({nums: {default: [1,2], validator: noop}});
+
+      aform.nums.setInitialValue([1,2,3]);
+      aform.nums([1,2,3]);
+      expect(aform.nums.isDirty()).to.equal(false);
+
+      aform.nums([1,2,3,4]);
+      expect(aform.nums.isDirty()).to.equal(true);
+    });
   });
 
   describe(".data()", () => {
