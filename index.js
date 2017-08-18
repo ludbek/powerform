@@ -37,11 +37,11 @@ function prop(model, field, defaultValue = null, multipleErrors, projector) {
 
     let field_projector = model._config[field].projector;
     if (field_projector && stateChanged && doProject !== false) {
-      field_projector(value, model.data());
+      field_projector(value, model.data(), model);
     }
 
     if (!field_projector && projector && stateChanged && doProject !== false) {
-      projector(model.data());
+      projector(model.data(), model);
     }
   };
 

@@ -113,11 +113,12 @@ describe("Form", () => {
     });
 
     it("projects changes specific to the field.", () => {
-      var fieldValue, modelData;
+      var fieldValue, modelData, dform;
 
-      var projector = (field, all) => {
+      var projector = (field, all, model) => {
         fieldValue = field;
         modelData = all;
+        dform = model;
       };
 
       var aform = form({
@@ -131,19 +132,22 @@ describe("Form", () => {
       aform.username("ausername");
       expect(fieldValue).to.equal("ausername");
       expect(modelData).to.eql({username: "ausername", password: "apassword"});
+      expect(dform).to.equal(aform);
     });
 
     it("projects changes in data", () => {
-      var store;
+      var store, dform;
 
-      var projector = (data) => {
+      var projector = (data, model) => {
         store = data;
+        dform = model;
       };
 
       var aform = form({username: required(true)}, false, projector);
       aform.username("aname");
 
       expect(store).to.eql({username: "aname"});
+      expect(dform).to.eql(aform);
     });
 
     it("does not project changes in data", () => {
