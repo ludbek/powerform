@@ -157,7 +157,7 @@ describe("Form", () => {
       expect(dform).to.equal(aform);
     });
 
-    it.only("does not project changes works for array data.", () => {
+    it("does not project changes works for array data.", () => {
       var fieldValue, modelData, dform;
 
       var projector = (field, all, model) => {
