@@ -135,6 +135,49 @@ describe("Form", () => {
       expect(dform).to.equal(aform);
     });
 
+    it("projects changes works for array data.", () => {
+      var fieldValue, modelData, dform;
+
+      var projector = (field, all, model) => {
+        fieldValue = field;
+        modelData = all;
+        dform = model;
+      };
+
+      var aform = form({
+        userlist: {validator: required(true), default: [], projector: projector},
+      });
+
+      expect(aform.userlist()).to.eql([]);
+      expect(fieldValue).to.equal(undefined);
+      aform.userlist(["ausername"]);
+      expect(typeof(fieldValue)).to.equal('object');
+      expect(fieldValue).to.eql(['ausername']);
+      expect(modelData).to.eql({userlist: ["ausername"]});
+      expect(dform).to.equal(aform);
+    });
+
+    it.only("does not project changes works for array data.", () => {
+      var fieldValue, modelData, dform;
+
+      var projector = (field, all, model) => {
+        fieldValue = field;
+        modelData = all;
+        dform = model;
+      };
+
+      var aform = form({
+        userlist: {validator: required(true), default: [], projector: projector},
+      });
+
+      aform.userlist([]);
+      expect(fieldValue).to.equal(undefined);
+      aform.userlist(['ausername']);
+      expect(fieldValue).to.eql(['ausername']);
+      expect(modelData).to.eql({userlist: ["ausername"]});
+      expect(dform).to.equal(aform);
+    });
+
     it("projects changes in data", () => {
       var store, dform;
 
@@ -331,6 +374,26 @@ describe("Form", () => {
       it("validates the value", () => {
         aform.username.setAndValidate("");
         expect(aform.username.error).to.exist;
+      });
+
+      it("setAndValidate works for array data.", () => {
+        var fieldValue, modelData, dform;
+
+        var projector = (field, all, model) => {
+          fieldValue = field;
+          modelData = all;
+          dform = model;
+        };
+
+        var aform = form({
+          userlist: {validator: required(true), default: [], projector: projector},
+        });
+
+        expect(aform.userlist()).to.eql([]);
+        aform.userlist.setAndValidate(["ausername"]);
+        expect(aform.userlist()).to.eql(["ausername"]);
+        aform.userlist.setAndValidate(["ausername", "busername"]);
+        expect(aform.userlist()).to.eql(["ausername", "busername"]);
       });
     });
 
