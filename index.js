@@ -14,6 +14,7 @@ let isValidValidator = (validator) => {
 };
 
 let clone = (data) => {
+  if (!data) return data;
   return JSON.parse(JSON.stringify(data));
 };
 
