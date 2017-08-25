@@ -17,6 +17,10 @@ let clone = (data) => {
   return JSON.parse(JSON.stringify(data));
 };
 
+let isequal = (val1, val2) => {
+  return JSON.stringify(val1) === JSON.stringify(val2);
+};
+
 function prop(model, field, defaultValue = null, multipleErrors, projector) {
   defaultValue = typeof(defaultValue) === 'undefined' ? null : defaultValue;
   let initialState = defaultValue;
@@ -27,9 +31,7 @@ function prop(model, field, defaultValue = null, multipleErrors, projector) {
 
   let aclosure = function (value, doProject) {
     if(arguments.length === 0) return state;
-
-    var stateChanged = state !== value;
-
+    var stateChanged = !isequal(state, value);
     previousState = state;
     state = model._config[field].modifier
       ? model._config[field].modifier(value, previousState)
@@ -46,7 +48,7 @@ function prop(model, field, defaultValue = null, multipleErrors, projector) {
   };
 
   aclosure.isDirty = () => {
-    return JSON.stringify(initialState) !== JSON.stringify(state);
+    return !isequal(initialState, state);
   };
 
   aclosure.setAndValidate = (value) => {
