@@ -30,12 +30,12 @@ function prop(model, field, defaultValue = null, multipleErrors, projector) {
       : clone(initialState);
 
   let aclosure = function (value, doProject) {
-    if(arguments.length === 0) return state;
+    if(arguments.length === 0) return clone(state);
     var stateChanged = !isequal(state, value);
-    previousState = state;
+    previousState = clone(state);
     state = model._config[field].modifier
-      ? model._config[field].modifier(value, previousState)
-      : value;
+      ? model._config[field].modifier(clone(value), previousState)
+      : clone(value);
 
     let field_projector = model._config[field].projector;
     if (field_projector && stateChanged && doProject !== false) {
