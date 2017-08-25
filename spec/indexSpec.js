@@ -135,7 +135,7 @@ describe("Form", () => {
       expect(dform).to.equal(aform);
     });
 
-    it("projects changes works for array data.", () => {
+    it("projects changes for array data in field.", () => {
       var fieldValue, modelData, dform;
 
       var projector = (field, all, model) => {
@@ -157,7 +157,7 @@ describe("Form", () => {
       expect(dform).to.equal(aform);
     });
 
-    it("does not project changes works for array data.", () => {
+    it("does not project changes for array data in field.", () => {
       var fieldValue, modelData, dform;
 
       var projector = (field, all, model) => {
@@ -376,7 +376,7 @@ describe("Form", () => {
         expect(aform.username.error).to.exist;
       });
 
-      it("setAndValidate works for array data.", () => {
+      it("validates array value", () => {
         var fieldValue, modelData, dform;
 
         var projector = (field, all, model) => {
