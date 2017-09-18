@@ -1,6 +1,7 @@
 import form from "../index.js";
 import chai from "chai";
 import {required, isString, ValidationError, isNumber} from "validatex";
+import sinon from "sinon";
 
 let expect = chai.expect;
 
@@ -150,6 +151,7 @@ describe("Form", () => {
 
       expect(aform.userlist()).to.eql([]);
       expect(fieldValue).to.equal(undefined);
+
       aform.userlist(["ausername"]);
       expect(typeof(fieldValue)).to.equal('object');
       expect(fieldValue).to.eql(['ausername']);
@@ -172,6 +174,7 @@ describe("Form", () => {
 
       aform.userlist([]);
       expect(fieldValue).to.equal(undefined);
+
       aform.userlist(['ausername']);
       expect(fieldValue).to.eql(['ausername']);
       expect(modelData).to.eql({userlist: ["ausername"]});
@@ -204,6 +207,28 @@ describe("Form", () => {
       aform.username("aname", false);
 
       expect(store).to.eql(undefined);
+    });
+
+
+    it("debounces data assignment", () => {
+      let clock = sinon.useFakeTimers();
+      let store;
+      let projector = (value) => {
+        store = value;
+      }
+
+      var aform = form({search:{validator: required(true), projector: projector, debounce: 1000}});
+      aform.search("g");
+      expect(store).to.eql(undefined);
+      clock.tick(500);
+      expect(store).to.eql(undefined);
+      aform.search("god");
+      clock.tick(500);
+      expect(store).to.eql(undefined);
+      clock.tick(500);
+      expect(store).to.eql("god");
+
+      clock.restore();
     });
 
     describe(".isDirty()", () => {

@@ -1,6 +1,6 @@
 {
   "name": "powerform",
-  "version": "2.7.2",
+  "version": "2.8.0",
   "description": "A powerful form model.",
   "main": "lib/index.js",
   "scripts": {
@@ -40,6 +40,7 @@
     "babel-register": "^6.11.5",
     "chai": "^3.5.0",
     "mocha": "^2.5.3",
+    "sinon": "^3.2.1",
     "webpack": "^1.12.14"
   }
 }

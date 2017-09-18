@@ -8,6 +8,7 @@ A tiny form model which can be used in apps with or without frameworks like [Mit
 - Decorate data, imagine inserting dashes while filling credit card
 - Reset form or single field
 - Check if fields have been modified
+- debounce projection
 
 # Updates
 - v2.3.0
@@ -211,6 +212,18 @@ aform.username("aname");
 
 expect(store).to.eql({username: "aname"});
 ```
+
+## Debounce projection
+Projection of changes in a field can be debounced by supplying `debounce` option.
+
+```javascript
+let search = (value) => {
+  // hit search api 
+}
+let aform = powerform({username: required(true), projector: search, debounce: 1000});
+aform.username("god"); // this change will be projected after 1 second.
+```
+
 
 ## Form methods
 ### .isValid()

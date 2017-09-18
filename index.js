@@ -22,13 +22,14 @@ let isequal = (val1, val2) => {
   return JSON.stringify(val1) === JSON.stringify(val2);
 };
 
-function prop(model, field, defaultValue = null, multipleErrors, projector) {
+function prop(model, field, defaultValue = null, multipleErrors, projector, debounce=0) {
   defaultValue = typeof(defaultValue) === 'undefined' ? null : defaultValue;
   let initialState = defaultValue;
   let previousState = null;
   let state = model._config[field].modifier
       ? model._config[field].modifier(clone(initialState), previousState)
       : clone(initialState);
+  let timer;
 
   let aclosure = function (value, doProject) {
     if(arguments.length === 0) return clone(state);
@@ -40,11 +41,23 @@ function prop(model, field, defaultValue = null, multipleErrors, projector) {
 
     let field_projector = model._config[field].projector;
     if (field_projector && stateChanged && doProject !== false) {
-      field_projector(value, model.data(), model);
+      if (debounce) {
+        clearTimeout(timer);
+        timer = setTimeout(() => field_projector(value, model.data(), model), debounce);
+      }
+      else {
+        field_projector(value, model.data(), model);
+      }
     }
 
     if (!field_projector && projector && stateChanged && doProject !== false) {
-      projector(model.data(), model);
+      if (debounce) {
+        clearTimeout(timer);
+        timer = setTimeout(() => projector(model.data(), model), debounce);
+      }
+      else {
+        projector(model.data(), model);
+      }
     }
   };
 
@@ -191,7 +204,7 @@ module.exports =  function (config, multipleErrors = false, projector) {
     if (!isValidValidator(field) && !isValidValidator(field.validator)) {
       throw Error("'" + key + "' needs a validator.");
     }
-    formModel[key] = prop(formModel, key, field.default, multipleErrors, projector);
+    formModel[key] = prop(formModel, key, field.default, multipleErrors, projector, field.debounce);
   });
 
   return formModel;
