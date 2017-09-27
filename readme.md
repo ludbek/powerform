@@ -1,3 +1,7 @@
+<img src="https://user-images.githubusercontent.com/8296449/30893678-3e1702a8-a35f-11e7-8f6c-965ffe88cf40.png" width=400>
+
+Logo by [Anand](https://www.behance.net/mukhiyaanad378)
+
 # Introduction
 A tiny form model which can be used in apps with or without frameworks like [Mithril](https://github.com/MithrilJS/mithril.js/), [React](https://github.com/facebook/react), etc.
 
