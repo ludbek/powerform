@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/ludbek/powerform.svg?branch=master)](https://travis-ci.org/ludbek/powerform)
+
 <img src="https://user-images.githubusercontent.com/8296449/30893678-3e1702a8-a35f-11e7-8f6c-965ffe88cf40.png" width=400>
 
 Logo by [Anand](https://www.behance.net/mukhiyaanad378)
