@@ -719,3 +719,57 @@ describe("Form", () => {
     });
   });
 });
+
+describe("Field", () => {
+  it("sets default value", () => {
+    const value = "apple"
+    let field = new Field({default: value})
+    expect(field.getData()).toEqual(value)
+  })
+
+  describe(".isValid()")
+  describe(".setData")
+  describe(".getData()")
+  describe(".setError()")
+  describe(".getError()")
+  describe(".isDirty()")
+  describe(".makePrestine()")
+  describe(".reset()")
+  describe(".setAndValidate()")
+  describe(".getDecorated()")
+})
+
+describe("Form", () => {
+  it("is a constructor", () => {
+    class UserForm extends Form {
+      username = fields.String.new({
+        default: "suren",
+        validator: ,
+        debounce: ,
+        onChange:,
+        onError:,
+        decorator:,
+        modifier:
+        })
+    }
+    const config = {
+      onData:,
+      onError:
+    }
+    let form = Form.new(config)
+    // or 
+    let form = new Form(fields, config)
+  })
+
+  it("converts keys to fields")
+
+  describe(".isValid()")
+  describe(".setData")
+  describe(".getData()")
+  describe(".setError()")
+  describe(".getError()")
+  describe(".isDirty()")
+  describe(".makePrestine()")
+  describe(".reset()")
+  describe(".getUpdates()")
+})
