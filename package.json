@@ -29,6 +29,7 @@
   "author": "ludbek",
   "license": "ISC",
   "dependencies": {
+    "jest": "^21.2.1",
     "validatex": "^0.3.1"
   },
   "devDependencies": {
@@ -38,8 +39,6 @@
     "babel-plugin-transform-es2015-modules-commonjs": "^6.11.5",
     "babel-preset-es2015": "^6.9.0",
     "babel-register": "^6.11.5",
-    "chai": "^3.5.0",
-    "mocha": "^2.5.3",
     "sinon": "^3.2.1",
     "webpack": "^1.12.14"
   }

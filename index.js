@@ -1,5 +1,4 @@
-import {validateSingle} from "validatex";
-
+import {validateSingle, validate, required} from "validatex";
 
 let isFunction = (data) => {
   return typeof data === "function";
@@ -22,190 +21,46 @@ let isequal = (val1, val2) => {
   return JSON.stringify(val1) === JSON.stringify(val2);
 };
 
-function prop(model, field, defaultValue = null, multipleErrors, projector, debounce=0) {
-  defaultValue = typeof(defaultValue) === 'undefined' ? null : defaultValue;
-  let initialState = defaultValue;
-  let previousState = null;
-  let state = model._config[field].modifier
-      ? model._config[field].modifier(clone(initialState), previousState)
-      : clone(initialState);
-  let timer;
-
-  let aclosure = function (value, doProject) {
-    if(arguments.length === 0) return clone(state);
-    var stateChanged = !isequal(state, value);
-    previousState = clone(state);
-    state = model._config[field].modifier
-      ? model._config[field].modifier(clone(value), previousState)
-      : clone(value);
-
-    let field_projector = model._config[field].projector;
-    if (field_projector && stateChanged && doProject !== false) {
-      if (debounce) {
-        clearTimeout(timer);
-        timer = setTimeout(() => field_projector(value, model.data(), model), debounce);
-      }
-      else {
-        field_projector(value, model.data(), model);
-      }
-    }
-
-    if (!field_projector && projector && stateChanged && doProject !== false) {
-      if (debounce) {
-        clearTimeout(timer);
-        timer = setTimeout(() => projector(model.data(), model), debounce);
-      }
-      else {
-        projector(model.data(), model);
-      }
-    }
-  };
-
-  aclosure.isDirty = () => {
-    return !isequal(initialState, state);
-  };
-
-  aclosure.setAndValidate = (value) => {
-    aclosure(value);
-    aclosure.isValid();
-  };
-
-  aclosure.isValid = (attach_error) => {
-    let error, cleaner, value;
-    let config = model._config[field];
-    cleaner = config.cleaner;
-    value = cleaner? cleaner(aclosure()): aclosure();
-
-    let validator = isFunction(config) || isArray(config)
-      ? config
-      : config.validator
-
-    error = validateSingle(value, validator, multipleErrors, model.data(), field);
-
-    if(attach_error !== false) {
-      aclosure.error(error? error: undefined);
-    }
-
-    return error === undefined || (multipleErrors && error.length === 0);
-  };
-
-  aclosure.reset = (doProject) => {
-    doProject === false? aclosure(initialState, false): aclosure(initialState);
-    aclosure.error(undefined);
-  };
-
-  aclosure.error = function () {
-    var state;
-    return function (error) {
-      if (arguments.length === 0) return state;
-      if (!multipleErrors && isArray(error) && error.length > 0) {
-        state = error[0];
-      }
-      else {
-        state = error;
-      }
-    };
-  }();
-
-  aclosure.setInitialValue = function (value) {
-    initialState = clone(value);
-  };
-
-  return aclosure;
+const configSchema = {
+  validator: required(true)
 }
 
-module.exports =  function (config, multipleErrors = false, projector) {
-  let formModel = {
-    _config: config,
-    isValid (attach_error) {
-      let truthPool = Object.keys(config).reduce((pool, key) => {
-        pool.push(this[key].isValid(attach_error));
-        return pool;
-      }, []);
+class Field {
+  constructor (config) {
+    const error = validate(config || {}, configSchema)
+    if (error) throw new Error(JSON.stringify(error))
 
-      return truthPool.every((value) => { return value === true;});
-    },
+    this.config = config
+    this.defaultValue = !config || typeof(config.default) === 'undefined'
+      ? null
+      : clone(config.default)
+    this.initialValue = this.defaultValue
+    this.previousValue = null
+    this.currentValue = this.defaultValue
+  }
 
-    isDirty () {
-      return Object.keys(config).some((akey) => {
-        return this[akey].isDirty();
-      });
-    },
+  static new (config) {
+    return new this(config)
+  }
 
-    data (init, setAsInitialValue) {
-      if (init) {
-        Object.keys(init).forEach((key) => {
-          let value = init[key];
-          if (config[key]) {
-            let field = this[key];
-            field(value, false);
-            setAsInitialValue && field.setInitialValue(value);
-          }
-        });
+  setData(value) {
+    this.previousValue = clone(this.currentValue)
+    this.currentValue = clone(value)
+  }
 
-        projector && projector(this.data());
-      }
-      else {
-        return Object.keys(config).reduce((data, key) => {
-          let cleaner = config[key].cleaner;
-          let value = this[key]();
-          data[key] = cleaner? cleaner(value): value;
-          return data;
-        }, {});
-      }
-    },
+  getData() {
+    return clone(this.currentValue)
+  }
 
-    setInitialValue (data) {
-      Object.keys(config).forEach((key) => {
-        this[key].setInitialValue(data[key]);
-      });
-    },
+  isValid(attachError) {
+  }
+}
 
-    error (supplied_error) {
-      var dict = {};
+class Form {
 
-      if (arguments.length === 0) {
-        return Object.keys(config).reduce((error, key) => {
-          error[key] = this[key].error();
-          return error;
-        }, {});
-      }
-      else {
-        Object.keys(config).forEach((key) => {
-          this[key].error(supplied_error[key]? supplied_error[key]: undefined);
-        });
-      };
-    },
+}
 
-    reset () {
-      Object.keys(config).forEach((key) => {
-        this[key].reset(false);
-        this[key].error(undefined);
-      });
-
-      projector && projector(this.data());
-    },
-
-    getUpdates () {
-      return Object.keys(config).reduce((updates, key) => {
-        if (this[key].isDirty()) {
-          let cleaner = config[key].cleaner;
-          let value = this[key]();
-
-          updates[key] = cleaner? cleaner(value): value;
-        }
-        return updates;
-      }, {});
-    }
-  };
-
-  Object.keys(config).forEach((key) => {
-    let field = config[key];
-    if (!isValidValidator(field) && !isValidValidator(field.validator)) {
-      throw Error("'" + key + "' needs a validator.");
-    }
-    formModel[key] = prop(formModel, key, field.default, multipleErrors, projector, field.debounce);
-  });
-
-  return formModel;
-};
+module.exports = {
+  Form,
+  Field
+}
