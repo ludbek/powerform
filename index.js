@@ -1,4 +1,4 @@
-import {validateSingle, validate, required} from "validatex";
+const {validateSingle, validate, required} = require('validatex')
 
 let isFunction = (data) => {
   return typeof data === "function";
@@ -31,12 +31,13 @@ class Field {
     if (error) throw new Error(JSON.stringify(error))
 
     this.config = config
-    this.defaultValue = !config || typeof(config.default) === 'undefined'
+    this.defaultValue = !config || config.default === undefined
       ? null
       : clone(config.default)
-    this.initialValue = this.defaultValue
-    this.previousValue = null
     this.currentValue = this.defaultValue
+    // will call onChange callback if exists
+    this.setData(this.defaultValue)
+    this.error = null
   }
 
   static new (config) {
@@ -44,6 +45,7 @@ class Field {
   }
 
   setData(value) {
+    if (this.currentValue === value) return
     this.previousValue = clone(this.currentValue)
     this.currentValue = clone(value)
   }
@@ -53,6 +55,25 @@ class Field {
   }
 
   isValid(attachError) {
+    let error = this.config.validator(this.currentValue)
+    if (error) {
+      if (attachError !== false)  {
+        this.error = error
+      }
+      return false
+    }
+    else {
+      this.error = null
+      return true
+    }
+  }
+
+  setError(error) {
+    return this.error = error
+  }
+
+  getError() {
+    return this.error
   }
 }
 
