@@ -343,10 +343,39 @@ describe("Form.new", () => {
 // describe("Form.constructor")
 
 describe("Form.isValid", () => {
-  it("returns true if all the fields are valid")
-  it("returns false if any of the field is invalid")
-  it("sets error")
-  it("won't set error if false passed")
+  it("returns true if all the fields are valid", () => {
+    const form = SignupForm.new()
+    const data = {
+      username: 'ausername',
+      password: 'apassword',
+      confirmPassword: 'apassword'
+    }
+    form.setData(data)
+    expect(form.isValid()).toEqual(true)
+  })
+
+  it("returns false if any of the field is invalid", () => {
+    const form = SignupForm.new()
+    const data = {
+      username: 'ausername',
+      password: 'apassword',
+      confirmPassword: null
+    }
+    form.setData(data)
+    expect(form.isValid()).toEqual(false)
+  })
+
+  it("sets error", () => {
+    const form = SignupForm.new()
+    form.isValid()
+    expect(form.getError()).toMatchSnapshot()
+  })
+
+  it("won't set error if false passed", () => {
+    const form = SignupForm.new()
+    form.isValid(false)
+    expect(form.getError()).toMatchSnapshot()
+  })
 })
 
 describe("Form.setData", () => {
@@ -361,6 +390,8 @@ describe("Form.setData", () => {
     expect(form.username.getData()).toEqual(data.username)
     expect(form.password.getData()).toEqual(data.password)
   })
+
+  it("wont trigger update event from fields")
 })
 
 describe("Form.getData", () => {
@@ -423,14 +454,49 @@ describe("Form.getError", () => {
 })
 
 describe("Form.isDirty", () => {
-  it("returns true if any field's data has changed")
-  it("returns false if non of the field's data has changed")
+  it("returns true if any field's data has changed", () => {
+    const form = SignupForm.new()
+    form.username.setData('ausername')
+    expect(form.isDirty()).toEqual(true)
+  })
+
+  it("returns false if non of the field's data has changed", () => {
+    const form = SignupForm.new()
+    expect(form.isDirty()).toEqual(false)
+  })
 })
 
 describe("Form.makePrestine", () => {
-  it("makes all the fields prestine")
+  it("makes all the fields prestine", () => {
+    const form = SignupForm.new()
+    const data = {
+      username: 'ausername',
+      password: 'apassword',
+      confirmPassword: 'password confirmation'
+    }
+    form.setData(data)
+    expect(form.isDirty()).toEqual(true)
+    form.makePrestine()
+    expect(form.isDirty()).toEqual(false)
+  })
 })
 
 describe("Form.reset", () => {
-  it("resets all the fields")
+  it("resets all the fields", () => {
+    const form = SignupForm.new()
+    const data = {
+      username: 'ausername',
+      password: 'apassword',
+      confirmPassword: 'password confirmation'
+    }
+    form.setData(data)
+    form.reset()
+
+    const expected = {
+      username: null,
+      password: null,
+      confirmPassword: null
+    }
+    expect(form.getData()).toEqual(expected)
+  })
 })
