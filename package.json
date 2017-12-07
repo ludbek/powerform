@@ -4,7 +4,7 @@
   "description": "A powerful form model.",
   "main": "lib/index.js",
   "scripts": {
-    "test": "mocha --compilers js:babel-register spec/*",
+    "test": "jest index.test.js",
     "build": "babel --plugins transform-es2015-modules-commonjs index.js --out-dir lib",
     "prepublish": "npm run test && npm run build"
   },
@@ -29,17 +29,23 @@
   "author": "ludbek",
   "license": "ISC",
   "dependencies": {
-    "jest": "^21.2.1",
     "validatex": "^0.3.1"
   },
   "devDependencies": {
     "babel-cli": "^6.11.4",
     "babel-core": "^6.11.4",
+    "babel-jest": "^21.2.0",
     "babel-loader": "^6.2.4",
+    "babel-plugin-transform-class-properties": "^6.24.1",
     "babel-plugin-transform-es2015-modules-commonjs": "^6.11.5",
     "babel-preset-es2015": "^6.9.0",
     "babel-register": "^6.11.5",
+    "jest": "^21.2.1",
+    "jest-cli": "^21.2.1",
     "sinon": "^3.2.1",
     "webpack": "^1.12.14"
+  },
+  "transform": {
+    "^.+\\.js$": "babel-jest"
   }
 }

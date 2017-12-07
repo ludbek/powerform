@@ -64,8 +64,13 @@ class Field {
   }
 
   isValid(attachError) {
-    const siblingData = this.getSiblingData && this.getSiblingData()
-    let error = this.config.validator(this.currentValue, siblingData)
+    let error = validateSingle(
+      this.currentValue,
+      this.config.validator,
+      false, // multiple error flag
+      this.parent && this.parent.getData(),
+      this.fieldName
+    )
     if (error) {
       if (attachError !== false)  {
         this.setError(error)
@@ -95,11 +100,12 @@ class Field {
   makePrestine() {
     this.previousValue = clone(this.currentValue)
     this.initialValue = clone(this.currentValue)
+    this.error = null
   }
 
   reset() {
-    this.currentValue = clone(this.initialValue)
-    this.previousValue = clone(this.initialValue)
+    this.setData(clone(this.initialValue))
+    this.makePrestine()
   }
 
   setAndValidate(value) {
@@ -116,7 +122,60 @@ class Field {
 }
 
 class Form {
+  static new(config) {
+    const form = new this()
+    form._fields = []
 
+    for(const fieldName in form) {
+      const field = form[fieldName]
+      if(form.hasOwnProperty(fieldName) && field instanceof Field) {
+        field.parent = form
+        field.fieldName = fieldName
+        form._fields.push(fieldName)
+      }
+    }
+
+    return form
+  }
+
+  setData(data) {
+    for(const prop in data) {
+      if (this._fields.indexOf(prop) !== -1) {
+        this[prop].setData(data[prop])
+      }
+    }
+  }
+
+  getData() {
+    return this._fields.reduce((acc, fieldName) => {
+      acc[fieldName] = this[fieldName].getData()
+      return acc
+    }, {})
+  }
+
+  getUpdates() {
+    return this._fields.reduce((acc, fieldName) => {
+      if (this[fieldName].isDirty()) {
+        acc[fieldName] = this[fieldName].getData()
+      }
+      return acc
+    }, {})
+  }
+
+  setError(errors) {
+    for(const field in errors) {
+      if(this._fields.indexOf(field) !== -1) {
+        this[field].setError(errors[field])
+      }
+    }
+  }
+
+  getError() {
+    return this._fields.reduce((acc, fieldName) => {
+      acc[fieldName] = this[fieldName].getError()
+      return acc
+    }, {})
+  }
 }
 
 module.exports = {

@@ -1,5 +1,5 @@
 const  {Form, Field} = require('./index.js')
-const {required, isString, ValidationError, isNumber} = require('validatex')
+const {required, isString, ValidationError, isNumber, equalsTo} = require('validatex')
 const sinon = require('sinon')
 
 var noop = () => {}
@@ -9,6 +9,11 @@ beforeEach(() => {
   config = {validator: required(true)}
 })
 
+class SignupForm extends Form {
+  username = Field.new({validator: required(true)})
+  password = Field.new({validator: required(true)})
+  confirmPassword = Field.new({validator: equalsTo('password')})
+}
 
 describe("Field.new()", () => {
   it("returns field instance", () => {
@@ -143,14 +148,24 @@ describe('Field.isValid()', () => {
         : null
     }
     const confirmPassword = Field.new(config)
-    confirmPassword.getSiblingData = function () {
-      return {
-        'password': 'apple'
+    confirmPassword.parent = {
+      getData: function () {
+        return { 'password': 'apple' }
       }
     }
     confirmPassword.setData('banana')
     expect(confirmPassword.isValid()).toEqual(false)
     expect(confirmPassword.getError()).toMatchSnapshot()
+  })
+
+  it("works with multiple validators", () => {
+    config.validator = [required(true), isNumber()]
+    let field = Field.new(config)
+    field.setAndValidate(undefined)
+    expect(field.getError()).toEqual('This field is required.')
+
+    field.setAndValidate('not a number')
+    expect(field.getError()).toEqual("'not a number' is not a valid number.")
   })
 })
 
@@ -200,7 +215,7 @@ describe('Field.isDirty()', () => {
   })
 })
 
-describe('.makePrestine()', () => {
+describe('Field.makePrestine()', () => {
   it('sets previousValue and initialValue to currentValue', () => {
     const field = Field.new(config)
     field.setData('apple')
@@ -210,6 +225,15 @@ describe('.makePrestine()', () => {
     expect(field.previousValue).toEqual('apple')
     expect(field.initialValue).toEqual('apple')
     expect(field.isDirty()).toEqual(false)
+  })
+
+  it("empties error", () => {
+    const field = Field.new(config)
+    field.isValid()
+    expect(field.getError()).toMatchSnapshot()
+
+    field.makePrestine()
+    expect(field.getError()).toEqual(null)
   })
 })
 
@@ -224,6 +248,28 @@ describe('Field.reset()', () => {
 
     expect(field.previousValue).toEqual('apple')
     expect(field.currentValue).toEqual('apple')
+  })
+
+  it('calls onChange callback', () => {
+    const spy = jest.fn()
+    config.default = 'apple'
+    config.onChange = spy
+    const field = Field.new(config)
+    field.setData('banana')
+    expect(field.currentValue).toEqual('banana')
+
+    field.reset()
+
+    expect(spy.mock.calls[2][0]).toEqual('apple')
+  })
+
+  it("empties error", () => {
+    const field = Field.new(config)
+    field.isValid()
+    expect(field.getError()).toMatchSnapshot()
+
+    field.reset()
+    expect(field.getError()).toEqual(null)
   })
 })
 
@@ -259,33 +305,132 @@ describe("Field.getDecorated()", () => {
   })
 })
 
-describe("Form", function() {
-  it("is a constructor", () => {
-    // class UserForm extends Form {
-    //   username = Field.new({
-    //     default: "suren",
-    //     validator:,
-    //     debounce:,
-    //     onChange:,
-    //     onError:,
-    //     decorator:,
-    //     modifier:
-    //   })
-    // }
-    // const config = {
-    //   onData:,
-    //   onError:
-    // }
-    // let form = Form.new(config)
+
+describe("Form.new", () => {
+  it("returns form instance", () => {
+    let form = SignupForm.new()
+    expect(form instanceof SignupForm).toEqual(true)
+    expect(form instanceof Form).toEqual(true)
   })
 
-  describe(".isValid()")
-  describe(".setData")
-  describe(".getData()")
-  describe(".setError()")
-  describe(".getError()")
-  describe(".isDirty()")
-  describe(".makePrestine()")
-  describe(".reset()")
-  describe(".getUpdates()")
+  it("attaches self to each field", () => {
+    let form = SignupForm.new()
+    expect(form.username.parent).toBe(form)
+    expect(form.password.parent).toBe(form)
+    expect(form.confirmPassword.parent).toBe(form)
+  })
+
+  it("attaches field name to each field", () => {
+    let form = SignupForm.new()
+    expect(form.username.fieldName).toEqual('username')
+    expect(form.password.fieldName).toEqual('password')
+    expect(form.confirmPassword.fieldName).toEqual('confirmPassword')
+  })
+
+  it("hooks into onChange callback of each field", () => {
+    let updatedData;
+    const config = {
+      onChange: function (data) {
+        updatedData = data
+      }
+    }
+    let form = SignupForm.new(config)
+  })
+
+  it("hooks into onError callback of each field")
+})
+
+// describe("Form.constructor")
+
+describe("Form.isValid", () => {
+  it("returns true if all the fields are valid")
+  it("returns false if any of the field is invalid")
+  it("sets error")
+  it("won't set error if false passed")
+})
+
+describe("Form.setData", () => {
+  it("sets data of each field", () => {
+    const form = SignupForm.new()
+    const data = {
+      username: 'ausername',
+      password: 'apassword'
+    }
+    form.setData(data)
+
+    expect(form.username.getData()).toEqual(data.username)
+    expect(form.password.getData()).toEqual(data.password)
+  })
+})
+
+describe("Form.getData", () => {
+  it("returns data from every fields", () => {
+    const form = SignupForm.new()
+    form.username.setData("ausername")
+    form.password.setData("apassword")
+
+    const expected = {
+      username: "ausername",
+      password: "apassword",
+      confirmPassword: null
+    }
+    expect(form.getData()).toEqual(expected)
+  })
+})
+
+describe("Form.getUpdates", () => {
+  it("returns key value pair of updated fields and their value", () => {
+    const form = SignupForm.new()
+    form.username.setData("ausername")
+    form.password.setData("apassword")
+
+    const expected = {
+      username: "ausername",
+      password: "apassword"
+    }
+    expect(form.getUpdates()).toEqual(expected)
+  })
+})
+
+describe("Form.setError", () => {
+  it("sets error on each field", () => {
+    const form = SignupForm.new()
+    const errors = {
+      username: 'a error',
+      password: 'a password'
+    }
+
+    form.setError(errors)
+
+    expect(form.username.getError()).toEqual(errors.username)
+    expect(form.password.getError()).toEqual(errors.password)
+  })
+})
+
+describe("Form.getError", () => {
+  it("returns errors from every fields", () => {
+    const form = SignupForm.new()
+    form.username.setError("a error")
+    form.password.setError("a error")
+
+    const expected = {
+      username: "a error",
+      password: "a error",
+      confirmPassword: null
+    }
+    expect(form.getError()).toEqual(expected)
+  })
+})
+
+describe("Form.isDirty", () => {
+  it("returns true if any field's data has changed")
+  it("returns false if non of the field's data has changed")
+})
+
+describe("Form.makePrestine", () => {
+  it("makes all the fields prestine")
+})
+
+describe("Form.reset", () => {
+  it("resets all the fields")
 })
