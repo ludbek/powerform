@@ -176,6 +176,32 @@ class Form {
       return acc
     }, {})
   }
+
+  isDirty() {
+    for(const field of this._fields) {
+      if(this[field].isDirty()) return true
+    }
+    return false
+  }
+
+  makePrestine() {
+    for(const field of this._fields) {
+      this[field].makePrestine()
+    }
+  }
+
+  reset() {
+    for(const field of this._fields) {
+      this[field].reset()
+    }
+  }
+
+  isValid(attachError) {
+    for(const field of this._fields) {
+      if(!this[field].isValid(attachError)) return false
+    }
+    return true
+  }
 }
 
 module.exports = {
