@@ -1,3 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`Field.isValid() can validate in relation to other form fields if exists 1`] = `"'password' and 'confirm password' should match."`;
+
 exports[`Field.isValid() sets error 1`] = `"This field is required."`;
+
+exports[`Field.setAndValidate() sets and validates field 1`] = `"This field is required."`;

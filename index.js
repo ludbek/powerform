@@ -30,14 +30,18 @@ class Field {
     const error = validate(config || {}, configSchema)
     if (error) throw new Error(JSON.stringify(error))
 
+    this.error = null
+    this.previousValue = null
+    this.currentValue = null
+    this.initialValue = null
+
     this.config = config
-    this.defaultValue = !config || config.default === undefined
+    this.defaultValue = this.initialValue = !config || config.default === undefined || config.default === null
       ? null
       : clone(config.default)
-    this.currentValue = this.defaultValue
     // will call onChange callback if exists
     this.setData(this.defaultValue)
-    this.error = null
+    this.makePrestine()
   }
 
   static new (config) {
@@ -47,7 +51,12 @@ class Field {
   setData(value) {
     if (this.currentValue === value) return
     this.previousValue = clone(this.currentValue)
-    this.currentValue = clone(value)
+
+    const modifier = this.config.modifier
+    this.currentValue = modifier && modifier(clone(value)) || clone(value)
+
+    const callback = this.config.onChange
+    callback && callback(clone(value))
   }
 
   getData() {
@@ -55,10 +64,11 @@ class Field {
   }
 
   isValid(attachError) {
-    let error = this.config.validator(this.currentValue)
+    const siblingData = this.getSiblingData && this.getSiblingData()
+    let error = this.config.validator(this.currentValue, siblingData)
     if (error) {
       if (attachError !== false)  {
-        this.error = error
+        this.setError(error)
       }
       return false
     }
@@ -69,11 +79,39 @@ class Field {
   }
 
   setError(error) {
-    return this.error = error
+    this.error = error
+    const callback = this.config.onError
+    callback && callback(error)
   }
 
   getError() {
     return this.error
+  }
+
+  isDirty() {
+    return this.previousValue !== this.currentValue
+  }
+
+  makePrestine() {
+    this.previousValue = clone(this.currentValue)
+    this.initialValue = clone(this.currentValue)
+  }
+
+  reset() {
+    this.currentValue = clone(this.initialValue)
+    this.previousValue = clone(this.initialValue)
+  }
+
+  setAndValidate(value) {
+    this.setData(value)
+    this.isValid()
+    return this.getError()
+  }
+
+  getDecorated() {
+    const {currentValue, previousValue} = this
+    const decorator = this.config.decorator
+    return decorator && decorator(currentValue, previousValue) || currentValue
   }
 }
 

@@ -30,7 +30,7 @@ describe("Field.constructor()", () => {
     expect(field.getData()).not.toBe(value)
   })
 
-  it('won\'t mark field as dirty', () => {
+  it("won't mark field as dirty", () => {
     config.default = 'apple'
     let field = Field.new(config)
     expect(field.isDirty()).toEqual(false)
@@ -48,6 +48,19 @@ describe("Field.setData", () => {
     expect(got).not.toBe(value)
   })
 
+  it('calls modifier and sets value returned by it', () => {
+    config.modifier = function (newVal, prevVal) {
+      return newVal.replace(
+				/(?:^|\s)\S/g,
+				function(s) {
+					return s.toUpperCase()
+				})
+    }
+    const field = Field.new(config)
+    field.setData('red apple')
+    expect(field.getData()).toEqual('Red Apple')
+  })
+
   it("sets previous value", () => {
     const field = Field.new(config)
 
@@ -58,9 +71,26 @@ describe("Field.setData", () => {
     expect(field.previousValue).toEqual('apple')
   })
 
-  it('calls onChange callback if exists')
+  it('calls onChange callback if exists', () => {
+    const spy = jest.fn()
+    config.onChange = spy
+    const field = Field.new(config)
+    const value = 'apple'
+    field.setData(value)
+    expect(spy.mock.calls[0][0]).toEqual(value)
+  })
 
-  it('won\'t call onChange if value has not changed')
+  it("won't call onChange if value has not changed", () => {
+    const spy = jest.fn()
+    config.onChange = spy
+    const field = Field.new(config)
+    const value = 'apple'
+    field.setData(value)
+    expect(spy.mock.calls.length).toEqual(1)
+
+    field.setData(value)
+    expect(spy.mock.calls.length).toEqual(1)
+  })
 })
 
 describe("Field.getData()", () => {
@@ -106,7 +136,22 @@ describe('Field.isValid()', () => {
     expect(field.getError()).toEqual(null)
   })
 
-  it('can validate in relation to other form fields if exists')
+  it('can validate in relation to other form fields if exists', () => {
+    config.validator = function (value, siblingData) {
+      return value !== siblingData.password
+        ? "'password' and 'confirm password' should match."
+        : null
+    }
+    const confirmPassword = Field.new(config)
+    confirmPassword.getSiblingData = function () {
+      return {
+        'password': 'apple'
+      }
+    }
+    confirmPassword.setData('banana')
+    expect(confirmPassword.isValid()).toEqual(false)
+    expect(confirmPassword.getError()).toMatchSnapshot()
+  })
 })
 
 describe('Field.setError()', () => {
@@ -117,21 +162,101 @@ describe('Field.setError()', () => {
     expect(field.getError()).toEqual(errMsg)
   })
 
-  it('triggers onError callback if exists')
+  it('calls onError callback if exists', () => {
+    const spy = jest.fn()
+    config.onError = spy
+    const field = Field.new(config) 
+    const errMsg = 'Nice error !!!'
+    field.setError(errMsg)
+    expect(spy.mock.calls.length).toEqual(1)
+  })
 })
 
 describe('Field.getError()', () => {
   it('returns error', () => {
-
+    const field = Field.new(config) 
+    const errMsg = 'Nice error !!!'
+    field.setError(errMsg)
+    expect(field.getError()).toEqual(errMsg)
   })
 })
 
-describe("Field", function() {
-  describe(".isDirty()")
-  describe(".makePrestine()")
-  describe(".reset()")
-  describe(".setAndValidate()")
-  describe(".getDecorated()")
+describe('Field.isDirty()', () => {
+  it('returns true for dirty field', () => {
+    const field = Field.new(config)
+    field.setData('apple')
+    expect(field.isDirty()).toEqual(true)
+  })
+
+  it('returns false for non dirty field', () => {
+    const field = Field.new(config)
+    expect(field.isDirty()).toEqual(false)
+  })
+
+  it('returns false for default value', () => {
+    config.default = 'apple'
+    const field = Field.new(config)
+    expect(field.isDirty()).toEqual(false)
+  })
+})
+
+describe('.makePrestine()', () => {
+  it('sets previousValue and initialValue to currentValue', () => {
+    const field = Field.new(config)
+    field.setData('apple')
+    expect(field.previousValue).toEqual(null)
+
+    field.makePrestine()
+    expect(field.previousValue).toEqual('apple')
+    expect(field.initialValue).toEqual('apple')
+    expect(field.isDirty()).toEqual(false)
+  })
+})
+
+describe('Field.reset()', () => {
+  it('sets currentValue and previousValue to initialValue', () => {
+    config.default = 'apple'
+    const field = Field.new(config)
+    field.setData('banana')
+    expect(field.currentValue).toEqual('banana')
+
+    field.reset()
+
+    expect(field.previousValue).toEqual('apple')
+    expect(field.currentValue).toEqual('apple')
+  })
+})
+
+describe('Field.setAndValidate()', () => {
+  it('sets and validates field', () => {
+    config.default = 'apple'
+    const field = Field.new(config)
+    const error = field.setAndValidate(null)
+    expect(field.isValid()).toEqual(false)
+    expect(error).toMatchSnapshot()
+  })
+})
+
+describe("Field.getDecorated()", () => {
+  it('returns what config.decorator returns', () => {
+    config.decorator = function (newVal, prevVal) {
+      return newVal.replace(
+				/(?:^|\s)\S/g,
+				function(s) {
+					return s.toUpperCase()
+				})
+    }
+
+    const field = Field.new(config)
+    field.setData('white tiger')
+    expect(field.getDecorated()).toEqual('White Tiger')
+  })
+
+  it('returns current value if no decorator is provided', () => {
+    const field = Field.new(config)
+    field.setData('white tiger')
+    expect(field.getDecorated()).toEqual('white tiger')
+  })
 })
 
 describe("Form", function() {
