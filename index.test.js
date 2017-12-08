@@ -151,7 +151,9 @@ describe('Field.isValid()', () => {
     confirmPassword.parent = {
       getData: function () {
         return { 'password': 'apple' }
-      }
+      },
+      notifyDataChange: jest.fn(),
+      notifyErrorChange: jest.fn()
     }
     confirmPassword.setData('banana')
     expect(confirmPassword.isValid()).toEqual(false)
@@ -336,8 +338,6 @@ describe("Form.new", () => {
     }
     let form = SignupForm.new(config)
   })
-
-  it("hooks into onError callback of each field")
 })
 
 // describe("Form.constructor")
@@ -376,6 +376,15 @@ describe("Form.isValid", () => {
     form.isValid(false)
     expect(form.getError()).toMatchSnapshot()
   })
+
+  it("calls onError callback", () => {
+    const config = {onError: jest.fn()}
+    const form = SignupForm.new(config)
+    form.isValid()
+
+    expect(config.onError.mock.calls.length).toEqual(1)
+    expect(config.onError.mock.calls[0][0]).toMatchSnapshot()
+  })
 })
 
 describe("Form.setData", () => {
@@ -391,7 +400,21 @@ describe("Form.setData", () => {
     expect(form.password.getData()).toEqual(data.password)
   })
 
-  it("wont trigger update event from fields")
+  it("wont trigger update event from fields", () => {
+    const config = {
+      onChange: jest.fn()
+    }
+    const form = SignupForm.new(config)
+    const data = {
+      username: 'ausername',
+      password: 'apassword',
+      confirmPassword: 'apassword'
+    }
+    form.setData(data)
+
+    expect(config.onChange.mock.calls.length).toEqual(1)
+    expect(config.onChange.mock.calls[0][0]).toEqual(data)
+  })
 })
 
 describe("Form.getData", () => {
@@ -428,13 +451,27 @@ describe("Form.setError", () => {
     const form = SignupForm.new()
     const errors = {
       username: 'a error',
-      password: 'a password'
+      password: 'a error'
     }
 
     form.setError(errors)
 
     expect(form.username.getError()).toEqual(errors.username)
     expect(form.password.getError()).toEqual(errors.password)
+  })
+
+  it("calls onError callback only once", () => {
+    const config = {
+      onError: jest.fn()
+    }
+    const form = SignupForm.new(config)
+    const errors = {
+      username: 'a error',
+      password: 'a error'
+    }
+    form.setError(errors)
+
+    expect(config.onError.mock.calls.length).toEqual(1)
   })
 })
 

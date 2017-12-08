@@ -10,10 +10,18 @@ exports[`Field.reset() empties error 1`] = `"This field is required."`;
 
 exports[`Field.setAndValidate() sets and validates field 1`] = `"This field is required."`;
 
+exports[`Form.isValid calls onError callback 1`] = `
+Object {
+  "confirmPassword": null,
+  "password": "This field is required.",
+  "username": "This field is required.",
+}
+`;
+
 exports[`Form.isValid sets error 1`] = `
 Object {
   "confirmPassword": null,
-  "password": null,
+  "password": "This field is required.",
   "username": "This field is required.",
 }
 `;

@@ -57,6 +57,8 @@ class Field {
 
     const callback = this.config.onChange
     callback && callback(clone(value))
+
+    if (this.parent && this.parent.getNotified) this.parent.notifyDataChange()
   }
 
   getData() {
@@ -87,6 +89,8 @@ class Field {
     this.error = error
     const callback = this.config.onError
     callback && callback(error)
+
+    if (this.parent && this.parent.getNotified) this.parent.notifyErrorChange()
   }
 
   getError() {
@@ -122,9 +126,11 @@ class Field {
 }
 
 class Form {
-  static new(config) {
+  static new(config = {}) {
     const form = new this()
     form._fields = []
+    form.config = config
+    form.getNotified = true
 
     for(const fieldName in form) {
       const field = form[fieldName]
@@ -139,11 +145,19 @@ class Form {
   }
 
   setData(data) {
+    this.toggleNotificationFlag()
     for(const prop in data) {
       if (this._fields.indexOf(prop) !== -1) {
         this[prop].setData(data[prop])
       }
     }
+    this.toggleNotificationFlag()
+    this.notifyDataChange()
+  }
+
+  notifyDataChange() {
+    const callback = this.config.onChange
+    callback && callback(this.getData())
   }
 
   getData() {
@@ -163,12 +177,21 @@ class Form {
   }
 
   setError(errors) {
+    this.toggleNotificationFlag()
     for(const field in errors) {
       if(this._fields.indexOf(field) !== -1) {
         this[field].setError(errors[field])
       }
     }
+    this.toggleNotificationFlag()
+    this.notifyErrorChange()
   }
+
+  notifyErrorChange() {
+    const callback = this.config.onError
+    callback && callback(this.getError())
+  }
+
 
   getError() {
     return this._fields.reduce((acc, fieldName) => {
@@ -185,22 +208,29 @@ class Form {
   }
 
   makePrestine() {
-    for(const field of this._fields) {
+    this._fields.forEach((field) => {
       this[field].makePrestine()
-    }
+    })
   }
 
   reset() {
-    for(const field of this._fields) {
+    this._fields.forEach((field) => {
       this[field].reset()
-    }
+    })
   }
 
-  isValid(attachError) {
-    for(const field of this._fields) {
-      if(!this[field].isValid(attachError)) return false
-    }
-    return true
+  isValid(skipAttachError) {
+    this.toggleNotificationFlag()
+    const status = this._fields.reduce((acc, field) => {
+      return this[field].isValid(skipAttachError) && acc
+    }, true)
+    this.toggleNotificationFlag()
+    this.notifyErrorChange()
+    return status
+  }
+
+  toggleNotificationFlag() {
+    this.getNotified = !this.getNotified
   }
 }
 
