@@ -16,7 +16,7 @@ class NameField extends Field {
   }
 
   normalize(value) {
-    if (!value) return ''
+    if (!value) return null
     return value.replace(/(?:^|\s)\S/g, s => s.toUpperCase())
   }
 }
@@ -33,7 +33,7 @@ class PasswordField extends Field {
 
 class ConfirmPasswordField extends Field {
   validate(value, all, fieldName) {
-    if (value !== all[this.options.field]) return 'Passwords do not match.'
+    if (value !== all[this.config.field]) return 'Passwords do not match.'
   }
 }
 
@@ -403,16 +403,28 @@ describe("Form.new", () => {
     expect(form.confirmPassword.fieldName).toEqual('confirmPassword')
   })
 
-  it("sets default values")
+  it("sets default values", () => {
+    const data = {
+      username: 'ausername',
+      name: 'a name'
+    }
+    let form = SignupForm.new({default: data})
+    const expected = {
+      username: 'ausername',
+      name: 'A Name',
+      password: null,
+      confirmPassword: null
+    }
+    expect(form.getData()).toEqual(expected)
+  })
 })
-
-// describe("Form.constructor")
 
 describe("Form.isValid", () => {
   it("returns true if all the fields are valid", () => {
     const form = SignupForm.new()
     const data = {
       username: 'ausername',
+      name: 'a name',
       password: 'apassword',
       confirmPassword: 'apassword'
     }
@@ -424,6 +436,7 @@ describe("Form.isValid", () => {
     const form = SignupForm.new()
     const data = {
       username: 'ausername',
+      name: 'a name',
       password: 'apassword',
       confirmPassword: null
     }
@@ -473,6 +486,7 @@ describe("Form.setData", () => {
     const form = SignupForm.new(config)
     const data = {
       username: 'ausername',
+      name: 'A Name',
       password: 'apassword',
       confirmPassword: 'apassword'
     }
@@ -491,6 +505,7 @@ describe("Form.getData", () => {
 
     const expected = {
       username: "ausername",
+      name: null,
       password: "apassword",
       confirmPassword: null
     }
@@ -549,6 +564,7 @@ describe("Form.getError", () => {
 
     const expected = {
       username: "a error",
+      name: null,
       password: "a error",
       confirmPassword: null
     }
@@ -589,6 +605,7 @@ describe("Form.reset", () => {
     const form = SignupForm.new()
     const data = {
       username: 'ausername',
+      name: 'a name',
       password: 'apassword',
       confirmPassword: 'password confirmation'
     }
@@ -597,6 +614,7 @@ describe("Form.reset", () => {
 
     const expected = {
       username: null,
+      name: null,
       password: null,
       confirmPassword: null
     }
@@ -622,11 +640,11 @@ describe("Usage", () => {
       username: 'a username',
       name: 'a name'
     }
-    const form = Signupform.new({default: data})
+    const form = SignupForm.new({default: data})
 
     var expected = {
       username: 'a username',
-      name: 'a name',
+      name: 'A Name',
       password: null,
       confirmPassword: null
     }
@@ -634,7 +652,10 @@ describe("Usage", () => {
 
     expect(form.isValid()).toEqual(false)
     var expected = {
-      password: 'This field is required.'
+      username: null,
+      name: null,
+      password: '"Password" is required.',
+      confirmPassword: null
     }
     expect(form.getError()).toEqual(expected)
 

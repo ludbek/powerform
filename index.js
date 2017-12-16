@@ -1,15 +1,3 @@
-let isFunction = (data) => {
-  return typeof data === "function";
-};
-
-let isArray = (data) => {
-  return data instanceof Array;
-};
-
-let isValidValidator = (validator) => {
-  return isFunction(validator) || isArray(validator);
-};
-
 let clone = (data) => {
   if (!data) return data;
   return JSON.parse(JSON.stringify(data));
@@ -129,6 +117,7 @@ class Form {
       }
     }
 
+    config.default && form.setData(config.default)
     return form
   }
 
