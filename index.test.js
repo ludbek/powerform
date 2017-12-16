@@ -50,6 +50,28 @@ describe("Field.new()", () => {
     let field = Field.new()
     expect(field instanceof Field).toEqual(true)
   })
+
+  it('sets up debounce support', async () => {
+    const interval = 1000
+    const value = 'apple'
+    let check = false;
+    let field = Field.new({
+      debounce: interval,
+      onChange: value => check = true
+    })
+    field.setData(value)
+    expect(field.getData()).toEqual(null)
+    expect(check).toEqual(false)
+
+    await new Promise(r => setTimeout(r, 500))
+    field.setData(value)
+    expect(field.getData()).toEqual(null)
+    expect(check).toEqual(false)
+
+    await new Promise(r => setTimeout(r, interval))
+    expect(field.getData()).toEqual(value)
+    expect(check).toEqual(true)
+  })
 })
 
 describe("Field.constructor()", () => {
@@ -662,7 +684,4 @@ describe("Usage", () => {
     form.setData({password: 'a password', confirmPassword: 'a password'})
     expect(form.isValid()).toEqual(true)
   })
-
-  it('handles debounce')
-  it('handles async validation')
 })

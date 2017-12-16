@@ -3,7 +3,7 @@ let clone = (data) => {
   return JSON.parse(JSON.stringify(data));
 };
 
-let isequal = (val1, val2) => {
+let isEqual = (val1, val2) => {
   return JSON.stringify(val1) === JSON.stringify(val2);
 };
 
@@ -21,6 +21,14 @@ class Field {
     // will call onChange callback if exists
     this.setData(this.defaultValue)
     this.makePrestine()
+    if (!config.debounce) return
+
+    let timer;
+    let _setData = this.setData
+    this.setData = (value) => {
+      timer && clearTimeout(timer)
+      timer = setTimeout(_setData.bind(this, value), config.debounce)
+    }
   }
 
   static new (config) {
@@ -36,7 +44,7 @@ class Field {
   }
 
   setData(value) {
-    if (this.currentValue === value) return
+    if (isEqual(this.currentValue, value)) return
     this.previousValue = clone(this.currentValue)
 
     this.currentValue = this.normalize(clone(value), clone(this.previousValue))
