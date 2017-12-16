@@ -1,5 +1,3 @@
-const {validateSingle, validate, required} = require('validatex')
-
 let isFunction = (data) => {
   return typeof data === "function";
 };
@@ -21,15 +19,8 @@ let isequal = (val1, val2) => {
   return JSON.stringify(val1) === JSON.stringify(val2);
 };
 
-const configSchema = {
-  validator: required(true)
-}
-
 class Field {
-  constructor (config) {
-    const error = validate(config || {}, configSchema)
-    if (error) throw new Error(JSON.stringify(error))
-
+  constructor (config = {}) {
     this.error = null
     this.previousValue = null
     this.currentValue = null
@@ -48,49 +39,47 @@ class Field {
     return new this(config)
   }
 
+  decorate(newVal, preVal) {
+    return newVal
+  }
+
+  normalize(newVal, preVal) {
+    return newVal
+  }
+
   setData(value) {
     if (this.currentValue === value) return
     this.previousValue = clone(this.currentValue)
 
-    const modifier = this.config.modifier
-    this.currentValue = modifier && modifier(clone(value)) || clone(value)
+    this.currentValue = this.normalize(clone(value), clone(this.previousValue))
 
     const callback = this.config.onChange
-    callback && callback(clone(value))
+    callback && callback(clone(value), this.getError())
 
-    if (this.parent && this.parent.getNotified) this.parent.notifyDataChange()
+    if (this.parent && this.parent.getNotified) this.parent.notifyChange()
   }
 
   getData() {
     return clone(this.currentValue)
   }
 
-  isValid(attachError) {
-    let error = validateSingle(
+  isValid(skipAttachError) {
+    const error = this.validate(
       this.currentValue,
-      this.config.validator,
-      false, // multiple error flag
       this.parent && this.parent.getData(),
       this.fieldName
-    )
-    if (error) {
-      if (attachError !== false)  {
-        this.setError(error)
-      }
-      return false
-    }
-    else {
-      this.error = null
-      return true
-    }
+    ) || null
+    !skipAttachError && this.setError(error)
+    return !error
   }
 
   setError(error) {
-    this.error = error
-    const callback = this.config.onError
-    callback && callback(error)
+    if (this.error === error) return
+    this.error = error || null
+    const callback = this.config.onChange
+    callback && callback(this.getData(), error)
 
-    if (this.parent && this.parent.getNotified) this.parent.notifyErrorChange()
+    if (this.parent && this.parent.getNotified) this.parent.notifyChange()
   }
 
   getError() {
@@ -120,8 +109,7 @@ class Field {
 
   getDecorated() {
     const {currentValue, previousValue} = this
-    const decorator = this.config.decorator
-    return decorator && decorator(currentValue, previousValue) || currentValue
+    return this.decorate(clone(currentValue), clone(previousValue))
   }
 }
 
@@ -152,12 +140,12 @@ class Form {
       }
     }
     this.toggleNotificationFlag()
-    this.notifyDataChange()
+    this.notifyChange()
   }
 
-  notifyDataChange() {
+  notifyChange() {
     const callback = this.config.onChange
-    callback && callback(this.getData())
+    callback && callback(this.getData(), this.getError())
   }
 
   getData() {
@@ -184,14 +172,8 @@ class Form {
       }
     }
     this.toggleNotificationFlag()
-    this.notifyErrorChange()
+    this.notifyChange()
   }
-
-  notifyErrorChange() {
-    const callback = this.config.onError
-    callback && callback(this.getError())
-  }
-
 
   getError() {
     return this._fields.reduce((acc, fieldName) => {
@@ -225,7 +207,7 @@ class Form {
       return this[field].isValid(skipAttachError) && acc
     }, true)
     this.toggleNotificationFlag()
-    this.notifyErrorChange()
+    this.notifyChange()
     return status
   }
 
