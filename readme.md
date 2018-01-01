@@ -72,7 +72,7 @@ console.log(form.confirmPassword.getError())
 // validate all the fields at once
 console.log(form.isValid())
 > false
-console.log(form.setError())
+console.log(form.getError())
 > { username: undefined,
   password: undefined,
   confirmPassword: "Password and confirmation does not match." }
@@ -81,6 +81,8 @@ console.log(form.setError())
 ## API
 ### Field
 #### Field.new(config?: object)
+Creates and returns a field instance.
+
 ##### Config schema
 ```
 {
@@ -89,20 +91,51 @@ console.log(form.setError())
   onChange(value: any, error: any)?: function
 }
 ```
+
 #### Field.clean(value: any)
+Override this method to do last minute cleaning of data.
+
 #### Field.modify(newValue: any, oldValue: any)
+Override this method to modify user input.
+
 #### Field.setData(value: any)
+Sets field value.
+
 #### Field.getData()
+Returns field value.
+
+### Field.validate(value: any, allValues: object)
+Implement this method to validate field data.
+It should return an error message in case of invalid value.
+This method is called by `Form.isValid()`.
+
 #### Field.isValid(skipAttachError?: boolean)
+Returns `true` if `Field.validate()` returns nothing.
+Returns `false` if `Field.validate()` returns an error.
+
 #### Field.setError(error: string)
+Sets field error.
+
 #### Field.getError()
+Returns field error.
+Call this method after validating the field.
+
 #### Field.isDirty()
+Returns `true` if value of a field is changed else returns `false`.
+
 #### Field.makePrestine()
+Sets initial value to current value.
+
 #### Field.reset()
+Sets current value to initial value.
+
 #### Field.setAndValidate(value: any)
+Sets and validates a field. It internally calls `Field.setData()` and `Field.validate()`.
 
 ### Form
 #### Form.new(config?: object)
+Creates and returns a form instance.
+
 ##### Config schema
 ```
 {
@@ -110,15 +143,35 @@ console.log(form.setError())
   onChange(data: object, error: object): function
 }
 ```
+
 #### Form.setData(data: object)
+Sets value of fields of a form.
+
 #### Form.getData()
+Returns key value pair of fields and their corresponding values.
+
 #### Form.getUpdates()
+Returns key value pair of updated fields and their corresponding values.
+
 #### Form.setError(errors: object)
+Sets error of fields in a form.
+
 #### Form.getError()
+Returns key value pair of fields and their corresponding errors.
+
 #### Form.isDirty()
+Returns `true` if value of one of the fields in a form has been updated.
+Returns `false` if non of the fields has been updated.
+
 #### Form.makePrestine()
+Sets initial value to current value in every fields.
+
 #### Form.reset()
+Resets all the fields of a form.
+
 #### Form.isValid(skipAttachError?: boolean)
+Returns `true` if all fields of a form are valid.
+Returns `false` if one of the fields in a form is invalid.
 
 ## Usage
 ### Set default value
@@ -128,3 +181,4 @@ console.log(form.setError())
 
 ## Example
 ### React
+### Mithril
