@@ -35,11 +35,11 @@ class Field {
     return new this(config)
   }
 
-  decorate(newVal, preVal) {
+  clean(newVal) {
     return newVal
   }
 
-  normalize(newVal, preVal) {
+  modify(newVal, preVal) {
     return newVal
   }
 
@@ -47,7 +47,7 @@ class Field {
     if (isEqual(this.currentValue, value)) return
     this.previousValue = clone(this.currentValue)
 
-    this.currentValue = this.normalize(clone(value), clone(this.previousValue))
+    this.currentValue = this.modify(clone(value), clone(this.previousValue))
 
     const callback = this.config.onChange
     callback && callback(clone(value), this.getError())
@@ -57,6 +57,10 @@ class Field {
 
   getData() {
     return clone(this.currentValue)
+  }
+
+  getCleanData() {
+    return this.clean(this.getData())
   }
 
   isValid(skipAttachError) {
@@ -102,11 +106,6 @@ class Field {
     this.isValid()
     return this.getError()
   }
-
-  getDecorated() {
-    const {currentValue, previousValue} = this
-    return this.decorate(clone(currentValue), clone(previousValue))
-  }
 }
 
 class Form {
@@ -147,7 +146,7 @@ class Form {
 
   getData() {
     return this._fields.reduce((acc, fieldName) => {
-      acc[fieldName] = this[fieldName].getData()
+      acc[fieldName] = this[fieldName].getCleanData()
       return acc
     }, {})
   }

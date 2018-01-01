@@ -15,7 +15,7 @@ class NameField extends Field {
     if (!value) return '"Name" is required.'
   }
 
-  normalize(value) {
+  modify(value) {
     if (!value) return null
     return value.replace(/(?:^|\s)\S/g, s => s.toUpperCase())
   }
@@ -109,11 +109,11 @@ describe("Field.setData", () => {
     expect(got).not.toBe(value)
   })
 
-  it('calls normalizer and sets value returned by it', () => {
+  it('calls modifies and sets value returned by it', () => {
     let nVal, pVal
 
     class AField extends Field {
-      normalize (newVal, preVal) {
+      modify (newVal, preVal) {
         nVal = newVal
         pVal = preVal
         return newVal.replace(
@@ -177,6 +177,20 @@ describe("Field.getData()", () => {
     const got = field.getData()
     expect(got).toEqual(value)
     expect(got).not.toBe(value)
+  })
+})
+
+describe("Field.getCleanData", () => {
+  class AField extends Field {
+    clean(value) {
+      return value.toUpperCase(value)
+    }
+  }
+
+  it("returns data processed by Field.clean()", () => {
+    const f = AField.new({default: "apple"})
+    expect(f.getData()).toEqual("apple")
+    expect(f.getCleanData()).toEqual("APPLE")
   })
 })
 
@@ -382,28 +396,6 @@ describe('Field.setAndValidate()', () => {
   })
 })
 
-describe("Field.getDecorated()", () => {
-  class AField extends Field {
-    validate(value) {
-      if(!value) return 'This field is required.'
-    }
-
-    decorate(newVal, oldVal) {
-      return newVal.replace(
-				/(?:^|\s)\S/g,
-				function(s) {
-					return s.toUpperCase()
-				})
-    }
-  }
-
-  it('returns what config.decorator returns', () => {
-    const field = AField.new()
-    field.setData('white tiger')
-    expect(field.getDecorated()).toEqual('White Tiger')
-  })
-})
-
 describe("Form.new", () => {
   it("returns form instance", () => {
     let form = SignupForm.new()
@@ -520,16 +512,26 @@ describe("Form.setData", () => {
 })
 
 describe("Form.getData", () => {
-  it("returns data from every fields", () => {
-    const form = SignupForm.new()
+  it("returns clean data from every fields", () => {
+    class AField extends Field {
+      clean (value) {
+        return value.toUpperCase()
+      }
+    }
+
+    class AForm extends Form {
+      afield = AField.new()
+      username = UsernameField.new()
+      password = PasswordField.new()
+    }
+    const form = AForm.new()
+    form.afield.setData("apple")
     form.username.setData("ausername")
-    form.password.setData("apassword")
 
     const expected = {
       username: "ausername",
-      name: null,
-      password: "apassword",
-      confirmPassword: null
+      password: null,
+      afield: "APPLE"
     }
     expect(form.getData()).toEqual(expected)
   })
