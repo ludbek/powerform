@@ -688,3 +688,52 @@ describe("Usage", () => {
     expect(form.isValid()).toEqual(true)
   })
 })
+
+test.only("example", () => {
+  class UsernameField extends Field {
+    validate(value, allValues) {
+      if(!value) {
+        return "This field is required."
+      }
+    }
+  }
+
+  class PasswordField extends Field {
+    validate(value, allValues) {
+      if(value.length < 8) {
+        return "This field must be at least 8 characters long."
+      }
+    }
+  }
+
+  class ConfirmPasswordField extends Field {
+    validate(value, allValues) {
+      if (value !== allValues[this.config.passwordField]) {
+        return "Passwords do not match."
+      }
+    }
+  }
+
+  class SignupForm extends Form {
+    username = UsernameField.new()
+    password = PasswordField.new()
+    confirmPassword = ConfirmPasswordField.new({passwordField: 'password'})
+  }
+
+  const form = SignupForm.new()
+
+  // assign values to fields
+  form.username.setData("ausername")
+  form.password.setData("apassword")
+  form.confirmPassword.setData("bpassword")
+
+  // per field validation
+  console.log(form.username.isValid())
+  console.log(form.password.isValid())
+  console.log(form.confirmPassword.isValid())
+  console.log(form.confirmPassword.getError())
+
+  // validate all the fields at once
+  console.log(form.isValid())
+  console.log(form.getError())
+})
