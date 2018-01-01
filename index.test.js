@@ -50,28 +50,6 @@ describe("Field.new()", () => {
     let field = Field.new()
     expect(field instanceof Field).toEqual(true)
   })
-
-  it('sets up debounce support', async () => {
-    const interval = 1000
-    const value = 'apple'
-    let check = false;
-    let field = Field.new({
-      debounce: interval,
-      onChange: value => check = true
-    })
-    field.setData(value)
-    expect(field.getData()).toEqual(null)
-    expect(check).toEqual(false)
-
-    await new Promise(r => setTimeout(r, 500))
-    field.setData(value)
-    expect(field.getData()).toEqual(null)
-    expect(check).toEqual(false)
-
-    await new Promise(r => setTimeout(r, interval))
-    expect(field.getData()).toEqual(value)
-    expect(check).toEqual(true)
-  })
 })
 
 describe("Field.constructor()", () => {
@@ -165,6 +143,29 @@ describe("Field.setData", () => {
 
     field.setData(value)
     expect(spy.mock.calls.length).toEqual(1)
+  })
+
+  it('supports debounce', async () => {
+    const interval = 1000
+    let check = false;
+    let field = Field.new({
+      debounce: interval,
+      onChange: value => check = true
+    })
+    field.setData('ap')
+    expect(field.getData()).toEqual('ap')
+    expect(check).toEqual(false)
+
+    await new Promise(r => setTimeout(r, 500))
+    field.setData('apple')
+    expect(field.getData()).toEqual('apple')
+    expect(check).toEqual(false)
+
+    await new Promise(r => setTimeout(r, 500))
+    expect(check).toEqual(false)
+
+    await new Promise(r => setTimeout(r, 500))
+    expect(check).toEqual(true)
   })
 })
 

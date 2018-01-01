@@ -21,14 +21,6 @@ class Field {
     // will call onChange callback if exists
     this.setData(this.defaultValue)
     this.makePrestine()
-    if (!config.debounce) return
-
-    let timer;
-    let _setData = this.setData
-    this.setData = (value) => {
-      timer && clearTimeout(timer)
-      timer = setTimeout(_setData.bind(this, value), config.debounce)
-    }
   }
 
   static new (config) {
@@ -43,16 +35,30 @@ class Field {
     return newVal
   }
 
+  notify (value) {
+    const callback = this.config.onChange
+    callback && callback(clone(value), this.getError())
+
+    if (this.parent && this.parent.getNotified) this.parent.notifyChange()
+  }
+
   setData(value) {
     if (isEqual(this.currentValue, value)) return
     this.previousValue = clone(this.currentValue)
 
     this.currentValue = this.modify(clone(value), clone(this.previousValue))
 
-    const callback = this.config.onChange
-    callback && callback(clone(value), this.getError())
-
-    if (this.parent && this.parent.getNotified) this.parent.notifyChange()
+    const debounce = this.config.debounce
+    if (debounce) {
+      this.timer && clearTimeout(this.timer)
+      this.timer = setTimeout(
+        this.notify.bind(this, this.currentValue),
+        debounce
+      )
+    }
+    else {
+      this.notify(this.currentValue)
+    }
   }
 
   getData() {
