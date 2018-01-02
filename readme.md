@@ -32,6 +32,7 @@ class UsernameField extends Field {
 
 class PasswordField extends Field {
   validate(value, allValues) {
+    if (!value) return "This field is required."
     if(value.length < 8) {
       return "This field must be at least 8 characters long."
     }
@@ -79,6 +80,290 @@ console.log(form.getError())
 ```
 
 ## API
+### Form
+#### Form.new(config?: object)
+Creates and returns a `Form` instance.
+
+```javascript
+// reusing the fields and form at walkthrough
+let f = SignupForm.new()
+console.log(f instanceof Form)
+> true
+```
+
+##### Config schema
+```
+{
+  data: object,
+  onChange(data: object, error: object): function
+}
+```
+
+##### Set initial values of field
+Pass an object at `config.data` to set initial field values.
+
+```javascript
+const config = {
+  data: {
+    username: 'a username',
+    password: 'a password'
+  }
+}
+let f = SignupForm.new(config)
+console.log(f.username.getData())
+> 'a username'
+console.log(f.password.getData())
+> 'a password'
+```
+
+##### Track changes in data and error
+Changes to values and errors of fields can be tracked through `config.onChange` callback.
+
+```javascript
+const config = {
+  onChange: (data, error) => {
+    console.log(data, error)
+  }
+}
+
+let f = SignupForm.new(config)
+f.username.setData('a username')
+// logs data
+> {
+  username: 'a username',
+  password: null,
+  confirmPassword: null
+}, {
+  username: null,
+  password: null,
+  confirmPassword: null
+}
+
+f.password.isValid()
+// logs changes to error
+> {
+  username: 'a username',
+  password: null,
+  confirmPassword: null
+}, {
+  username: null,
+  password: 'This field is required.',
+  confirmPassword: null
+}
+```
+
+#### Form.setData(data: object)
+Sets value of fields of a form.
+
+```javascript
+let f = SignupForm.new()
+let data = {
+  username: 'a username',
+  password: 'a password'
+}
+f.setData(data)
+
+console.log(f.username.getData())
+> 'a username'
+console.log(f.password.getData())
+> 'a password'
+console.log(f.confirmPassword.getData())
+> null
+```
+
+#### Form.getData()
+Returns key value pair of fields and their corresponding values.
+
+```javascript
+let f = SignupForm.new()
+let data = {
+  username: 'a username',
+  password: 'a password'
+}
+f.setData(data)
+
+console.log(f.getData())
+> {
+  username: 'a username',
+  password: 'a password',
+  confirmPassword: null
+}
+```
+
+#### Form.getUpdates()
+Returns key value pair of updated fields and their corresponding values.
+The data it returns can be used for patching a resource over API.
+
+```javascript
+class StringField extends Field {
+  validate(value, allValues) {
+    if (!value) return "This field is required."
+  }
+}
+
+class UserForm extends Form {
+  name = StringField.new()
+  address = StringField.new()
+  username = UsernameField.new()
+}
+
+let f = UserForm.new()
+let data = {
+  name: 'a name',
+  address: 'an address'
+}
+f.setData(data)
+
+console.log(f.getUpdates())
+> {
+  name: 'a name',
+  address: 'an address'
+}
+```
+
+#### Form.setError(errors: object)
+Sets error of fields in a form.
+
+```javascript
+let f = SignupForm.new()
+const errors = {
+  username: "Invalid username.",
+  password: "Password is too common."
+}
+f.setError(errors)
+
+console.log(f.username.getError())
+> "Invalid username."
+
+console.log(f.password.getError())
+> "Password is too common."
+
+console.log(f.confirmPassword.getError())
+> null
+```
+
+#### Form.getError()
+Returns key value pair of fields and their corresponding errors.
+
+```javascript
+let f = SignupForm.new()
+f.password.setData('1234567')
+f.confirmPassword.setData('12')
+f.isValid()
+
+console.log(f.getError())
+> {
+  username: "This field is required.",
+  password: "This field must be at least 8 characters long.",
+  confirmPassword: "Passwords do not match."
+}
+```
+
+#### Form.isDirty()
+Returns `true` if value of one of the fields in a form has been updated.
+Returns `false` if non of the fields has been updated.
+
+```javascript
+let f = SignupForm.new()
+
+console.log(f.isDirty())
+> false
+
+f.username.setData('a username')
+console.log(f.isDirty())
+> true
+```
+
+#### Form.makePrestine()
+Sets initial value to current value in every fields.
+
+```javascript
+let f = SignupForm.new()
+f.username.setData('a username')
+
+console.log(f.isDirty())
+> true
+
+f.makePrestine()
+console.log(f.isDirty())
+> false
+console.log(f.username.getData())
+> 'a username'
+```
+
+#### Form.reset()
+Resets all the fields of a form.
+
+```javascript
+let f = SignupForm.new()
+f.username.setData('a username')
+f.password.setData('a password')
+console.log(f.getData())
+> {
+  username: 'a username',
+  password: 'a password',
+  confirmPassword: null
+}
+
+f.reset()
+console.log(f.getData())
+> {
+  username: null,
+  password: null,
+  confirmPassword: null
+}
+```
+
+#### Form.isValid(skipAttachError?: boolean)
+Returns `true` if all fields of a form are valid.
+Returns `false` if one of the fields in a form is invalid.
+It sets field errors if the form is invalid.
+
+```javascript
+let f = SignupForm.new()
+f.password.setData('1234567')
+
+console.log(f.getError())
+> {
+  username: null,
+  password: null,
+  confirmPassword: null
+}
+
+console.log(f.isValid())
+> false
+
+console.log(f.getError())
+> {
+  username: "This field is required.",
+  password: "This field must be at least 8 characters long.",
+  confirmPassword: "Passwords do not match."
+}
+```
+
+To check form validity without setting the errors pass `skipAttachError` to `Form.isValid`.
+```javascript
+let f = SignupForm.new()
+f.password.setData('1234567')
+
+console.log(f.getError())
+> {
+  username: null,
+  password: null,
+  confirmPassword: null
+}
+
+console.log(f.isValid(true))
+> false
+
+console.log(f.getError())
+> {
+  username: null,
+  password: null,
+  confirmPassword: null
+}
+```
+
 ### Field
 #### Field.new(config?: object)
 Creates and returns a field instance.
@@ -131,47 +416,6 @@ Sets current value to initial value.
 
 #### Field.setAndValidate(value: any)
 Sets and validates a field. It internally calls `Field.setData()` and `Field.validate()`.
-
-### Form
-#### Form.new(config?: object)
-Creates and returns a form instance.
-
-##### Config schema
-```
-{
-  default: object,
-  onChange(data: object, error: object): function
-}
-```
-
-#### Form.setData(data: object)
-Sets value of fields of a form.
-
-#### Form.getData()
-Returns key value pair of fields and their corresponding values.
-
-#### Form.getUpdates()
-Returns key value pair of updated fields and their corresponding values.
-
-#### Form.setError(errors: object)
-Sets error of fields in a form.
-
-#### Form.getError()
-Returns key value pair of fields and their corresponding errors.
-
-#### Form.isDirty()
-Returns `true` if value of one of the fields in a form has been updated.
-Returns `false` if non of the fields has been updated.
-
-#### Form.makePrestine()
-Sets initial value to current value in every fields.
-
-#### Form.reset()
-Resets all the fields of a form.
-
-#### Form.isValid(skipAttachError?: boolean)
-Returns `true` if all fields of a form are valid.
-Returns `false` if one of the fields in a form is invalid.
 
 ## Usage
 ### Set default value
