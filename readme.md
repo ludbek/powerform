@@ -365,6 +365,9 @@ console.log(f.getError())
 ```
 
 ### Field
+`Field` should be attached to a form.
+Checkout the examples below.
+
 #### Field.new(config?: object)
 Creates and returns a field instance.
 
@@ -377,22 +380,180 @@ Creates and returns a field instance.
 }
 ```
 
-#### Field.clean(value: any)
-Override this method to do last minute cleaning of data.
+```javascript
+class NumberField extends Field {}
+let f = NumberField.new()
+console.log(f instanceof Field)
+> true
+```
 
-#### Field.modify(newValue: any, oldValue: any)
-Override this method to modify user input.
+##### Set default value
+A field can have default value.
+
+```javascript
+class UserForm extends Form {
+  // assuming UsernameField is defined somewhere
+  username = UsernameField.new({default: 'orange'})
+}
+
+let f = UserForm.new()
+console.log(f.username.getData())
+> 'orange'
+```
+
+##### Trance changes in value and error
+Changes in value and error of a field can be tracked through `config.onChange` callback.
+
+```javascript
+function log(data, error) {
+  console.log(data, error)
+}
+
+class UsernameField extends Field {
+  validate(value, allValues) {
+    if (!value) return "This field is required."
+  }
+}
+
+class UserForm extends Form {
+  // assuming UsernameField is defined somewhere
+  username = UsernameField.new({default: 'orange', onChange: log})
+}
+
+let f = UserForm.new()
+f.username.isValid()
+> null, "This field is required."
+
+f.username.setData('orange')
+> "orange", "This field is required"
+
+f.username.isValid()
+> "orange", null
+```
+
+##### Debounce change in value
+Changes in data can be debounced.
+
+```javascript
+// reusing above UsernameField and log function
+class UserForm extends Form {
+  username = UsernameField.new(debounce: 1000, onChange: log)
+}
+
+let f = UserForm.new()
+f.username.setData("banana")
+// after 1 second
+> "banana", null
+```
 
 #### Field.setData(value: any)
 Sets field value.
 
+```javascript
+class StringField extends Field {}
+
+class UserForm extends Form {
+  name = StringField.new()
+}
+
+let f = UserForm.new()
+f.name.setData('a name')
+console.log(f.name.getData('a name'))
+> 'a name'
+```
+
 #### Field.getData()
 Returns field value.
+
+#### Field.modify(newValue: any, oldValue: any)
+Override this method to modify user input.
+Example usage -
+
+- capitalize user name as user types
+- insert space or dash as user types card number
+
+```javascript
+class NameField extends Field {
+  validate(value, all) {
+    if (!value) return `"${this.fieldName}" is required.`
+  }
+
+  modify(value) {
+    if (!value) return null
+    return value.replace(/(?:^|\s)\S/g, s => s.toUpperCase())
+  }
+}
+
+let nameField = NameField.new()
+nameField.setData('first last')
+console.log(nameField.getData())
+> 'First Last'
+```
+
+#### Field.clean(value: any)
+Override this method to do last minute cleaning of data.
+`Form.getData()` uses this method to get clean data.
+It is useful for situations where value in a view should be different to
+the value in stores.
+
+```javascript
+Class CardField extends Field {
+  modify(newVal, oldVal) {
+    return newVal.length === 16
+      ? newCard.split("-").join("").replace(/(\d{4})/g, "$1-").replace(/(.)$/, "")
+      : newCard.split("-").join("").replace(/(\d{4})/g, "$1-")
+  }
+
+  clean(value) {
+    return card.split("-").join("")
+  }
+}
+
+class AForm extends Form {
+  card = CardField.new()
+}
+
+let aform = AForm.new()
+
+aform.card.setData("1111222233334444")
+console.log(aform.card.getData())
+> "1111-2222-3333-4444"
+console.log(aform.getData())
+> {card: "1111222233334444"}
+```
 
 ### Field.validate(value: any, allValues: object)
 Implement this method to validate field data.
 It should return an error message in case of invalid value.
 This method is called by `Form.isValid()`.
+
+```javascript
+class PasswordField extends Field {
+  validate(value, allValues) {
+    if(!value) return `'${this.fieldName}' is required.`
+    if (value.length < 8) return `'${this.fieldName}' must be at least 8 characters long.`
+  }
+}
+
+class LoginForm extends Form {
+  password = PasswordField.new()
+}
+
+let f = LoginForm.new
+f.password.isValid() // false
+console.log(f.password.getError())
+> "'password' is required."
+
+f.password.setData("1234567")
+f.password.isValid() // false
+console.log(f.password.getError())
+> "'password' must be at least 8 characters long."
+
+f.password.setData("12345678")
+f.password.isValid()
+console.log(f.password.getError())
+> null
+```
 
 #### Field.isValid(skipAttachError?: boolean)
 Returns `true` if `Field.validate()` returns nothing.
@@ -416,12 +577,6 @@ Sets current value to initial value.
 
 #### Field.setAndValidate(value: any)
 Sets and validates a field. It internally calls `Field.setData()` and `Field.validate()`.
-
-## Usage
-### Set default value
-### Debounce
-### Project data/error changes at field
-### Project data/error changes at form
 
 ## Example
 ### React
