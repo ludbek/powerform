@@ -1,35 +1,14 @@
-const {validateSingle, validate, required} = require('validatex')
-
-let isFunction = (data) => {
-  return typeof data === "function";
-};
-
-let isArray = (data) => {
-  return data instanceof Array;
-};
-
-let isValidValidator = (validator) => {
-  return isFunction(validator) || isArray(validator);
-};
-
 let clone = (data) => {
   if (!data) return data;
   return JSON.parse(JSON.stringify(data));
 };
 
-let isequal = (val1, val2) => {
+let isEqual = (val1, val2) => {
   return JSON.stringify(val1) === JSON.stringify(val2);
 };
 
-const configSchema = {
-  validator: required(true)
-}
-
 class Field {
-  constructor (config) {
-    const error = validate(config || {}, configSchema)
-    if (error) throw new Error(JSON.stringify(error))
-
+  constructor (config = {}) {
     this.error = null
     this.previousValue = null
     this.currentValue = null
@@ -48,45 +27,65 @@ class Field {
     return new this(config)
   }
 
+  clean(newVal) {
+    return newVal
+  }
+
+  modify(newVal, preVal) {
+    return newVal
+  }
+
+  notify (value) {
+    const callback = this.config.onChange
+    callback && callback(clone(value), this.getError())
+
+    if (this.parent && this.parent.getNotified) this.parent.notifyChange()
+  }
+
   setData(value) {
-    if (this.currentValue === value) return
+    if (isEqual(this.currentValue, value)) return
     this.previousValue = clone(this.currentValue)
 
-    const modifier = this.config.modifier
-    this.currentValue = modifier && modifier(clone(value)) || clone(value)
+    this.currentValue = this.modify(clone(value), clone(this.previousValue))
 
-    const callback = this.config.onChange
-    callback && callback(clone(value))
+    const debounce = this.config.debounce
+    if (debounce) {
+      this.timer && clearTimeout(this.timer)
+      this.timer = setTimeout(
+        this.notify.bind(this, this.currentValue),
+        debounce
+      )
+    }
+    else {
+      this.notify(this.currentValue)
+    }
   }
 
   getData() {
     return clone(this.currentValue)
   }
 
-  isValid(attachError) {
-    let error = validateSingle(
+  getCleanData() {
+    return this.clean(this.getData())
+  }
+
+  isValid(skipAttachError) {
+    const error = this.validate(
       this.currentValue,
-      this.config.validator,
-      false, // multiple error flag
       this.parent && this.parent.getData(),
       this.fieldName
-    )
-    if (error) {
-      if (attachError !== false)  {
-        this.setError(error)
-      }
-      return false
-    }
-    else {
-      this.error = null
-      return true
-    }
+    ) || null
+    !skipAttachError && this.setError(error)
+    return !error
   }
 
   setError(error) {
-    this.error = error
-    const callback = this.config.onError
-    callback && callback(error)
+    if (this.error === error) return
+    this.error = error || null
+    const callback = this.config.onChange
+    callback && callback(this.getData(), error)
+
+    if (this.parent && this.parent.getNotified) this.parent.notifyChange()
   }
 
   getError() {
@@ -113,18 +112,14 @@ class Field {
     this.isValid()
     return this.getError()
   }
-
-  getDecorated() {
-    const {currentValue, previousValue} = this
-    const decorator = this.config.decorator
-    return decorator && decorator(currentValue, previousValue) || currentValue
-  }
 }
 
 class Form {
-  static new(config) {
+  static new(config = {}) {
     const form = new this()
     form._fields = []
+    form.config = config
+    form.getNotified = true
 
     for(const fieldName in form) {
       const field = form[fieldName]
@@ -135,20 +130,29 @@ class Form {
       }
     }
 
+    config.default && form.setData(config.default)
     return form
   }
 
   setData(data) {
+    this.toggleNotificationFlag()
     for(const prop in data) {
       if (this._fields.indexOf(prop) !== -1) {
         this[prop].setData(data[prop])
       }
     }
+    this.toggleNotificationFlag()
+    this.notifyChange()
+  }
+
+  notifyChange() {
+    const callback = this.config.onChange
+    callback && callback(this.getData(), this.getError())
   }
 
   getData() {
     return this._fields.reduce((acc, fieldName) => {
-      acc[fieldName] = this[fieldName].getData()
+      acc[fieldName] = this[fieldName].getCleanData()
       return acc
     }, {})
   }
@@ -163,11 +167,14 @@ class Form {
   }
 
   setError(errors) {
+    this.toggleNotificationFlag()
     for(const field in errors) {
       if(this._fields.indexOf(field) !== -1) {
         this[field].setError(errors[field])
       }
     }
+    this.toggleNotificationFlag()
+    this.notifyChange()
   }
 
   getError() {
@@ -185,22 +192,29 @@ class Form {
   }
 
   makePrestine() {
-    for(const field of this._fields) {
+    this._fields.forEach((field) => {
       this[field].makePrestine()
-    }
+    })
   }
 
   reset() {
-    for(const field of this._fields) {
+    this._fields.forEach((field) => {
       this[field].reset()
-    }
+    })
   }
 
-  isValid(attachError) {
-    for(const field of this._fields) {
-      if(!this[field].isValid(attachError)) return false
-    }
-    return true
+  isValid(skipAttachError) {
+    this.toggleNotificationFlag()
+    const status = this._fields.reduce((acc, field) => {
+      return this[field].isValid(skipAttachError) && acc
+    }, true)
+    this.toggleNotificationFlag()
+    this.notifyChange()
+    return status
+  }
+
+  toggleNotificationFlag() {
+    this.getNotified = !this.getNotified
   }
 }
 

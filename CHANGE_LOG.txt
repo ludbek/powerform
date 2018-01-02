@@ -1,0 +1,14 @@
+- v3.0.0
+  - Class based fields and form
+  - droped dependency to validatex
+- v2.3.0
+  - bulk assign
+  - data change projector
+- v2.2.0 [breaking changes]
+
+  - validatex@0.3.x
+  
+    - it requires validators to return error message instead of throwing them
+    - it requires validators to throw SkipValidation to short curcuit the validation
+    - [visit validatex for more detail](https://github.com/ludbek/validatex#updates)
+

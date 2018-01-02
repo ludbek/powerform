@@ -1,7 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Field.isValid() can validate in relation to other form fields if exists 1`] = `"'password' and 'confirm password' should match."`;
-
 exports[`Field.isValid() sets error 1`] = `"This field is required."`;
 
 exports[`Field.makePrestine() empties error 1`] = `"This field is required."`;
@@ -10,18 +8,54 @@ exports[`Field.reset() empties error 1`] = `"This field is required."`;
 
 exports[`Field.setAndValidate() sets and validates field 1`] = `"This field is required."`;
 
+exports[`Form.isValid calls onChange callback 1`] = `
+Array [
+  Object {
+    "confirmPassword": null,
+    "name": null,
+    "password": null,
+    "username": null,
+  },
+  Object {
+    "confirmPassword": null,
+    "name": "\\"Name\\" is required.",
+    "password": "\\"Password\\" is required.",
+    "username": "\\"Username\\" is required.",
+  },
+]
+`;
+
 exports[`Form.isValid sets error 1`] = `
 Object {
   "confirmPassword": null,
-  "password": null,
-  "username": "This field is required.",
+  "name": "\\"Name\\" is required.",
+  "password": "\\"Password\\" is required.",
+  "username": "\\"Username\\" is required.",
 }
 `;
 
-exports[`Form.isValid won't set error if false passed 1`] = `
+exports[`Form.isValid won't set error if true passed 1`] = `
 Object {
   "confirmPassword": null,
+  "name": null,
   "password": null,
   "username": null,
 }
+`;
+
+exports[`Form.notifyChange calls callback with value and error 1`] = `
+Array [
+  Object {
+    "confirmPassword": null,
+    "name": null,
+    "password": null,
+    "username": null,
+  },
+  Object {
+    "confirmPassword": null,
+    "name": "\\"Name\\" is required.",
+    "password": "\\"Password\\" is required.",
+    "username": "\\"Username\\" is required.",
+  },
+]
 `;
