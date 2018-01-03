@@ -95,7 +95,7 @@ console.log(f instanceof Form)
 ```
 {
   data: object,
-  onChange(data: object, error: object): function
+  onChange(data: object, error: object, form: Form): function,
 }
 ```
 
@@ -376,7 +376,7 @@ Creates and returns a field instance.
 {
   default?: any,
   debounce?: number,
-  onChange(value: any, error: any)?: function
+  onChange(value: any, error: any, field: Field)?: function
 }
 ```
 

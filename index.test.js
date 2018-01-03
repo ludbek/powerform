@@ -129,6 +129,8 @@ describe("Field.setData", () => {
     const value = 'apple'
     field.setData(value)
     expect(spy.mock.calls[0][0]).toEqual(value)
+    expect(spy.mock.calls[0][1]).toEqual(null)
+    expect(spy.mock.calls[0][2]).toBe(field)
   })
 
   it("won't call onChange if value has not changed", () => {
@@ -418,12 +420,12 @@ describe("Form.new", () => {
     expect(form.confirmPassword.fieldName).toEqual('confirmPassword')
   })
 
-  it("sets default values", () => {
+  it("sets initial values", () => {
     const data = {
       username: 'ausername',
       name: 'a name'
     }
-    let form = SignupForm.new({default: data})
+    let form = SignupForm.new({data: data})
     const expected = {
       username: 'ausername',
       name: 'A Name',
@@ -665,7 +667,7 @@ describe("Usage", () => {
       username: 'a username',
       name: 'a name'
     }
-    const form = SignupForm.new({default: data})
+    const form = SignupForm.new({data: data})
 
     var expected = {
       username: 'a username',

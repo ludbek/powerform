@@ -37,7 +37,7 @@ class Field {
 
   notify (value) {
     const callback = this.config.onChange
-    callback && callback(clone(value), this.getError())
+    callback && callback(clone(value), this.getError(), this)
 
     if (this.parent && this.parent.getNotified) this.parent.notifyChange()
   }
@@ -130,7 +130,7 @@ class Form {
       }
     }
 
-    config.default && form.setData(config.default)
+    config.data && form.setData(config.data)
     return form
   }
 
@@ -147,7 +147,7 @@ class Form {
 
   notifyChange() {
     const callback = this.config.onChange
-    callback && callback(this.getData(), this.getError())
+    callback && callback(this.getData(), this.getError(), this)
   }
 
   getData() {
