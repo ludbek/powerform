@@ -689,7 +689,7 @@ describe("Usage", () => {
   })
 })
 
-test.only("example", () => {
+test("example", () => {
   class UsernameField extends Field {
     validate(value, allValues) {
       if(!value) {
