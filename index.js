@@ -35,11 +35,18 @@ class Field {
     return newVal
   }
 
-  notify (value) {
-    const callback = this.config.onChange
-    callback && callback(clone(value), this.getError(), this)
+  triggerOnError () {
+    const callback = this.config.onError
+    callback && callback(clone(this.getError()), this)
 
-    if (this.parent && this.parent.getNotified) this.parent.notifyChange()
+    if (this.parent && this.parent.getNotified) this.parent.triggerOnError()
+  }
+
+  triggerOnChange () {
+    const callback = this.config.onChange
+    callback && callback(clone(this.currentValue), this)
+
+    if (this.parent && this.parent.getNotified) this.parent.triggerOnChange()
   }
 
   setData(value) {
@@ -52,12 +59,12 @@ class Field {
     if (debounce) {
       this.timer && clearTimeout(this.timer)
       this.timer = setTimeout(
-        this.notify.bind(this, this.currentValue),
+        this.triggerOnChange.bind(this),
         debounce
       )
     }
     else {
-      this.notify(this.currentValue)
+      this.triggerOnChange()
     }
   }
 
@@ -82,10 +89,7 @@ class Field {
   setError(error) {
     if (this.error === error) return
     this.error = error || null
-    const callback = this.config.onChange
-    callback && callback(this.getData(), error)
-
-    if (this.parent && this.parent.getNotified) this.parent.notifyChange()
+    this.triggerOnError()
   }
 
   getError() {
@@ -142,12 +146,17 @@ class Form {
       }
     }
     this.toggleNotificationFlag()
-    this.notifyChange()
+    this.triggerOnChange()
   }
 
-  notifyChange() {
+  triggerOnChange() {
     const callback = this.config.onChange
-    callback && callback(this.getData(), this.getError(), this)
+    callback && callback(this.getData(), this)
+  }
+
+  triggerOnError() {
+    const callback = this.config.onError
+    callback && callback(this.getError(), this)
   }
 
   getData() {
@@ -174,7 +183,7 @@ class Form {
       }
     }
     this.toggleNotificationFlag()
-    this.notifyChange()
+    this.triggerOnError()
   }
 
   getError() {
@@ -209,7 +218,7 @@ class Form {
       return this[field].isValid(skipAttachError) && acc
     }, true)
     this.toggleNotificationFlag()
-    this.notifyChange()
+    this.triggerOnError()
     return status
   }
 

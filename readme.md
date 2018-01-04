@@ -95,7 +95,8 @@ console.log(f instanceof Form)
 ```
 {
   data: object,
-  onChange(data: object, error: object, form: Form): function,
+  onChange(data: object, form: Form): function,
+  onError(error: object, form: Form): function
 }
 ```
 
@@ -121,8 +122,11 @@ Changes to values and errors of fields can be tracked through `config.onChange` 
 
 ```javascript
 const config = {
-  onChange: (data, error) => {
-    console.log(data, error)
+  onChange: (data, form) => {
+    console.log(data)
+  },
+  onError: (error, form) => {
+    console.log(error)
   }
 }
 
@@ -133,19 +137,10 @@ f.username.setData('a username')
   username: 'a username',
   password: null,
   confirmPassword: null
-}, {
-  username: null,
-  password: null,
-  confirmPassword: null
 }
-
 f.password.isValid()
 // logs changes to error
 > {
-  username: 'a username',
-  password: null,
-  confirmPassword: null
-}, {
   username: null,
   password: 'This field is required.',
   confirmPassword: null
@@ -376,7 +371,8 @@ Creates and returns a field instance.
 {
   default?: any,
   debounce?: number,
-  onChange(value: any, error: any, field: Field)?: function
+  onChange(value: any, field: Field)?: function
+  onError(error: any, field: Field)?: function
 }
 ```
 
@@ -402,11 +398,15 @@ console.log(f.username.getData())
 ```
 
 ##### Trance changes in value and error
-Changes in value and error of a field can be tracked through `config.onChange` callback.
+Changes in value and error of a field can be tracked through `config.onChange` and `config.onError` callbacks.
 
 ```javascript
-function log(data, error) {
-  console.log(data, error)
+function logData(data, field) {
+  console.log('data: ', data)
+}
+
+function logError(data, field) {
+  console.log('error: ', error)
 }
 
 class UsernameField extends Field {
@@ -417,18 +417,18 @@ class UsernameField extends Field {
 
 class UserForm extends Form {
   // assuming UsernameField is defined somewhere
-  username = UsernameField.new({default: 'orange', onChange: log})
+  username = UsernameField.new({default: 'orange', onChange: logData, onError: logError})
 }
 
 let f = UserForm.new()
 f.username.isValid()
-> null, "This field is required."
+> "error: " "This field is required."
 
 f.username.setData('orange')
-> "orange", "This field is required"
+> "data: " "orange"
 
 f.username.isValid()
-> "orange", null
+> "error: " null
 ```
 
 ##### Debounce change in value
@@ -437,13 +437,13 @@ Changes in data can be debounced.
 ```javascript
 // reusing above UsernameField and log function
 class UserForm extends Form {
-  username = UsernameField.new(debounce: 1000, onChange: log)
+  username = UsernameField.new(debounce: 1000, onChange: logData)
 }
 
 let f = UserForm.new()
 f.username.setData("banana")
 // after 1 second
-> "banana", null
+> "data: " "banana"
 ```
 
 #### Field.setData(value: any)

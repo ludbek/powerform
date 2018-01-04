@@ -129,8 +129,7 @@ describe("Field.setData", () => {
     const value = 'apple'
     field.setData(value)
     expect(spy.mock.calls[0][0]).toEqual(value)
-    expect(spy.mock.calls[0][1]).toEqual(null)
-    expect(spy.mock.calls[0][2]).toBe(field)
+    expect(spy.mock.calls[0][1]).toBe(field)
   })
 
   it("won't call onChange if value has not changed", () => {
@@ -264,16 +263,16 @@ describe('Field.setError()', () => {
     expect(field.getError()).toEqual(errMsg)
   })
 
-  it('calls onChange callback if exists', () => {
+  it('calls onError callback if exists', () => {
     const spy = jest.fn()
     const config = {
-      onChange: spy
+      onError: spy
     }
     const field = Field.new(config) 
     const errMsg = 'Nice error !!!'
     field.setError(errMsg)
     expect(spy.mock.calls.length).toEqual(1)
-    expect(spy.mock.calls[0]).toEqual([null, errMsg])
+    expect(spy.mock.calls[0]).toMatchSnapshot()
   })
 })
 
@@ -473,13 +472,13 @@ describe("Form.isValid", () => {
     expect(form.getError()).toMatchSnapshot()
   })
 
-  it("calls onChange callback", () => {
-    const config = {onChange: jest.fn()}
+  it("calls onError callback", () => {
+    const config = {onError: jest.fn()}
     const form = SignupForm.new(config)
     form.isValid()
 
-    expect(config.onChange.mock.calls.length).toEqual(1)
-    expect(config.onChange.mock.calls[0]).toMatchSnapshot()
+    expect(config.onError.mock.calls.length).toEqual(1)
+    expect(config.onError.mock.calls[0]).toMatchSnapshot()
   })
 })
 
@@ -568,9 +567,9 @@ describe("Form.setError", () => {
     expect(form.password.getError()).toEqual(errors.password)
   })
 
-  it("calls onChange callback only once", () => {
+  it("calls onError callback only once", () => {
     const config = {
-      onChange: jest.fn()
+      onError: jest.fn()
     }
     const form = SignupForm.new(config)
     const errors = {
@@ -579,7 +578,8 @@ describe("Form.setError", () => {
     }
     form.setError(errors)
 
-    expect(config.onChange.mock.calls.length).toEqual(1)
+    expect(config.onError.mock.calls.length).toEqual(1)
+    expect(config.onError.mock.calls[0]).toMatchSnapshot()
   })
 })
 
@@ -649,15 +649,16 @@ describe("Form.reset", () => {
   })
 })
 
-describe("Form.notifyChange", () => {
-  it("calls callback with value and error", () => {
+describe("Form.triggerOnChange", () => {
+  it("calls callback with value and form instance", () => {
     const config = {
       onChange: jest.fn()
     }
     const form = SignupForm.new(config)
-    form.isValid()
-    form.notifyChange()
-    expect(config.onChange.mock.calls[0]).toMatchSnapshot()
+    form.setData({username: 'ausername'})
+    form.triggerOnChange()
+    expect(config.onChange.mock.calls.length).toEqual(2)
+    expect(config.onChange.mock.calls[1]).toMatchSnapshot()
   })
 })
 
