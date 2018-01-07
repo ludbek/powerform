@@ -19,7 +19,7 @@ class Field {
       ? null
       : clone(config.default)
     // will call onChange callback if exists
-    this.setData(this.defaultValue)
+    this.setData(this.defaultValue, true)
     this.makePrestine()
   }
 
@@ -39,22 +39,23 @@ class Field {
     const callback = this.config.onError
     callback && callback(clone(this.getError()), this)
 
-    if (this.parent && this.parent.getNotified) this.parent.triggerOnError()
+    if (this.parent) this.parent.triggerOnError()
   }
 
   triggerOnChange () {
     const callback = this.config.onChange
     callback && callback(clone(this.currentValue), this)
 
-    if (this.parent && this.parent.getNotified) this.parent.triggerOnChange()
+    if (this.parent) this.parent.triggerOnChange()
   }
 
-  setData(value) {
+  setData(value, skipTrigger) {
     if (isEqual(this.currentValue, value)) return
     this.previousValue = clone(this.currentValue)
 
     this.currentValue = this.modify(clone(value), clone(this.previousValue))
 
+    if (skipTrigger) return
     const debounce = this.config.debounce
     if (debounce) {
       this.timer && clearTimeout(this.timer)
@@ -86,9 +87,11 @@ class Field {
     return !error
   }
 
-  setError(error) {
+  setError(error, skipTrigger) {
     if (this.error === error) return
     this.error = error || null
+
+    if(skipTrigger) return
     this.triggerOnError()
   }
 
@@ -103,7 +106,7 @@ class Field {
   makePrestine() {
     this.previousValue = clone(this.currentValue)
     this.initialValue = clone(this.currentValue)
-    this.error = null
+    this.setError(null)
   }
 
   reset() {
@@ -134,29 +137,32 @@ class Form {
       }
     }
 
-    config.data && form.setData(config.data)
+    config.data && form.setData(config.data, true)
     return form
   }
 
-  setData(data) {
-    this.toggleNotificationFlag()
+  toggleGetNotified() {
+    this.getNotified = !this.getNotified
+  }
+
+  setData(data, skipTrigger) {
     for(const prop in data) {
       if (this._fields.indexOf(prop) !== -1) {
-        this[prop].setData(data[prop])
+        this[prop].setData(data[prop], skipTrigger)
       }
     }
-    this.toggleNotificationFlag()
+    if (skipTrigger) return
     this.triggerOnChange()
   }
 
   triggerOnChange() {
     const callback = this.config.onChange
-    callback && callback(this.getData(), this)
+    this.getNotified && callback && callback(this.getData(), this)
   }
 
   triggerOnError() {
     const callback = this.config.onError
-    callback && callback(this.getError(), this)
+    this.getNotified && callback && callback(this.getError(), this)
   }
 
   getData() {
@@ -175,14 +181,14 @@ class Form {
     }, {})
   }
 
-  setError(errors) {
-    this.toggleNotificationFlag()
+  setError(errors, skipTrigger) {
     for(const field in errors) {
       if(this._fields.indexOf(field) !== -1) {
-        this[field].setError(errors[field])
+        this[field].setError(errors[field], skipTrigger)
       }
     }
-    this.toggleNotificationFlag()
+
+    if (skipTrigger) return
     this.triggerOnError()
   }
 
@@ -201,29 +207,32 @@ class Form {
   }
 
   makePrestine() {
+    this.toggleGetNotified()
     this._fields.forEach((field) => {
       this[field].makePrestine()
     })
+    this.toggleGetNotified()
+    this.triggerOnError()
   }
 
   reset() {
+    this.toggleGetNotified()
     this._fields.forEach((field) => {
       this[field].reset()
     })
+    this.toggleGetNotified()
+    this.triggerOnError()
+    this.triggerOnChange()
   }
 
   isValid(skipAttachError) {
-    this.toggleNotificationFlag()
+    this.toggleGetNotified()
     const status = this._fields.reduce((acc, field) => {
       return this[field].isValid(skipAttachError) && acc
     }, true)
-    this.toggleNotificationFlag()
-    this.triggerOnError()
+    this.toggleGetNotified()
+    !skipAttachError && this.triggerOnError()
     return status
-  }
-
-  toggleNotificationFlag() {
-    this.getNotified = !this.getNotified
   }
 }
 

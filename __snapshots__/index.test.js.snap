@@ -107,6 +107,26 @@ Object {
 }
 `;
 
+exports[`Form.makePrestine empties all the error fields and calls onError callback only once 1`] = `[Function]`;
+
+exports[`Form.makePrestine empties all the error fields and calls onError callback only once 2`] = `
+Object {
+  "confirmPassword": null,
+  "name": null,
+  "password": null,
+  "username": null,
+}
+`;
+
+exports[`Form.makePrestine empties all the error fields and calls onError callback only once 3`] = `
+Object {
+  "confirmPassword": null,
+  "name": null,
+  "password": null,
+  "username": "ausername",
+}
+`;
+
 exports[`Form.setError calls onError callback only once 1`] = `
 Array [
   Object {
