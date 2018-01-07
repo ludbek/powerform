@@ -1,6 +1,6 @@
 {
   "name": "powerform",
-  "version": "3.0.2",
+  "version": "3.0.3",
   "description": "A powerful form model.",
   "main": "lib/index.js",
   "scripts": {
@@ -40,7 +40,6 @@
     "babel-register": "^6.11.5",
     "jest": "^21.2.1",
     "jest-cli": "^21.2.1",
-    "sinon": "^3.2.1",
     "webpack": "^1.12.14"
   },
   "transform": {
