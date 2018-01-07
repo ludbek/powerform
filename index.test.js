@@ -1,6 +1,4 @@
 const  {Form, Field} = require('./index.js')
-const {required, isString, ValidationError, isNumber, equalsTo} = require('validatex')
-const sinon = require('sinon')
 
 var noop = () => {}
 
