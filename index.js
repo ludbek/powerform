@@ -46,7 +46,7 @@ class Field {
     const callback = this.config.onChange
     callback && callback(clone(this.currentValue), this)
 
-    if (this.parent) this.parent.triggerOnChange()
+    this.parent && this.parent.triggerOnChange()
   }
 
   setData(value, skipTrigger) {
@@ -146,11 +146,13 @@ class Form {
   }
 
   setData(data, skipTrigger) {
+    this.toggleGetNotified()
     for(const prop in data) {
       if (this._fields.indexOf(prop) !== -1) {
         this[prop].setData(data[prop], skipTrigger)
       }
     }
+    this.toggleGetNotified()
     if (skipTrigger) return
     this.triggerOnChange()
   }
@@ -182,11 +184,13 @@ class Form {
   }
 
   setError(errors, skipTrigger) {
+    this.toggleGetNotified()
     for(const field in errors) {
       if(this._fields.indexOf(field) !== -1) {
         this[field].setError(errors[field], skipTrigger)
       }
     }
+    this.toggleGetNotified()
 
     if (skipTrigger) return
     this.triggerOnError()

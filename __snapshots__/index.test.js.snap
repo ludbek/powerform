@@ -107,7 +107,14 @@ Object {
 }
 `;
 
-exports[`Form.makePrestine empties all the error fields and calls onError callback only once 1`] = `[Function]`;
+exports[`Form.makePrestine empties all the error fields and calls onError callback only once 1`] = `
+Object {
+  "confirmPassword": null,
+  "name": "\\"Name\\" is required.",
+  "password": "\\"Password\\" is required.",
+  "username": null,
+}
+`;
 
 exports[`Form.makePrestine empties all the error fields and calls onError callback only once 2`] = `
 Object {
@@ -248,6 +255,71 @@ Array [
       "currentValue": "ausername",
       "defaultValue": null,
       "error": null,
+      "fieldName": "username",
+      "initialValue": null,
+      "parent": [Circular],
+      "previousValue": null,
+    },
+  },
+]
+`;
+
+exports[`Form.triggerOnError calls callback with value and form instance 1`] = `
+Array [
+  Object {
+    "confirmPassword": null,
+    "name": null,
+    "password": null,
+    "username": "an error",
+  },
+  SignupForm {
+    "_fields": Array [
+      "username",
+      "name",
+      "password",
+      "confirmPassword",
+    ],
+    "config": Object {
+      "onError": [Function],
+    },
+    "confirmPassword": ConfirmPasswordField {
+      "config": Object {
+        "field": "password",
+      },
+      "currentValue": null,
+      "defaultValue": null,
+      "error": null,
+      "fieldName": "confirmPassword",
+      "initialValue": null,
+      "parent": [Circular],
+      "previousValue": null,
+    },
+    "getNotified": true,
+    "name": NameField {
+      "config": Object {},
+      "currentValue": null,
+      "defaultValue": null,
+      "error": null,
+      "fieldName": "name",
+      "initialValue": null,
+      "parent": [Circular],
+      "previousValue": null,
+    },
+    "password": PasswordField {
+      "config": Object {},
+      "currentValue": null,
+      "defaultValue": null,
+      "error": null,
+      "fieldName": "password",
+      "initialValue": null,
+      "parent": [Circular],
+      "previousValue": null,
+    },
+    "username": UsernameField {
+      "config": Object {},
+      "currentValue": null,
+      "defaultValue": null,
+      "error": "an error",
       "fieldName": "username",
       "initialValue": null,
       "parent": [Circular],

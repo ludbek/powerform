@@ -255,23 +255,16 @@ describe('Field.isValid()', () => {
   })
 
   it('can validate in relation to other form fields if exists', () => {
-    const error = "'password' and 'confirm password' should match."
-    class AField extends Field {
-      validate(value, all) {
-        return value !== all.password
-          ? error
-          : null
-      }
+    class AForm extends Form {
+      password = PasswordField.new()
+      confirmPassword = ConfirmPasswordField.new()
     }
-    const confirmPassword = AField.new()
-    confirmPassword.parent = {
-      getData: function () {
-        return { 'password': 'apple' }
-      }
-    }
-    confirmPassword.setData('banana')
-    expect(confirmPassword.isValid()).toEqual(false)
-    expect(confirmPassword.getError()).toEqual(error)
+
+    const f = AForm.new()
+    f.password.setData("apple")
+    f.confirmPassword.setData("banana")
+    expect(f.confirmPassword.isValid()).toEqual(false)
+    expect(f.confirmPassword.getError()).toEqual("Passwords do not match.")
   })
 
   it("won't trigger onError callback if 'skipAttachError' is true", () => {
@@ -412,7 +405,7 @@ describe('Field.reset()', () => {
 
     field.reset()
 
-    expect(spy.mock.calls[2][0]).toEqual('apple')
+    expect(spy.mock.calls[1][0]).toEqual('apple')
   })
 
   it("empties error", () => {
@@ -568,8 +561,6 @@ describe("Form.setData", () => {
     expect(config.onChange.mock.calls.length).toEqual(1)
     expect(config.onChange.mock.calls[0][0]).toEqual(data)
   })
-
-  it("calls onChange callback only if 'hasDataChanges' is true")
 })
 
 describe("Form.getData", () => {
@@ -642,8 +633,6 @@ describe("Form.setError", () => {
   })
 
   it("stops at first invalid field if 'haltOnError' is true")
-
-  it("won't call onError callback if there is no change in errors")
 })
 
 describe("Form.getError", () => {
@@ -690,33 +679,41 @@ describe("Form.makePrestine", () => {
   })
 
   it("empties all the error fields and calls onError callback only once", () => {
-    const form = SignupForm.new()
+    const config = {
+      onError: jest.fn()
+    }
+    const form = SignupForm.new(config)
     const data = {
       username: 'ausername'
     }
     form.setData(data)
-    form.isValid()
+    form.isValid() // first call
     expect(form.isDirty()).toEqual(true)
     expect(form.getError()).toMatchSnapshot()
 
-    form.makePrestine()
+    form.makePrestine() // second call
     expect(form.isDirty()).toEqual(false)
     expect(form.getError()).toMatchSnapshot()
     expect(form.getData()).toMatchSnapshot()
+
+    expect(config.onError.mock.calls.length).toEqual(2)
   })
 })
 
 describe("Form.reset", () => {
   it("resets all the fields and calls onChange callback only once", () => {
-    const form = SignupForm.new()
+    const config = {
+      onChange: jest.fn()
+    }
+    const form = SignupForm.new(config)
     const data = {
       username: 'ausername',
       name: 'a name',
       password: 'apassword',
       confirmPassword: 'password confirmation'
     }
-    form.setData(data)
-    form.reset()
+    form.setData(data) // first trigger
+    form.reset() // second trigger
 
     const expected = {
       username: null,
@@ -725,10 +722,26 @@ describe("Form.reset", () => {
       confirmPassword: null
     }
     expect(form.getData()).toEqual(expected)
-    expect(true).toEqual(false)
+    expect(config.onChange.mock.calls.length).toEqual(2)
   })
 
-  it("resets all the errors and calls onError callback only once")
+  it("resets all the errors and calls onError callback only once", () => {
+    const config = {
+      onError: jest.fn()
+    }
+    const form = SignupForm.new(config)
+    form.isValid() // 1st trigger
+    form.reset() // 2nd triggter
+
+    const expected = {
+      username: null,
+      name: null,
+      password: null,
+      confirmPassword: null
+    }
+    expect(form.getError()).toEqual(expected)
+    expect(config.onError.mock.calls.length).toEqual(2)
+  })
 })
 
 describe("Form.triggerOnChange", () => {
@@ -745,7 +758,16 @@ describe("Form.triggerOnChange", () => {
 
   it("wont call onChange callback if data has not changed")
 
-  it("won't call onChange callback if 'getNotified' is false")
+  it("won't call onChange callback if 'getNotified' is false", () => {
+    const config = {
+      onChange: jest.fn()
+    }
+    const form = SignupForm.new(config)
+    form.setData({username: 'ausername'})
+    form.toggleGetNotified()
+    form.triggerOnChange()
+    expect(config.onChange.mock.calls.length).toEqual(1)
+  })
 })
 
 describe("Form.triggerOnError", () => {
@@ -762,7 +784,16 @@ describe("Form.triggerOnError", () => {
 
   it("wont call onError callback if errors have not changed")
 
-  it("won't call onError callback if 'getNotified' is false")
+  it("won't call onError callback if 'getNotified' is false", () => {
+    const config = {
+      onError: jest.fn()
+    }
+    const form = SignupForm.new(config)
+    form.isValid()
+    form.toggleGetNotified()
+    form.triggerOnError()
+    expect(config.onError.mock.calls.length).toEqual(1)
+  })
 })
 
 describe("Usage", () => {
