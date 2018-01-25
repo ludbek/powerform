@@ -5,7 +5,7 @@
   "main": "lib/index.js",
   "scripts": {
     "test": "jest index.test.js",
-    "build": "babel --plugins transform-es2015-modules-commonjs index.js --out-dir lib",
+    "build": "babel --config .babelrc index.js --out-dir lib",
     "prepublish": "npm run test && npm run build"
   },
   "files": [
