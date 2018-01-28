@@ -13,14 +13,14 @@ let isEqual = (val1, val2) => {
 
 class Field {
   constructor (config = {}) {
-    this.error = null
-    this.previousValue = null
-    this.currentValue = null
-    this.initialValue = null
+    this.error = undefined
+    this.previousValue = undefined
+    this.currentValue = undefined
+    this.initialValue = undefined
 
     this.config = config
     this.defaultValue = this.initialValue = !config || config.default === undefined || config.default === null
-      ? null
+      ? undefined
       : clone(config.default)
     // will call onChange callback if exists
     this.setData(this.defaultValue, true)
@@ -86,14 +86,14 @@ class Field {
       this.currentValue,
       this.parent && this.parent.getData(),
       this.fieldName
-    ) || null
+    ) || undefined
     !skipAttachError && this.setError(error)
     return !error
   }
 
   setError(error, skipTrigger) {
     if (this.error === error) return
-    this.error = error || null
+    this.error = error || undefined
 
     if(skipTrigger) return
     this.triggerOnError()
@@ -110,7 +110,7 @@ class Field {
   makePrestine() {
     this.previousValue = clone(this.currentValue)
     this.initialValue = clone(this.currentValue)
-    this.setError(null)
+    this.setError(undefined)
   }
 
   reset() {

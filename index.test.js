@@ -14,7 +14,7 @@ class NameField extends Field {
   }
 
   modify(value) {
-    if (!value) return null
+    if (!value) return undefined
     return value.replace(/(?:^|\s)\S/g, s => s.toUpperCase())
   }
 }
@@ -122,7 +122,7 @@ describe("Field.setData", () => {
     const field = Field.new()
 
     field.setData('apple')
-    expect(field.previousValue).toEqual(null)
+    expect(field.previousValue).toEqual(undefined)
 
     field.setData('banana')
     expect(field.previousValue).toEqual('apple')
@@ -249,7 +249,7 @@ describe('Field.isValid()', () => {
     field.setData(undefined)
 
     expect(field.isValid(true)).toEqual(false)
-    expect(field.getError()).toEqual(null)
+    expect(field.getError()).toEqual(undefined)
   })
 
   it('can validate in relation to other form fields if exists', () => {
@@ -352,7 +352,7 @@ describe('Field.makePrestine()', () => {
   it('sets previousValue and initialValue to currentValue', () => {
     const field = AField.new()
     field.setData('apple')
-    expect(field.previousValue).toEqual(null)
+    expect(field.previousValue).toEqual(undefined)
 
     field.makePrestine()
     expect(field.previousValue).toEqual('apple')
@@ -366,7 +366,7 @@ describe('Field.makePrestine()', () => {
     expect(field.getError()).toMatchSnapshot()
 
     field.makePrestine()
-    expect(field.getError()).toEqual(null)
+    expect(field.getError()).toEqual(undefined)
   })
 })
 
@@ -412,7 +412,7 @@ describe('Field.reset()', () => {
     expect(field.getError()).toMatchSnapshot()
 
     field.reset()
-    expect(field.getError()).toEqual(null)
+    expect(field.getError()).toEqual(undefined)
   })
 })
 
@@ -428,7 +428,7 @@ describe('Field.setAndValidate()', () => {
       default: 'apple'
     }
     const field = AField.new(config)
-    const error = field.setAndValidate(null)
+    const error = field.setAndValidate(undefined)
     expect(field.isValid()).toEqual(false)
     expect(error).toMatchSnapshot()
   })
@@ -465,8 +465,8 @@ describe("Form.new", () => {
     const expected = {
       username: 'ausername',
       name: 'A Name',
-      password: null,
-      confirmPassword: null
+      password: undefined,
+      confirmPassword: undefined
     }
     expect(form.getData()).toEqual(expected)
     expect(spy.mock.calls.length).toEqual(0)
@@ -494,7 +494,7 @@ describe("Form.isValid", () => {
       username: 'ausername',
       name: 'a name',
       password: 'apassword',
-      confirmPassword: null
+      confirmPassword: undefined
     }
     form.setData(data)
     expect(form.isValid()).toEqual(false)
@@ -538,9 +538,9 @@ describe("Form.isValid", () => {
     const aform = AForm.new({stopOnError: true})
     aform.username.setData('a username')
     expect(aform.isValid()).toEqual(false)
-    expect(aform.username.getError()).toEqual(null)
+    expect(aform.username.getError()).toEqual(undefined)
     expect(aform.name.getError()).toEqual('"Name" is required.')
-    expect(aform.password.getError()).toEqual(null)
+    expect(aform.password.getError()).toEqual(undefined)
   })
 })
 
@@ -594,7 +594,7 @@ describe("Form.getData", () => {
 
     const expected = {
       username: "ausername",
-      password: null,
+      password: undefined,
       afield: "APPLE"
     }
     expect(form.getData()).toEqual(expected)
@@ -655,9 +655,9 @@ describe("Form.getError", () => {
 
     const expected = {
       username: "a error",
-      name: null,
+      name: undefined,
       password: "a error",
-      confirmPassword: null
+      confirmPassword: undefined
     }
     expect(form.getError()).toEqual(expected)
   })
@@ -728,10 +728,10 @@ describe("Form.reset", () => {
     form.reset() // second trigger
 
     const expected = {
-      username: null,
-      name: null,
-      password: null,
-      confirmPassword: null
+      username: undefined,
+      name: undefined,
+      password: undefined,
+      confirmPassword: undefined
     }
     expect(form.getData()).toEqual(expected)
     expect(config.onChange.mock.calls.length).toEqual(2)
@@ -746,10 +746,10 @@ describe("Form.reset", () => {
     form.reset() // 2nd triggter
 
     const expected = {
-      username: null,
-      name: null,
-      password: null,
-      confirmPassword: null
+      username: undefined,
+      name: undefined,
+      password: undefined,
+      confirmPassword: undefined
     }
     expect(form.getError()).toEqual(expected)
     expect(config.onError.mock.calls.length).toEqual(2)
@@ -819,17 +819,17 @@ describe("Usage", () => {
     var expected = {
       username: 'a username',
       name: 'A Name',
-      password: null,
-      confirmPassword: null
+      password: undefined,
+      confirmPassword: undefined
     }
     expect(form.getData()).toEqual(expected)
 
     expect(form.isValid()).toEqual(false)
     var expected = {
-      username: null,
-      name: null,
+      username: undefined,
+      name: undefined,
       password: '"Password" is required.',
-      confirmPassword: null
+      confirmPassword: undefined
     }
     expect(form.getError()).toEqual(expected)
 
