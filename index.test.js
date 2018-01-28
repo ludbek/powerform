@@ -528,6 +528,20 @@ describe("Form.isValid", () => {
 
     expect(config.onError.mock.calls.length).toEqual(0)
   })
+
+  it("respects config.stopOnError", () => {
+    class AForm extends Form {
+      username = UsernameField.new({index: 1})
+      name = NameField.new({index: 2})
+      password = PasswordField.new({index: 3})
+    }
+    const aform = AForm.new({stopOnError: true})
+    aform.username.setData('a username')
+    expect(aform.isValid()).toEqual(false)
+    expect(aform.username.getError()).toEqual(null)
+    expect(aform.name.getError()).toEqual('"Name" is required.')
+    expect(aform.password.getError()).toEqual(null)
+  })
 })
 
 describe("Form.setData", () => {

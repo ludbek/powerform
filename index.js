@@ -1,3 +1,7 @@
+function StopValidationError () {
+  this.stack = (new Error()).stack
+}
+
 let clone = (data) => {
   if (!data) return data;
   return JSON.parse(JSON.stringify(data));
@@ -130,10 +134,17 @@ class Form {
 
     for(const fieldName in form) {
       const field = form[fieldName]
-      if(form.hasOwnProperty(fieldName) && field instanceof Field) {
+      const index = field.index
+      if(field instanceof Field) {
         field.parent = form
         field.fieldName = fieldName
-        form._fields.push(fieldName)
+
+        if (index) {
+          form._fields[index] = fieldName
+        }
+        else {
+          form._fields.push(fieldName)
+        }
       }
     }
 
@@ -230,10 +241,27 @@ class Form {
   }
 
   isValid(skipAttachError) {
+    let status
     this.toggleGetNotified()
-    const status = this._fields.reduce((acc, field) => {
-      return this[field].isValid(skipAttachError) && acc
-    }, true)
+
+    try {
+      status = this._fields.reduce((acc, field) => {
+        const validity = this[field].isValid(skipAttachError)
+        if (!validity && this.config.stopOnError) {
+          throw new StopValidationError()
+        }
+        return  validity && acc
+      }, true)
+    }
+    catch (err) {
+      if (err instanceof StopValidationError) {
+        status = false
+      }
+      else {
+        throw err
+      }
+    }
+
     this.toggleGetNotified()
     !skipAttachError && this.triggerOnError()
     return status
