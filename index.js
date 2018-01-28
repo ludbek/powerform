@@ -2,6 +2,12 @@ function StopValidationError () {
   this.stack = (new Error()).stack
 }
 
+function ValidationError (msg) {
+  this.message = msg
+  this.stack = (new Error(msg)).stack
+}
+
+
 let clone = (data) => {
   if (!data) return data;
   return JSON.parse(JSON.stringify(data));
@@ -82,13 +88,21 @@ class Field {
   }
 
   isValid(skipAttachError) {
-    const error = this.validate(
-      this.currentValue,
-      this.parent && this.parent.getData(),
-      this.fieldName
-    ) || undefined
-    !skipAttachError && this.setError(error)
-    return !error
+    try {
+      this.validate(
+        this.currentValue,
+        this.parent && this.parent.getData(),
+        this.fieldName
+      )
+    }
+    catch(err) {
+      if(err instanceof ValidationError) {
+        !skipAttachError && this.setError(err.message)
+        return false
+      }
+      throw err
+    }
+    return true
   }
 
   setError(error, skipTrigger) {
@@ -270,5 +284,6 @@ class Form {
 
 module.exports = {
   Form,
-  Field
+  Field,
+  ValidationError
 }

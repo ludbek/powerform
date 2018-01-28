@@ -1,37 +1,35 @@
-const  {Form, Field} = require('./index.js')
+const  {Form, Field, ValidationError} = require('./index.js')
 
 var noop = () => {}
 
-class UsernameField extends Field {
+class BaseField extends Field {
   validate(value, all) {
-    if (!value) return '"Username" is required.'
+    const fieldName = this.fieldName.charAt(0).toUpperCase() +
+      this.fieldName.slice(1)
+    if(!value) throw new ValidationError(`"${fieldName}" is required.`)
   }
 }
 
-class NameField extends Field {
-  validate(value, all) {
-    if (!value) return '"Name" is required.'
-  }
+class UsernameField extends BaseField {}
 
+class NameField extends BaseField {
   modify(value) {
     if (!value) return undefined
     return value.replace(/(?:^|\s)\S/g, s => s.toUpperCase())
   }
 }
 
-class PasswordField extends Field {
-  validate(value, all) {
-    if(!value) return '"Password" is required.'
-  }
-
+class PasswordField extends BaseField {
   decorate(currentValue, prevValue) {
     return "********"
   }
 }
 
-class ConfirmPasswordField extends Field {
+class ConfirmPasswordField extends BaseField {
   validate(value, all, fieldName) {
-    if (value !== all[this.config.field]) return 'Passwords do not match.'
+    if (value !== all[this.config.field]) {
+      throw new ValidationError('Passwords do not match.')
+    }
   }
 }
 
@@ -218,7 +216,9 @@ describe("Field.getCleanData", () => {
 describe('Field.isValid()', () => {
   class AField extends Field {
     validate(value) {
-      if (!value) return 'This field is required.'
+      if (!value) {
+        throw new ValidationError('This field is required.')
+      }
     }
   }
 
@@ -271,7 +271,9 @@ describe('Field.isValid()', () => {
     }
     class AField extends Field {
       validate(value, allValues) {
-        if(!value) return "This field is required."
+        if(!value) {
+          throw new ValidationError("This field is required.")
+        }
       }
     }
     let f = AField.new(config)
@@ -345,7 +347,9 @@ describe('Field.isDirty()', () => {
 describe('Field.makePrestine()', () => {
   class AField extends Field {
     validate(value) {
-      if(!value) return 'This field is required.'
+      if(!value) {
+        throw new ValidationError('This field is required.')
+      }
     }
   }
 
@@ -373,7 +377,9 @@ describe('Field.makePrestine()', () => {
 describe('Field.reset()', () => {
   class AField extends Field {
     validate(value) {
-      if(!value) return 'This field is required.'
+      if(!value) {
+        throw new ValidationError('This field is required.')
+      }
     }
   }
 
@@ -419,7 +425,9 @@ describe('Field.reset()', () => {
 describe('Field.setAndValidate()', () => {
   class AField extends Field {
     validate(value) {
-      if(!value) return 'This field is required.'
+      if(!value) {
+        throw new ValidationError('This field is required.')
+      }
     }
   }
 
@@ -842,7 +850,7 @@ test("example", () => {
   class UsernameField extends Field {
     validate(value, allValues) {
       if(!value) {
-        return "This field is required."
+        throw new ValidationError( "This field is required.")
       }
     }
   }
@@ -850,7 +858,7 @@ test("example", () => {
   class PasswordField extends Field {
     validate(value, allValues) {
       if(value.length < 8) {
-        return "This field must be at least 8 characters long."
+        throw new ValidationError("This field must be at least 8 characters long.")
       }
     }
   }
@@ -858,7 +866,7 @@ test("example", () => {
   class ConfirmPasswordField extends Field {
     validate(value, allValues) {
       if (value !== allValues[this.config.passwordField]) {
-        return "Passwords do not match."
+        throw new ValidationError("Passwords do not match.")
       }
     }
   }
