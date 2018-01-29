@@ -88,21 +88,25 @@ class Field {
   }
 
   isValid(skipAttachError) {
+    let error
     try {
       this.validate(
         this.currentValue,
         this.parent && this.parent.getData(),
         this.fieldName
       )
+      error = undefined
     }
     catch(err) {
       if(err instanceof ValidationError) {
-        !skipAttachError && this.setError(err.message)
-        return false
+        error = err.message
       }
-      throw err
+      else {
+        throw err
+      }
     }
-    return true
+    !skipAttachError && this.setError(error)
+    return !error
   }
 
   setError(error, skipTrigger) {
