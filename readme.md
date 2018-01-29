@@ -4,6 +4,10 @@
 
 Logo by [Anand](https://www.behance.net/mukhiyaanad378)
 
+## Breaking changes
+v3 introduces significant changes which are not backward compatible with v2.
+Please checkout the [change log](CHANGE_LOG.txt).
+
 ## Introduction
 A tiny form model which can be used in apps with or without frameworks like [Mithril](https://github.com/MithrilJS/mithril.js/), [React](https://github.com/facebook/react), etc.
 
@@ -20,21 +24,21 @@ A tiny form model which can be used in apps with or without frameworks like [Mit
 ## Quick walk-through
 ```javascript
 // es6
-import {Field, Form} from "powerform"
+import {Field, Form, ValidationError} from "powerform"
 
 class UsernameField extends Field {
   validate(value, allValues) {
     if(!value) {
-      return "This field is required."
+      throw new ValidationError("This field is required.")
     }
   }
 }
 
 class PasswordField extends Field {
   validate(value, allValues) {
-    if (!value) return "This field is required."
+    if (!value) throw new ValidationError("This field is required.")
     if(value.length < 8) {
-      return "This field must be at least 8 characters long."
+      throw new ValidationError("This field must be at least 8 characters long.")
     }
   }
 }
@@ -42,7 +46,7 @@ class PasswordField extends Field {
 class ConfirmPasswordField extends Field {
   validate(value, allValues) {
     if (value !== allValues[this.config.passwordField]) {
-      return "Passwords do not match."
+      throw new ValidationError("Passwords do not match.")
     }
   }
 }
@@ -192,7 +196,7 @@ The data it returns can be used for patching a resource over API.
 ```javascript
 class StringField extends Field {
   validate(value, allValues) {
-    if (!value) return "This field is required."
+    if (!value) throw new ValidationError("This field is required.")
   }
 }
 
@@ -411,7 +415,7 @@ function logError(data, field) {
 
 class UsernameField extends Field {
   validate(value, allValues) {
-    if (!value) return "This field is required."
+    if (!value) throw new ValidationError("This field is required.")
   }
 }
 
@@ -475,7 +479,7 @@ Example usage -
 ```javascript
 class NameField extends Field {
   validate(value, all) {
-    if (!value) return `"${this.fieldName}" is required.`
+    if (!value) throw new ValidationError(`"${this.fieldName}" is required.`)
   }
 
   modify(value) {
@@ -530,8 +534,8 @@ This method is called by `Form.isValid()`.
 ```javascript
 class PasswordField extends Field {
   validate(value, allValues) {
-    if(!value) return `'${this.fieldName}' is required.`
-    if (value.length < 8) return `'${this.fieldName}' must be at least 8 characters long.`
+    if(!value) throw new ValidationError(`'${this.fieldName}' is required.`)
+    if (value.length < 8) throw new ValidationError(`'${this.fieldName}' must be at least 8 characters long.`)
   }
 }
 

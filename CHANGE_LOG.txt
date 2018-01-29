@@ -1,6 +1,8 @@
+-v3.1.0
+  - validate method must throw ValidationError instead of returning an error
 - v3.0.0
   - Class based fields and form
-  - droped dependency to validatex
+  - dropped dependency to validatex
 - v2.3.0
   - bulk assign
   - data change projector
