@@ -100,7 +100,8 @@ console.log(f instanceof Form)
 {
   data: object,
   onChange(data: object, form: Form): function,
-  onError(error: object, form: Form): function
+  onError(error: object, form: Form): function,
+  stopOnError: boolean
 }
 ```
 
@@ -149,6 +150,27 @@ f.password.isValid()
   password: 'This field is required.',
   confirmPassword: null
 }
+```
+
+##### Validate one field at a time
+It is possible to stop validation as soon as one of the fields fails.
+To enable this mode of validation set `config.stopOnError` to `true`.
+One can control the order at which fields are validated by supplying `index` to fields.
+
+```javascript
+class LoginForm extends Form {
+  password = PasswordField.new({index: 2})
+  username = UsernameField.new({index: 1})
+}
+
+const f = LoginForm.new({stopOnError: true})
+
+console.log(f.isValid())
+>> false
+
+console.log(f.getError())
+>> {username: "This field is required."}
+
 ```
 
 #### Form.setData(data: object)
