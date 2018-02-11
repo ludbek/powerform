@@ -4,6 +4,11 @@
 
 Logo by [Anand](https://www.behance.net/mukhiyaanad378)
 
+## Showcase
+
+- [Mithril](https://codesandbox.io/s/nr4lxn4ovm)
+- [React](https://codesandbox.io/s/625pjy4q5w)
+
 ## Breaking changes
 v3 introduces significant changes which are not backward compatible with v2.
 Please checkout the [change log](CHANGE_LOG.txt).
@@ -603,7 +608,3 @@ Sets current value to initial value.
 
 #### Field.setAndValidate(value: any)
 Sets and validates a field. It internally calls `Field.setData()` and `Field.validate()`.
-
-## Example
-### [React](https://codesandbox.io/s/625pjy4q5w)
-### [Mithril](https://codesandbox.io/s/nr4lxn4ovm)
