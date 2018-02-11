@@ -605,5 +605,5 @@ Sets current value to initial value.
 Sets and validates a field. It internally calls `Field.setData()` and `Field.validate()`.
 
 ## Example
-### React
-### Mithril
+### [React](https://codesandbox.io/s/625pjy4q5w)
+### [Mithril](https://codesandbox.io/s/nr4lxn4ovm)
