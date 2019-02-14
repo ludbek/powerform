@@ -131,9 +131,13 @@ class Field {
     this.setError(undefined)
   }
 
+  makePristine() {
+    this.makePrestine()
+  }
+
   reset() {
     this.setData(clone(this.initialValue))
-    this.makePrestine()
+    this.makePristine()
   }
 
   setAndValidate(value) {
@@ -246,6 +250,10 @@ class Form {
     })
     this.toggleGetNotified()
     this.triggerOnError()
+  }
+
+  makePristine() {
+    this.makePrestine()
   }
 
   reset() {

@@ -300,7 +300,7 @@ console.log(f.isDirty())
 > true
 ```
 
-#### Form.makePrestine()
+#### Form.makePristine()
 Sets initial value to current value in every fields.
 
 ```javascript
@@ -310,7 +310,7 @@ f.username.setData('a username')
 console.log(f.isDirty())
 > true
 
-f.makePrestine()
+f.makePristine()
 console.log(f.isDirty())
 > false
 console.log(f.username.getData())
@@ -600,7 +600,7 @@ Call this method after validating the field.
 #### Field.isDirty()
 Returns `true` if value of a field is changed else returns `false`.
 
-#### Field.makePrestine()
+#### Field.makePristine()
 Sets initial value to current value.
 
 #### Field.reset()

@@ -2,7 +2,7 @@
 
 exports[`Field.isValid() sets error 1`] = `"This field is required."`;
 
-exports[`Field.makePrestine() empties error 1`] = `"This field is required."`;
+exports[`Field.makePristine() empties error 1`] = `"This field is required."`;
 
 exports[`Field.reset() empties error 1`] = `"This field is required."`;
 
@@ -107,7 +107,7 @@ Object {
 }
 `;
 
-exports[`Form.makePrestine empties all the error fields and calls onError callback only once 1`] = `
+exports[`Form.makePristine empties all the error fields and calls onError callback only once 1`] = `
 Object {
   "confirmPassword": undefined,
   "name": "\\"Name\\" is required.",
@@ -116,7 +116,7 @@ Object {
 }
 `;
 
-exports[`Form.makePrestine empties all the error fields and calls onError callback only once 2`] = `
+exports[`Form.makePristine empties all the error fields and calls onError callback only once 2`] = `
 Object {
   "confirmPassword": undefined,
   "name": undefined,
@@ -125,7 +125,7 @@ Object {
 }
 `;
 
-exports[`Form.makePrestine empties all the error fields and calls onError callback only once 3`] = `
+exports[`Form.makePristine empties all the error fields and calls onError callback only once 3`] = `
 Object {
   "confirmPassword": undefined,
   "name": undefined,

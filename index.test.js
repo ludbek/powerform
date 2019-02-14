@@ -344,7 +344,7 @@ describe('Field.isDirty()', () => {
   })
 })
 
-describe('Field.makePrestine()', () => {
+describe('Field.makePristine()', () => {
   class AField extends Field {
     validate(value) {
       if(!value) {
@@ -358,7 +358,7 @@ describe('Field.makePrestine()', () => {
     field.setData('apple')
     expect(field.previousValue).toEqual(undefined)
 
-    field.makePrestine()
+    field.makePristine()
     expect(field.previousValue).toEqual('apple')
     expect(field.initialValue).toEqual('apple')
     expect(field.isDirty()).toEqual(false)
@@ -369,7 +369,7 @@ describe('Field.makePrestine()', () => {
     field.isValid()
     expect(field.getError()).toMatchSnapshot()
 
-    field.makePrestine()
+    field.makePristine()
     expect(field.getError()).toEqual(undefined)
   })
 })
@@ -684,7 +684,7 @@ describe("Form.isDirty", () => {
   })
 })
 
-describe("Form.makePrestine", () => {
+describe("Form.makePristine", () => {
   it("makes all the fields prestine", () => {
     const form = SignupForm.new()
     const data = {
@@ -694,7 +694,7 @@ describe("Form.makePrestine", () => {
     }
     form.setData(data)
     expect(form.isDirty()).toEqual(true)
-    form.makePrestine()
+    form.makePristine()
     expect(form.isDirty()).toEqual(false)
   })
 
@@ -711,7 +711,7 @@ describe("Form.makePrestine", () => {
     expect(form.isDirty()).toEqual(true)
     expect(form.getError()).toMatchSnapshot()
 
-    form.makePrestine() // second call
+    form.makePristine() // second call
     expect(form.isDirty()).toEqual(false)
     expect(form.getError()).toMatchSnapshot()
     expect(form.getData()).toMatchSnapshot()
