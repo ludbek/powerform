@@ -16,9 +16,6 @@ Please checkout the [change log](CHANGE_LOG.txt).
 ## Introduction
 A tiny form model which can be used in apps with or without frameworks like [Mithril](https://github.com/MithrilJS/mithril.js/), [React](https://github.com/facebook/react), etc.
 
-### Features
-...
-
 ## Installation
 ### yarn
 `yarn add powerform`
@@ -601,10 +598,12 @@ Call this method after validating the field.
 Returns `true` if value of a field is changed else returns `false`.
 
 #### Field.makePristine()
-Sets initial value to current value.
+Marks a field to be untouched.
+It sets current value as initial value.
 
 #### Field.reset()
-Sets current value to initial value.
+It resets the field.
+Sets initial value as current value.
 
 #### Field.setAndValidate(value: any)
 Sets and validates a field. It internally calls `Field.setData()` and `Field.validate()`.
