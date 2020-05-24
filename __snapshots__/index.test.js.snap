@@ -2,13 +2,13 @@
 
 exports[`Field.isValid() sets error 1`] = `"This field is required."`;
 
-exports[`Field.makePristine() empties error 1`] = `"This field is required."`;
+exports[`field.makePristine() empties error 1`] = `"This field is required."`;
 
-exports[`Field.reset() empties error 1`] = `"This field is required."`;
+exports[`field.reset() empties error 1`] = `"This field is required."`;
 
-exports[`Field.setAndValidate() sets and validates field 1`] = `"This field is required."`;
+exports[`field.setAndValidate() sets and validates field 1`] = `"This field is required."`;
 
-exports[`Field.setError() calls onError callback if exists 1`] = `
+exports[`field.setError() calls onError callback if exists 1`] = `
 Array [
   "Nice error !!!",
   Field {
@@ -20,103 +20,105 @@ Array [
     "error": "Nice error !!!",
     "initialValue": undefined,
     "previousValue": undefined,
+    "validator": [Function],
   },
 ]
 `;
 
-exports[`Form.isValid calls onError callback 1`] = `
+exports[`form.isValid calls onError callback 1`] = `
 Array [
   Object {
-    "confirmPassword": undefined,
-    "name": "\\"Name\\" is required.",
-    "password": "\\"Password\\" is required.",
-    "username": "\\"Username\\" is required.",
+    "confirmPassword": "This field is required.",
+    "name": "This field is required.",
+    "password": "This field is required.",
+    "username": "This field is required.",
   },
-  SignupForm {
-    "_fields": Array [
+  Form {
+    "config": Object {
+      "onError": [Function],
+    },
+    "confirmPassword": Field {
+      "config": Object {},
+      "currentValue": undefined,
+      "defaultValue": undefined,
+      "error": "This field is required.",
+      "fieldName": "confirmPassword",
+      "initialValue": undefined,
+      "multipleErrors": false,
+      "parent": [Circular],
+      "previousValue": undefined,
+      "validator": Array [
+        [Function],
+        [Function],
+      ],
+    },
+    "fieldNames": Array [
       "username",
       "name",
       "password",
       "confirmPassword",
     ],
-    "config": Object {
-      "onError": [Function],
-    },
-    "confirmPassword": ConfirmPasswordField {
+    "getNotified": true,
+    "name": Field {
       "config": Object {
-        "field": "password",
+        "modify": [Function],
       },
       "currentValue": undefined,
       "defaultValue": undefined,
-      "error": undefined,
-      "fieldName": "confirmPassword",
-      "initialValue": undefined,
-      "parent": [Circular],
-      "previousValue": undefined,
-    },
-    "getNotified": true,
-    "name": NameField {
-      "config": Object {},
-      "currentValue": undefined,
-      "defaultValue": undefined,
-      "error": "\\"Name\\" is required.",
+      "error": "This field is required.",
       "fieldName": "name",
       "initialValue": undefined,
+      "multipleErrors": false,
       "parent": [Circular],
       "previousValue": undefined,
+      "validator": Array [
+        [Function],
+        [Function],
+      ],
     },
-    "password": PasswordField {
+    "password": Field {
       "config": Object {},
       "currentValue": undefined,
       "defaultValue": undefined,
-      "error": "\\"Password\\" is required.",
+      "error": "This field is required.",
       "fieldName": "password",
       "initialValue": undefined,
+      "multipleErrors": false,
       "parent": [Circular],
       "previousValue": undefined,
+      "validator": Array [
+        [Function],
+      ],
     },
-    "username": UsernameField {
+    "username": Field {
       "config": Object {},
       "currentValue": undefined,
       "defaultValue": undefined,
-      "error": "\\"Username\\" is required.",
+      "error": "This field is required.",
       "fieldName": "username",
       "initialValue": undefined,
+      "multipleErrors": false,
       "parent": [Circular],
       "previousValue": undefined,
+      "validator": Array [
+        [Function],
+        [Function],
+      ],
     },
   },
 ]
 `;
 
-exports[`Form.isValid sets error 1`] = `
+exports[`form.isValid sets error 1`] = `
 Object {
-  "confirmPassword": undefined,
-  "name": "\\"Name\\" is required.",
-  "password": "\\"Password\\" is required.",
-  "username": "\\"Username\\" is required.",
+  "confirmPassword": "This field is required.",
+  "name": "This field is required.",
+  "password": "This field is required.",
+  "username": "This field is required.",
 }
 `;
 
-exports[`Form.isValid won't set error if true passed 1`] = `
-Object {
-  "confirmPassword": undefined,
-  "name": undefined,
-  "password": undefined,
-  "username": undefined,
-}
-`;
-
-exports[`Form.makePristine empties all the error fields and calls onError callback only once 1`] = `
-Object {
-  "confirmPassword": undefined,
-  "name": "\\"Name\\" is required.",
-  "password": "\\"Password\\" is required.",
-  "username": undefined,
-}
-`;
-
-exports[`Form.makePristine empties all the error fields and calls onError callback only once 2`] = `
+exports[`form.isValid won't set error if 'skipAttachError' true passed 1`] = `
 Object {
   "confirmPassword": undefined,
   "name": undefined,
@@ -125,7 +127,25 @@ Object {
 }
 `;
 
-exports[`Form.makePristine empties all the error fields and calls onError callback only once 3`] = `
+exports[`form.makePristine empties all the error fields and calls onError callback only once 1`] = `
+Object {
+  "confirmPassword": "This field is required.",
+  "name": "This field is required.",
+  "password": "This field is required.",
+  "username": undefined,
+}
+`;
+
+exports[`form.makePristine empties all the error fields and calls onError callback only once 2`] = `
+Object {
+  "confirmPassword": undefined,
+  "name": undefined,
+  "password": undefined,
+  "username": undefined,
+}
+`;
+
+exports[`form.makePristine empties all the error fields and calls onError callback only once 3`] = `
 Object {
   "confirmPassword": undefined,
   "name": undefined,
@@ -134,7 +154,7 @@ Object {
 }
 `;
 
-exports[`Form.setError calls onError callback only once 1`] = `
+exports[`form.setError calls onError callback only once 1`] = `
 Array [
   Object {
     "confirmPassword": undefined,
@@ -142,64 +162,83 @@ Array [
     "password": "a error",
     "username": "a error",
   },
-  SignupForm {
-    "_fields": Array [
-      "username",
-      "name",
-      "password",
-      "confirmPassword",
-    ],
+  Form {
     "config": Object {
       "onError": [Function],
     },
-    "confirmPassword": ConfirmPasswordField {
-      "config": Object {
-        "field": "password",
-      },
+    "confirmPassword": Field {
+      "config": Object {},
       "currentValue": undefined,
       "defaultValue": undefined,
       "error": undefined,
       "fieldName": "confirmPassword",
       "initialValue": undefined,
+      "multipleErrors": false,
       "parent": [Circular],
       "previousValue": undefined,
+      "validator": Array [
+        [Function],
+        [Function],
+      ],
     },
+    "fieldNames": Array [
+      "username",
+      "name",
+      "password",
+      "confirmPassword",
+    ],
     "getNotified": true,
-    "name": NameField {
-      "config": Object {},
+    "name": Field {
+      "config": Object {
+        "modify": [Function],
+      },
       "currentValue": undefined,
       "defaultValue": undefined,
       "error": undefined,
       "fieldName": "name",
       "initialValue": undefined,
+      "multipleErrors": false,
       "parent": [Circular],
       "previousValue": undefined,
+      "validator": Array [
+        [Function],
+        [Function],
+      ],
     },
-    "password": PasswordField {
+    "password": Field {
       "config": Object {},
       "currentValue": undefined,
       "defaultValue": undefined,
       "error": "a error",
       "fieldName": "password",
       "initialValue": undefined,
+      "multipleErrors": false,
       "parent": [Circular],
       "previousValue": undefined,
+      "validator": Array [
+        [Function],
+      ],
     },
-    "username": UsernameField {
+    "username": Field {
       "config": Object {},
       "currentValue": undefined,
       "defaultValue": undefined,
       "error": "a error",
       "fieldName": "username",
       "initialValue": undefined,
+      "multipleErrors": false,
       "parent": [Circular],
       "previousValue": undefined,
+      "validator": Array [
+        [Function],
+        [Function],
+      ],
     },
   },
 ]
 `;
 
-exports[`Form.triggerOnChange calls callback with value and form instance 1`] = `
+exports[`form.triggerOnChange calls callback with value and form instance 1`] = `
 Array [
   Object {
     "confirmPassword": undefined,
@@ -207,64 +246,83 @@ Array [
     "password": undefined,
     "username": "ausername",
   },
-  SignupForm {
-    "_fields": Array [
-      "username",
-      "name",
-      "password",
-      "confirmPassword",
-    ],
+  Form {
     "config": Object {
       "onChange": [Function],
     },
-    "confirmPassword": ConfirmPasswordField {
-      "config": Object {
-        "field": "password",
-      },
+    "confirmPassword": Field {
+      "config": Object {},
       "currentValue": undefined,
       "defaultValue": undefined,
       "error": undefined,
       "fieldName": "confirmPassword",
       "initialValue": undefined,
+      "multipleErrors": false,
       "parent": [Circular],
       "previousValue": undefined,
+      "validator": Array [
+        [Function],
+        [Function],
+      ],
     },
+    "fieldNames": Array [
+      "username",
+      "name",
+      "password",
+      "confirmPassword",
+    ],
     "getNotified": true,
-    "name": NameField {
-      "config": Object {},
+    "name": Field {
+      "config": Object {
+        "modify": [Function],
+      },
       "currentValue": undefined,
       "defaultValue": undefined,
       "error": undefined,
       "fieldName": "name",
       "initialValue": undefined,
+      "multipleErrors": false,
       "parent": [Circular],
       "previousValue": undefined,
+      "validator": Array [
+        [Function],
+        [Function],
+      ],
     },
-    "password": PasswordField {
+    "password": Field {
       "config": Object {},
       "currentValue": undefined,
       "defaultValue": undefined,
       "error": undefined,
       "fieldName": "password",
       "initialValue": undefined,
+      "multipleErrors": false,
       "parent": [Circular],
       "previousValue": undefined,
+      "validator": Array [
+        [Function],
+      ],
     },
-    "username": UsernameField {
+    "username": Field {
       "config": Object {},
       "currentValue": "ausername",
       "defaultValue": undefined,
       "error": undefined,
       "fieldName": "username",
       "initialValue": undefined,
+      "multipleErrors": false,
       "parent": [Circular],
       "previousValue": undefined,
+      "validator": Array [
+        [Function],
+        [Function],
+      ],
     },
   },
 ]
 `;
 
-exports[`Form.triggerOnError calls callback with value and form instance 1`] = `
+exports[`form.triggerOnError calls callback with value and form instance 1`] = `
 Array [
   Object {
     "confirmPassword": undefined,
@@ -272,58 +330,77 @@ Array [
     "password": undefined,
     "username": "an error",
   },
-  SignupForm {
-    "_fields": Array [
-      "username",
-      "name",
-      "password",
-      "confirmPassword",
-    ],
+  Form {
     "config": Object {
       "onError": [Function],
     },
-    "confirmPassword": ConfirmPasswordField {
-      "config": Object {
-        "field": "password",
-      },
+    "confirmPassword": Field {
+      "config": Object {},
       "currentValue": undefined,
       "defaultValue": undefined,
       "error": undefined,
       "fieldName": "confirmPassword",
       "initialValue": undefined,
+      "multipleErrors": false,
       "parent": [Circular],
       "previousValue": undefined,
+      "validator": Array [
+        [Function],
+        [Function],
+      ],
     },
+    "fieldNames": Array [
+      "username",
+      "name",
+      "password",
+      "confirmPassword",
+    ],
     "getNotified": true,
-    "name": NameField {
-      "config": Object {},
+    "name": Field {
+      "config": Object {
+        "modify": [Function],
+      },
       "currentValue": undefined,
       "defaultValue": undefined,
       "error": undefined,
       "fieldName": "name",
       "initialValue": undefined,
+      "multipleErrors": false,
       "parent": [Circular],
       "previousValue": undefined,
+      "validator": Array [
+        [Function],
+        [Function],
+      ],
     },
-    "password": PasswordField {
+    "password": Field {
       "config": Object {},
       "currentValue": undefined,
       "defaultValue": undefined,
       "error": undefined,
       "fieldName": "password",
       "initialValue": undefined,
+      "multipleErrors": false,
       "parent": [Circular],
       "previousValue": undefined,
+      "validator": Array [
+        [Function],
+      ],
     },
-    "username": UsernameField {
+    "username": Field {
       "config": Object {},
       "currentValue": undefined,
       "defaultValue": undefined,
       "error": "an error",
       "fieldName": "username",
       "initialValue": undefined,
+      "multipleErrors": false,
       "parent": [Circular],
       "previousValue": undefined,
+      "validator": Array [
+        [Function],
+        [Function],
+      ],
     },
   },
 ]
