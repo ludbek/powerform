@@ -1,3 +1,6 @@
+-v4
+  - brought back validatex
+  - functional validators instead of class based validators
 -v3.1.0
   - validate method must throw ValidationError instead of returning an error
 - v3.0.0

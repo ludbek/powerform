@@ -10,7 +10,7 @@ Logo by [Anand](https://www.behance.net/mukhiyaanad378)
 - [React](https://codesandbox.io/s/625pjy4q5w)
 
 ## Breaking changes
-v3 introduces significant changes which are not backward compatible with v2.
+v4 introduces significant changes which are not backward compatible with v3.
 Please checkout the [change log](CHANGE_LOG.txt).
 
 ## Introduction
@@ -26,40 +26,16 @@ A tiny form model which can be used in apps with or without frameworks like [Mit
 ## Quick walk-through
 ```javascript
 // es6
-import {Field, Form, ValidationError} from "powerform"
+import { powerform } from "powerform"
+import { required, minLength, equalsTo } from 'validatex'
 
-class UsernameField extends Field {
-  validate(value, allValues) {
-    if(!value) {
-      throw new ValidationError("This field is required.")
-    }
-  }
+const schema  = {
+  username: required(true),
+  password: [required(true), minLength(8)],
+  confirmPassword: [required(true), equalsTo('password')]
 }
 
-class PasswordField extends Field {
-  validate(value, allValues) {
-    if (!value) throw new ValidationError("This field is required.")
-    if(value.length < 8) {
-      throw new ValidationError("This field must be at least 8 characters long.")
-    }
-  }
-}
-
-class ConfirmPasswordField extends Field {
-  validate(value, allValues) {
-    if (value !== allValues[this.config.passwordField]) {
-      throw new ValidationError("Passwords do not match.")
-    }
-  }
-}
-
-class SignupForm extends Form {
-  username = UsernameField.new()
-  password = PasswordField.new()
-  confirmPassword = ConfirmPasswordField.new({passwordField: 'password'})
-}
-
-const form = SignupForm.new()
+const form = powerform(schema)
 
 // assign values to fields
 form.username.setData("ausername")
@@ -87,14 +63,12 @@ console.log(form.getError())
 
 ## API
 ### Form
-#### Form.new(config?: object)
-Creates and returns a `Form` instance.
+#### powerform(schema, config?: object)
+Returns a form.
 
 ```javascript
-// reusing the fields and form at walkthrough
-let f = SignupForm.new()
-console.log(f instanceof Form)
-> true
+// reusing the schema from walkthrough
+const form = powerform(schema)
 ```
 
 ##### Config schema
@@ -117,7 +91,7 @@ const config = {
     password: 'a password'
   }
 }
-let f = SignupForm.new(config)
+const f = powerform(schema, config)
 console.log(f.username.getData())
 > 'a username'
 console.log(f.password.getData())
@@ -137,7 +111,7 @@ const config = {
   }
 }
 
-let f = SignupForm.new(config)
+const f = powerform(schema, config)
 f.username.setData('a username')
 // logs data
 > {
@@ -175,37 +149,37 @@ console.log(f.getError())
 
 ```
 
-#### Form.setData(data: object)
+#### form.setData(data: object)
 Sets value of fields of a form.
 
 ```javascript
-let f = SignupForm.new()
+const form = powerform(schema)
 let data = {
   username: 'a username',
   password: 'a password'
 }
-f.setData(data)
+form.setData(data)
 
-console.log(f.username.getData())
+console.log(form.username.getData())
 > 'a username'
-console.log(f.password.getData())
+console.log(form.password.getData())
 > 'a password'
-console.log(f.confirmPassword.getData())
+console.log(form.confirmPassword.getData())
 > null
 ```
 
-#### Form.getData()
+#### form.getData()
 Returns key value pair of fields and their corresponding values.
 
 ```javascript
-let f = SignupForm.new()
+const form = powerform(schema)
 let data = {
   username: 'a username',
   password: 'a password'
 }
-f.setData(data)
+form.setData(data)
 
-console.log(f.getData())
+console.log(form.getData())
 > {
   username: 'a username',
   password: 'a password',
@@ -213,68 +187,62 @@ console.log(f.getData())
 }
 ```
 
-#### Form.getUpdates()
+#### form.getUpdates()
 Returns key value pair of updated fields and their corresponding values.
 The data it returns can be used for patching a resource over API.
 
 ```javascript
-class StringField extends Field {
-  validate(value, allValues) {
-    if (!value) throw new ValidationError("This field is required.")
-  }
+const userFormSchema = {
+  name: required(true),
+  address: required(true),
+  username: required(true)
 }
 
-class UserForm extends Form {
-  name = StringField.new()
-  address = StringField.new()
-  username = UsernameField.new()
-}
-
-let f = UserForm.new()
+const form = powerform(userFormSchema)
 let data = {
   name: 'a name',
   address: 'an address'
 }
-f.setData(data)
+form.setData(data)
 
-console.log(f.getUpdates())
+console.log(form.getUpdates())
 > {
   name: 'a name',
   address: 'an address'
 }
 ```
 
-#### Form.setError(errors: object)
+#### form.setError(errors: object)
 Sets error of fields in a form.
 
 ```javascript
-let f = SignupForm.new()
+const form = powerform(schema)
 const errors = {
   username: "Invalid username.",
   password: "Password is too common."
 }
-f.setError(errors)
+form.setError(errors)
 
-console.log(f.username.getError())
+console.log(form.username.getError())
 > "Invalid username."
 
-console.log(f.password.getError())
+console.log(form.password.getError())
 > "Password is too common."
 
-console.log(f.confirmPassword.getError())
+console.log(form.confirmPassword.getError())
 > null
 ```
 
-#### Form.getError()
+#### form.getError()
 Returns key value pair of fields and their corresponding errors.
 
 ```javascript
-let f = SignupForm.new()
-f.password.setData('1234567')
-f.confirmPassword.setData('12')
-f.isValid()
+const form = powerform(schema)
+form.password.setData('1234567')
+form.confirmPassword.setData('12')
+form.isValid()
 
-console.log(f.getError())
+console.log(form.getError())
 > {
   username: "This field is required.",
   password: "This field must be at least 8 characters long.",
@@ -282,54 +250,54 @@ console.log(f.getError())
 }
 ```
 
-#### Form.isDirty()
+#### form.isDirty()
 Returns `true` if value of one of the fields in a form has been updated.
 Returns `false` if non of the fields has been updated.
 
 ```javascript
-let f = SignupForm.new()
+const form = powerform(schema)
 
-console.log(f.isDirty())
+console.log(form.isDirty())
 > false
 
-f.username.setData('a username')
+form.username.setData('a username')
 console.log(f.isDirty())
 > true
 ```
 
-#### Form.makePristine()
+#### form.makePristine()
 Sets initial value to current value in every fields.
 
 ```javascript
-let f = SignupForm.new()
-f.username.setData('a username')
+const form = powerform(schema)
+form.username.setData('a username')
 
-console.log(f.isDirty())
+console.log(form.isDirty())
 > true
 
-f.makePristine()
-console.log(f.isDirty())
+form.makePristine()
+console.log(form.isDirty())
 > false
-console.log(f.username.getData())
+console.log(form.username.getData())
 > 'a username'
 ```
 
-#### Form.reset()
+#### form.reset()
 Resets all the fields of a form.
 
 ```javascript
-let f = SignupForm.new()
-f.username.setData('a username')
-f.password.setData('a password')
-console.log(f.getData())
+const form = powerform(schema)
+form.username.setData('a username')
+form.password.setData('a password')
+console.log(form.getData())
 > {
   username: 'a username',
   password: 'a password',
   confirmPassword: null
 }
 
-f.reset()
-console.log(f.getData())
+form.reset()
+console.log(form.getData())
 > {
   username: null,
   password: null,
@@ -337,26 +305,26 @@ console.log(f.getData())
 }
 ```
 
-#### Form.isValid(skipAttachError?: boolean)
+#### form.isValid(skipAttachError?: boolean)
 Returns `true` if all fields of a form are valid.
 Returns `false` if one of the fields in a form is invalid.
 It sets field errors if the form is invalid.
 
 ```javascript
-let f = SignupForm.new()
-f.password.setData('1234567')
+const form = powerform(schema)
+form.password.setData('1234567')
 
-console.log(f.getError())
+console.log(form.getError())
 > {
   username: null,
   password: null,
   confirmPassword: null
 }
 
-console.log(f.isValid())
+console.log(form.isValid())
 > false
 
-console.log(f.getError())
+console.log(form.getError())
 > {
   username: "This field is required.",
   password: "This field must be at least 8 characters long.",
@@ -366,20 +334,20 @@ console.log(f.getError())
 
 To check form validity without setting the errors pass `skipAttachError` to `Form.isValid`.
 ```javascript
-let f = SignupForm.new()
-f.password.setData('1234567')
+const form = powerform(schema)
+form.password.setData('1234567')
 
-console.log(f.getError())
+console.log(form.getError())
 > {
   username: null,
   password: null,
   confirmPassword: null
 }
 
-console.log(f.isValid(true))
+console.log(form.isValid(true))
 > false
 
-console.log(f.getError())
+console.log(form.getError())
 > {
   username: null,
   password: null,
