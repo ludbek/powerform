@@ -6,7 +6,7 @@ var noop = () => {}
 const nameField = {
   validator: [required(true), isString()],
   modify(value) {
-    if (!value) return undefined
+    if (!value) return null
     return value.replace(/(?:^|\s)\S/g, s => s.toUpperCase())
   }
 }
@@ -98,7 +98,7 @@ describe("field.setData", () => {
     const field = new Field([required(true)])
 
     field.setData('apple')
-    expect(field.previousValue).toEqual(undefined)
+    expect(field.previousValue).toEqual(null)
 
     field.setData('banana')
     expect(field.previousValue).toEqual('apple')
@@ -195,37 +195,79 @@ describe("field.getCleanData", () => {
   })
 })
 
-describe('Field.isValid()', () => {
+describe('field.validate()', () => {
   const config = { validator: required(true) }
 
   it('returns true on positive validation', () => {
-    const field = new Field(config)
-    field.setData('apple')
+    const form = powerform({
+      field: config
+    })
+    form.field.setData('apple')
     
-    expect(field.isValid()).toEqual(true)
+    expect(form.field.validate()).toEqual(true)
   })
 
   it('returns false on negative validation', () => {
-    const field = new Field(config)
-    field.setData(undefined)
+    const form = powerform({
+      field: config
+    })
+    form.field.setData(undefined)
 
-    expect(field.isValid()).toEqual(false)
+    expect(form.field.validate()).toEqual(false)
   })
 
   it('sets error', () => {
-    const field = new Field(config)
-    field.setData(undefined)
+    const form = powerform({
+      field: config
+    })
+    form.field.setData(undefined)
+    form.field.validate()
 
-    expect(field.isValid()).toEqual(false)
-    expect(field.getError()).toMatchSnapshot()
+    expect(form.field.getError()).toEqual('This field is required.')
   })
 
-  it('wont set error if true is passed', () => {
-    const field = new Field(config)
-    field.setData(undefined)
+  it('can validate in relation to other form fields if exists', () => {
+    const form = powerform({
+      password: required(true),
+      confirmPassword: [required(true), equalsTo('password')]
+    })
 
-    expect(field.isValid(true)).toEqual(false)
-    expect(field.getError()).toEqual(undefined)
+    form.password.setData("apple")
+    form.confirmPassword.setData("banana")
+    form.confirmPassword.validate()
+    expect(form.confirmPassword.getError()).toEqual("'confirmPassword' and 'password' do not match.")
+  })
+})
+
+describe('field.isValid()', () => {
+  const config = { validator: required(true) }
+
+  it('returns true on positive validation', () => {
+    const form = powerform({
+      field: config
+    })
+    form.field.setData('apple')
+    
+    expect(form.field.isValid()).toEqual(true)
+  })
+
+  it('returns false on negative validation', () => {
+    const form = powerform({
+      field: config
+    })
+    form.field.setData(undefined)
+
+    expect(form.field.isValid()).toEqual(false)
+  })
+
+  it('wont set error', () => {
+    const form = powerform({
+      field: config
+    })
+    form.field.setData(undefined)
+
+    expect(form.field.isValid()).toEqual(false)
+    expect(form.field.getError()).toEqual(null)
   })
 
   it('can validate in relation to other form fields if exists', () => {
@@ -237,17 +279,6 @@ describe('Field.isValid()', () => {
     form.password.setData("apple")
     form.confirmPassword.setData("banana")
     expect(form.confirmPassword.isValid()).toEqual(false)
-    expect(form.confirmPassword.getError()).toEqual("'confirmPassword' and 'password' do not match.")
-  })
-
-  it("won't trigger onError callback if 'skipAttachError' is true", () => {
-    let config = {
-      validator: required(true),
-      onError: jest.fn()
-    }
-    const f = new Field(config)
-    expect(f.isValid(true)).toEqual(false)
-    expect(config.onError.mock.calls.length).toEqual(0)
   })
 })
 
@@ -320,7 +351,7 @@ describe('field.makePristine()', () => {
   it('sets previousValue and initialValue to currentValue', () => {
     const field = new Field(required(true))
     field.setData('apple')
-    expect(field.previousValue).toEqual(undefined)
+    expect(field.previousValue).toEqual(null)
 
     field.makePristine()
     expect(field.previousValue).toEqual('apple')
@@ -329,12 +360,14 @@ describe('field.makePristine()', () => {
   })
 
   it("empties error", () => {
-    const field = new Field(required(true))
-    field.isValid()
-    expect(field.getError()).toMatchSnapshot()
+    const form = powerform({
+      field: required(true)
+    })
+    form.field.validate()
+    expect(form.field.getError()).toEqual('This field is required.')
 
-    field.makePristine()
-    expect(field.getError()).toEqual(undefined)
+    form.field.makePristine()
+    expect(form.field.getError()).toEqual(null)
   })
 })
 
@@ -371,12 +404,12 @@ describe('field.reset()', () => {
   })
 
   it("empties error", () => {
-    const field = new Field(required(true))
-    field.isValid()
-    expect(field.getError()).toMatchSnapshot()
+    const form = powerform({field: required(true)})
+    form.field.validate()
+    expect(form.field.getError()).toEqual('This field is required.')
 
-    field.reset()
-    expect(field.getError()).toEqual(undefined)
+    form.field.reset()
+    expect(form.field.getError()).toEqual(null)
   })
 })
 
@@ -386,10 +419,9 @@ describe('field.setAndValidate()', () => {
       validator: required(true),
       default: 'apple'
     }
-    const field = new Field(config)
-    const error = field.setAndValidate(undefined)
-    expect(field.isValid()).toEqual(false)
-    expect(error).toMatchSnapshot()
+    const form = powerform({field: config})
+    const error = form.field.setAndValidate(null)
+    expect(error).toEqual('This field is required.')
   })
 })
 
@@ -423,8 +455,8 @@ describe("powerform", () => {
     const expected = {
       username: 'ausername',
       name: 'A Name',
-      password: undefined,
-      confirmPassword: undefined
+      password: null,
+      confirmPassword: null
     }
     expect(form.getData()).toEqual(expected)
     expect(spy.mock.calls.length).toEqual(0)
@@ -436,6 +468,67 @@ describe("powerform", () => {
       password: {validator: required(true), index: 0}
     })
     expect(form.fieldNames).toEqual(['username', 'password'])
+  })
+})
+
+describe("form.validate", () => {
+  it("returns true if all the fields are valid", () => {
+    const form = powerform(signupSchema)
+    const data = {
+      username: 'ausername',
+      name: 'a name',
+      password: 'apassword',
+      confirmPassword: 'apassword'
+    }
+    form.setData(data)
+    expect(form.validate()).toEqual(true)
+  })
+
+  it("returns false if any of the field is invalid", () => {
+    const form = powerform(signupSchema)
+    const data = {
+      username: 'ausername',
+      name: 'a name',
+      password: 'apassword',
+      confirmPassword: undefined
+    }
+    form.setData(data)
+    expect(form.validate()).toEqual(false)
+  })
+
+  it("sets error", () => {
+    const form = powerform(signupSchema)
+    form.validate()
+    expect(form.getError()).toEqual({
+      confirmPassword: 'This field is required.',
+      name: 'This field is required.',
+      password: 'This field is required.',
+      username: 'This field is required.'
+    })
+  })
+
+  it("calls onError callback", () => {
+    const config = {onError: jest.fn()}
+    const form = powerform(signupSchema, config)
+    form.validate()
+
+    expect(config.onError.mock.calls.length).toEqual(1)
+    expect(config.onError.mock.calls[0]).toMatchSnapshot()
+  })
+
+  it("respects config.stopOnError", () => {
+    const schema = {
+      username: {validator: required(true), index: 1},
+      name: {validator: required(true), index: 2},
+      password: {validator: required(true), index: 3}
+    }
+    const config = {stopOnError: true}
+    const form = powerform(schema, config)
+    form.username.setData('a username')
+    expect(form.validate()).toEqual(false)
+    expect(form.username.getError()).toEqual(null)
+    expect(form.name.getError()).toEqual('This field is required.')
+    expect(form.password.getError()).toEqual(null)
   })
 })
 
@@ -464,48 +557,23 @@ describe("form.isValid", () => {
     expect(form.isValid()).toEqual(false)
   })
 
-  it("sets error", () => {
+  it("won't set error", () => {
     const form = powerform(signupSchema)
     form.isValid()
-    expect(form.getError()).toMatchSnapshot()
+    expect(form.getError()).toEqual({
+      "confirmPassword": null,
+      "name": null,
+      "password": null,
+      "username": null,
+    })
   })
 
-  it("won't set error if 'skipAttachError' true passed", () => {
-    const form = powerform(signupSchema)
-    form.isValid(true)
-    expect(form.getError()).toMatchSnapshot()
-  })
-
-  it("calls onError callback", () => {
+  it("won't call onError callback", () => {
     const config = {onError: jest.fn()}
     const form = powerform(signupSchema, config)
     form.isValid()
-
-    expect(config.onError.mock.calls.length).toEqual(1)
-    expect(config.onError.mock.calls[0]).toMatchSnapshot()
-  })
-
-  it("won't call onError callback if 'skipAttachError' is true", () => {
-    const config = {onError: jest.fn()}
-    const form = powerform(signupSchema, config)
-    form.isValid(true)
 
     expect(config.onError.mock.calls.length).toEqual(0)
-  })
-
-  it("respects config.stopOnError", () => {
-    const schema = {
-      username: {validator: required(true), index: 1},
-      name: {validator: required(true), index: 2},
-      password: {validator: required(true), index: 3}
-    }
-    const config = {stopOnError: true}
-    const form = powerform(schema, config)
-    form.username.setData('a username')
-    expect(form.isValid()).toEqual(false)
-    expect(form.username.getError()).toEqual(undefined)
-    expect(form.name.getError()).toEqual('This field is required.')
-    expect(form.password.getError()).toEqual(undefined)
   })
 })
 
@@ -561,7 +629,7 @@ describe("form.getData", () => {
 
     const expected = {
       username: "ausername",
-      password: undefined,
+      password: null,
       afield: "APPLE"
     }
     expect(form.getData()).toEqual(expected)
@@ -620,9 +688,9 @@ describe("form.getError", () => {
 
     const expected = {
       username: "a error",
-      name: undefined,
+      name: null,
       password: "a error",
-      confirmPassword: undefined
+      confirmPassword: null
     }
     expect(form.getError()).toEqual(expected)
   })
@@ -664,14 +732,29 @@ describe("form.makePristine", () => {
       username: 'ausername'
     }
     form.setData(data)
-    form.isValid() // first call
+    form.validate() // first call
     expect(form.isDirty()).toEqual(true)
-    expect(form.getError()).toMatchSnapshot()
+    expect(form.getError()).toEqual({
+      "confirmPassword": "This field is required.",
+      "name": "This field is required.",
+      "password": "This field is required.",
+      "username": null
+    })
 
     form.makePristine() // second call
     expect(form.isDirty()).toEqual(false)
-    expect(form.getError()).toMatchSnapshot()
-    expect(form.getData()).toMatchSnapshot()
+    expect(form.getError()).toEqual({
+      "confirmPassword": null,
+      "name": null,
+      "password": null,
+      "username": null
+    })
+    expect(form.getData()).toEqual({
+      "confirmPassword": null,
+      "name": null,
+      "password": null,
+      "username": "ausername"
+    })
     expect(config.onError.mock.calls.length).toEqual(2)
   })
 })
@@ -692,10 +775,10 @@ describe("form.reset", () => {
     form.reset() // second trigger
 
     const expected = {
-      username: undefined,
-      name: undefined,
-      password: undefined,
-      confirmPassword: undefined
+      username: null,
+      name: null,
+      password: null,
+      confirmPassword: null
     }
     expect(form.getData()).toEqual(expected)
     expect(config.onChange.mock.calls.length).toEqual(2)
@@ -706,14 +789,14 @@ describe("form.reset", () => {
       onError: jest.fn()
     }
     const form = powerform(signupSchema, config)
-    form.isValid() // 1st trigger
+    form.validate() // 1st trigger
     form.reset() // 2nd triggter
 
     const expected = {
-      username: undefined,
-      name: undefined,
-      password: undefined,
-      confirmPassword: undefined
+      username: null,
+      name: null,
+      password: null,
+      confirmPassword: null
     }
     expect(form.getError()).toEqual(expected)
     expect(config.onError.mock.calls.length).toEqual(2)
@@ -761,7 +844,7 @@ describe("form.triggerOnError", () => {
       onError: jest.fn()
     }
     const form = powerform(signupSchema, config)
-    form.isValid()
+    form.validate()
     form.toggleGetNotified()
     form.triggerOnError()
     expect(config.onError.mock.calls.length).toEqual(1)
@@ -779,15 +862,15 @@ describe("Usage", () => {
     var expected = {
       username: 'a username',
       name: 'A Name',
-      password: undefined,
-      confirmPassword: undefined
+      password: null,
+      confirmPassword: null
     }
     expect(form.getData()).toEqual(expected)
 
-    expect(form.isValid()).toEqual(false)
+    expect(form.validate()).toEqual(false)
     var expected = {
-      username: undefined,
-      name: undefined,
+      username: null,
+      name: null,
       password: 'This field is required.',
       confirmPassword: 'This field is required.'
     }

@@ -3901,10 +3901,10 @@ validate-npm-package-license@^3.0.1:
     spdx-correct "^3.0.0"
     spdx-expression-parse "^3.0.0"
 
-validatex@^0.3.1:
-  version "0.3.1"
-  resolved "https://registry.yarnpkg.com/validatex/-/validatex-0.3.1.tgz#99965253f0bf2186f51d43bfafb4d620540fb9ef"
-  integrity sha1-mZZSU/C/IYb1HUO/r7TWIFQPue8=
+validatex@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/validatex/-/validatex-1.0.0.tgz#2a685c833dd7010cf42c5f0c23c60b9d5301624c"
+  integrity sha512-Yh/FKw3d7eYvZK8YMgVO93d95WSXUW5rbUJrr1IY3cTKKGpm5UDPSe0v5nc3FVuEFpBK7MhPfHqSdAHFzq13uw==
 
 verror@1.10.0:
   version "1.10.0"

@@ -9,6 +9,7 @@ class StopValidationError extends Error {
 } 
 
 const clone = (data) => {
+  if(data === undefined) return null
   if (!data) return data;
   return JSON.parse(JSON.stringify(data));
 };
@@ -40,12 +41,12 @@ class Field {
       this.config = {}
     }
 
-    this.error = undefined
-    this.previousValue = undefined
-    this.currentValue = undefined
-    this.initialValue = undefined
+    this.error = null
+    this.previousValue = null
+    this.currentValue = null
+    this.initialValue = null
     this.defaultValue = this.initialValue = this.config.default === undefined || this.config.default === null
-      ? undefined
+      ? null
       : clone(this.config.default)
     // will call onChange callback if exists
     this.setData(this.defaultValue, true)
@@ -111,26 +112,32 @@ class Field {
     return this.clean(this.getData())
   }
 
-  // may be validate should set error
-  validate(currentValue, allValues, fieldName) {
-    return validateSingle(currentValue, this.validator, this.multipleErrors, allValues, fieldName)
-  }
-
-  // may be isValid should not set error
-  isValid(skipAttachError) {
-    const error = this.validate(
+  validate() {
+    const error = validateSingle(
       this.currentValue,
-      this.parent && this.parent.getData(),
+      this.validator,
+      this.multipleErrors,
+      this.parent.getData(),
       this.fieldName
     )
+    this.setError(error)
+    return !error
+  }
 
-    !skipAttachError && this.setError(error)
+  isValid() {
+    const error = validateSingle(
+      this.currentValue,
+      this.validator,
+      this.multipleErrors,
+      this.parent.getData(),
+      this.fieldName
+    )
     return !error
   }
 
   setError(error, skipTrigger) {
     if (this.error === error) return
-    this.error = error || undefined
+    this.error = error || null
 
     if(skipTrigger) return
     this.triggerOnError()
@@ -147,7 +154,7 @@ class Field {
   makePrestine() {
     this.previousValue = clone(this.currentValue)
     this.initialValue = clone(this.currentValue)
-    this.setError(undefined)
+    this.setError(null)
   }
 
   makePristine() {
@@ -161,7 +168,7 @@ class Field {
 
   setAndValidate(value) {
     this.setData(value)
-    this.isValid()
+    this.validate()
     return this.getError()
   }
 }
@@ -259,13 +266,19 @@ class Form {
     this.triggerOnChange()
   }
 
-  isValid(skipAttachError) {
+  _validate(skipAttachError) {
     let status
     this.toggleGetNotified()
 
     try {
       status = this.fieldNames.reduce((acc, field) => {
-        const validity = this[field].isValid(skipAttachError)
+        let validity
+        if(skipAttachError) {
+          validity = this[field].isValid()
+        }
+        else {
+          validity = this[field].validate()
+        }
         if (!validity && this.config.stopOnError) {
           throw new StopValidationError()
         }
@@ -282,8 +295,17 @@ class Form {
     }
 
     this.toggleGetNotified()
-    !skipAttachError && this.triggerOnError()
     return status
+  }
+
+  validate() {
+    const validity = this._validate(false)
+    this.triggerOnError()
+    return validity
+  }
+
+  isValid() {
+    return this._validate(true)
   }
 }
 
