@@ -29,7 +29,7 @@
   "author": "ludbek",
   "license": "ISC",
   "dependencies": {
-    "validatex": "^1.0.0"
+    "validatex": "^1.0.1"
   },
   "devDependencies": {
     "babel-cli": "^6.11.4",
