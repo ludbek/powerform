@@ -1,47 +1,72 @@
-function StopValidationError () {
-  this.stack = (new Error()).stack
-}
+import { validateSingle } from 'validatex';
+const STOP_VALIDATION_ERROR_NAME = 'StopValidationError'
 
-function ValidationError (msg) {
-  this.message = msg
-  this.stack = (new Error(msg)).stack
-}
+class StopValidationError extends Error {
+  constructor() {
+    super()
+    this.name = STOP_VALIDATION_ERROR_NAME
+  }
+} 
 
-
-let clone = (data) => {
+const clone = (data) => {
+  if(data === undefined) return null
   if (!data) return data;
   return JSON.parse(JSON.stringify(data));
 };
 
-let isEqual = (val1, val2) => {
+const cloneObj = (obj) => {
+  const clonedObj = {}
+  for (const key in obj) {
+    clonedObj[key] = obj[key]
+  }
+  return clonedObj
+}
+
+const isEqual = (val1, val2) => {
   return JSON.stringify(val1) === JSON.stringify(val2);
 };
 
 class Field {
-  constructor (config = {}) {
-    this.error = undefined
-    this.previousValue = undefined
-    this.currentValue = undefined
-    this.initialValue = undefined
+  constructor (validator) {
+    // its an object
+    if(validator.validator) {
+      const clonedValidator = cloneObj(validator)
+      this.validator = clonedValidator.validator
+      delete clonedValidator.validator
+      this.config = clonedValidator
+    }
+    // its a function
+    else {
+      this.validator = validator
+      this.config = {}
+    }
 
-    this.config = config
-    this.defaultValue = this.initialValue = !config || config.default === undefined || config.default === null
-      ? undefined
-      : clone(config.default)
+    this.error = null
+    this.previousValue = null
+    this.currentValue = null
+    this.initialValue = null
+    this.defaultValue = this.initialValue = this.config.default === undefined || this.config.default === null
+      ? null
+      : clone(this.config.default)
     // will call onChange callback if exists
     this.setData(this.defaultValue, true)
     this.makePrestine()
   }
 
-  static new (config) {
-    return new this(config)
-  }
-
   clean(newVal) {
+    const clean = this.config.clean
+    if(clean) {
+      return clean(newVal)
+    }
+
     return newVal
   }
 
   modify(newVal, preVal) {
+    const modify = this.config.modify
+    if(modify) {
+      return modify(newVal, preVal)
+    }
     return newVal
   }
 
@@ -87,31 +112,32 @@ class Field {
     return this.clean(this.getData())
   }
 
-  isValid(skipAttachError) {
-    let error
-    try {
-      this.validate(
-        this.currentValue,
-        this.parent && this.parent.getData(),
-        this.fieldName
-      )
-      error = undefined
-    }
-    catch(err) {
-      if(err instanceof ValidationError) {
-        error = err.message
-      }
-      else {
-        throw err
-      }
-    }
-    !skipAttachError && this.setError(error)
+  validate() {
+    const error = validateSingle(
+      this.currentValue,
+      this.validator,
+      this.multipleErrors,
+      this.parent.getData(),
+      this.fieldName
+    )
+    this.setError(error)
+    return !error
+  }
+
+  isValid() {
+    const error = validateSingle(
+      this.currentValue,
+      this.validator,
+      this.multipleErrors,
+      this.parent.getData(),
+      this.fieldName
+    )
     return !error
   }
 
   setError(error, skipTrigger) {
     if (this.error === error) return
-    this.error = error || undefined
+    this.error = error || null
 
     if(skipTrigger) return
     this.triggerOnError()
@@ -128,7 +154,7 @@ class Field {
   makePrestine() {
     this.previousValue = clone(this.currentValue)
     this.initialValue = clone(this.currentValue)
-    this.setError(undefined)
+    this.setError(null)
   }
 
   makePristine() {
@@ -142,38 +168,12 @@ class Field {
 
   setAndValidate(value) {
     this.setData(value)
-    this.isValid()
+    this.validate()
     return this.getError()
   }
 }
 
 class Form {
-  static new(config = {}) {
-    const form = new this()
-    form._fields = []
-    form.config = config
-    form.getNotified = true
-
-    for(const fieldName in form) {
-      const field = form[fieldName]
-      const index = field.index
-      if(field instanceof Field) {
-        field.parent = form
-        field.fieldName = fieldName
-
-        if (index) {
-          form._fields[index] = fieldName
-        }
-        else {
-          form._fields.push(fieldName)
-        }
-      }
-    }
-
-    config.data && form.setData(config.data, true)
-    return form
-  }
-
   toggleGetNotified() {
     this.getNotified = !this.getNotified
   }
@@ -181,7 +181,7 @@ class Form {
   setData(data, skipTrigger) {
     this.toggleGetNotified()
     for(const prop in data) {
-      if (this._fields.indexOf(prop) !== -1) {
+      if (this.fieldNames.indexOf(prop) !== -1) {
         this[prop].setData(data[prop], skipTrigger)
       }
     }
@@ -201,14 +201,14 @@ class Form {
   }
 
   getData() {
-    return this._fields.reduce((acc, fieldName) => {
+    return this.fieldNames.reduce((acc, fieldName) => {
       acc[fieldName] = this[fieldName].getCleanData()
       return acc
     }, {})
   }
 
   getUpdates() {
-    return this._fields.reduce((acc, fieldName) => {
+    return this.fieldNames.reduce((acc, fieldName) => {
       if (this[fieldName].isDirty()) {
         acc[fieldName] = this[fieldName].getData()
       }
@@ -219,7 +219,7 @@ class Form {
   setError(errors, skipTrigger) {
     this.toggleGetNotified()
     for(const field in errors) {
-      if(this._fields.indexOf(field) !== -1) {
+      if(this.fieldNames.indexOf(field) !== -1) {
         this[field].setError(errors[field], skipTrigger)
       }
     }
@@ -230,14 +230,14 @@ class Form {
   }
 
   getError() {
-    return this._fields.reduce((acc, fieldName) => {
+    return this.fieldNames.reduce((acc, fieldName) => {
       acc[fieldName] = this[fieldName].getError()
       return acc
     }, {})
   }
 
   isDirty() {
-    for(const field of this._fields) {
+    for(const field of this.fieldNames) {
       if(this[field].isDirty()) return true
     }
     return false
@@ -245,7 +245,7 @@ class Form {
 
   makePrestine() {
     this.toggleGetNotified()
-    this._fields.forEach((field) => {
+    this.fieldNames.forEach((field) => {
       this[field].makePrestine()
     })
     this.toggleGetNotified()
@@ -258,7 +258,7 @@ class Form {
 
   reset() {
     this.toggleGetNotified()
-    this._fields.forEach((field) => {
+    this.fieldNames.forEach((field) => {
       this[field].reset()
     })
     this.toggleGetNotified()
@@ -266,21 +266,27 @@ class Form {
     this.triggerOnChange()
   }
 
-  isValid(skipAttachError) {
+  _validate(skipAttachError) {
     let status
     this.toggleGetNotified()
 
     try {
-      status = this._fields.reduce((acc, field) => {
-        const validity = this[field].isValid(skipAttachError)
+      status = this.fieldNames.reduce((acc, field) => {
+        let validity
+        if(skipAttachError) {
+          validity = this[field].isValid()
+        }
+        else {
+          validity = this[field].validate()
+        }
         if (!validity && this.config.stopOnError) {
           throw new StopValidationError()
         }
-        return  validity && acc
+        return validity && acc
       }, true)
     }
     catch (err) {
-      if (err instanceof StopValidationError) {
+      if (err.name === STOP_VALIDATION_ERROR_NAME) {
         status = false
       }
       else {
@@ -289,13 +295,48 @@ class Form {
     }
 
     this.toggleGetNotified()
-    !skipAttachError && this.triggerOnError()
     return status
   }
+
+  validate() {
+    const validity = this._validate(false)
+    this.triggerOnError()
+    return validity
+  }
+
+  isValid() {
+    return this._validate(true)
+  }
+}
+
+function powerform(fields, config = {}) {
+  const form = new Form()
+  form.fieldNames = []
+  form.config = config
+  form.getNotified = true
+
+  for(const fieldName in fields) {
+    const field = new Field(fields[fieldName])
+    const index = field.index
+    field.parent = form
+    field.fieldName = fieldName
+    field.multipleErrors = form.config.multipleErrors || false
+    form[fieldName] = field
+
+    if (index) {
+      form.fieldNames[index] = fieldName
+    }
+    else {
+      form.fieldNames.push(fieldName)
+    }
+  }
+
+  config.data && form.setData(config.data, true)
+  return form
 }
 
 module.exports = {
   Form,
   Field,
-  ValidationError
+  powerform
 }

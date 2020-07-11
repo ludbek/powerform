@@ -10,7 +10,7 @@ Logo by [Anand](https://www.behance.net/mukhiyaanad378)
 - [React](https://codesandbox.io/s/625pjy4q5w)
 
 ## Breaking changes
-v3 introduces significant changes which are not backward compatible with v2.
+v4 introduces significant changes which are not backward compatible with v3.
 Please checkout the [change log](CHANGE_LOG.txt).
 
 ## Introduction
@@ -26,40 +26,16 @@ A tiny form model which can be used in apps with or without frameworks like [Mit
 ## Quick walk-through
 ```javascript
 // es6
-import {Field, Form, ValidationError} from "powerform"
+import { powerform } from "powerform"
+import { required, minLength, equalsTo } from 'validatex'
 
-class UsernameField extends Field {
-  validate(value, allValues) {
-    if(!value) {
-      throw new ValidationError("This field is required.")
-    }
-  }
+const schema  = {
+  username: required(true),
+  password: [required(true), minLength(8)],
+  confirmPassword: [required(true), equalsTo('password')]
 }
 
-class PasswordField extends Field {
-  validate(value, allValues) {
-    if (!value) throw new ValidationError("This field is required.")
-    if(value.length < 8) {
-      throw new ValidationError("This field must be at least 8 characters long.")
-    }
-  }
-}
-
-class ConfirmPasswordField extends Field {
-  validate(value, allValues) {
-    if (value !== allValues[this.config.passwordField]) {
-      throw new ValidationError("Passwords do not match.")
-    }
-  }
-}
-
-class SignupForm extends Form {
-  username = UsernameField.new()
-  password = PasswordField.new()
-  confirmPassword = ConfirmPasswordField.new({passwordField: 'password'})
-}
-
-const form = SignupForm.new()
+const form = powerform(schema)
 
 // assign values to fields
 form.username.setData("ausername")
@@ -87,14 +63,12 @@ console.log(form.getError())
 
 ## API
 ### Form
-#### Form.new(config?: object)
-Creates and returns a `Form` instance.
+#### powerform(schema, config?: object)
+Returns a form.
 
 ```javascript
-// reusing the fields and form at walkthrough
-let f = SignupForm.new()
-console.log(f instanceof Form)
-> true
+// reusing the schema from walkthrough
+const form = powerform(schema)
 ```
 
 ##### Config schema
@@ -117,10 +91,10 @@ const config = {
     password: 'a password'
   }
 }
-let f = SignupForm.new(config)
-console.log(f.username.getData())
+const form = powerform(schema, config)
+console.log(form.username.getData())
 > 'a username'
-console.log(f.password.getData())
+console.log(form.password.getData())
 > 'a password'
 ```
 
@@ -137,15 +111,15 @@ const config = {
   }
 }
 
-let f = SignupForm.new(config)
-f.username.setData('a username')
+const form = powerform(schema, config)
+form.username.setData('a username')
 // logs data
 > {
   username: 'a username',
   password: null,
   confirmPassword: null
 }
-f.password.isValid()
+form.password.isValid()
 // logs changes to error
 > {
   username: null,
@@ -160,52 +134,51 @@ To enable this mode of validation set `config.stopOnError` to `true`.
 One can control the order at which fields are validated by supplying `index` to fields.
 
 ```javascript
-class LoginForm extends Form {
-  password = PasswordField.new({index: 2})
-  username = UsernameField.new({index: 1})
+const loginSchema = {
+  password: {validator: required(true), index: 2}
+  username: {validator: required(true), index: 1}
 }
+const form = powerform(loginSchema, {stopOnError: true})
 
-const f = LoginForm.new({stopOnError: true})
-
-console.log(f.isValid())
+console.log(form.isValid())
 >> false
 
-console.log(f.getError())
+console.log(form.getError())
 >> {username: "This field is required."}
 
 ```
 
-#### Form.setData(data: object)
+#### form.setData(data: object)
 Sets value of fields of a form.
 
 ```javascript
-let f = SignupForm.new()
+const form = powerform(schema)
 let data = {
   username: 'a username',
   password: 'a password'
 }
-f.setData(data)
+form.setData(data)
 
-console.log(f.username.getData())
+console.log(form.username.getData())
 > 'a username'
-console.log(f.password.getData())
+console.log(form.password.getData())
 > 'a password'
-console.log(f.confirmPassword.getData())
+console.log(form.confirmPassword.getData())
 > null
 ```
 
-#### Form.getData()
+#### form.getData()
 Returns key value pair of fields and their corresponding values.
 
 ```javascript
-let f = SignupForm.new()
+const form = powerform(schema)
 let data = {
   username: 'a username',
   password: 'a password'
 }
-f.setData(data)
+form.setData(data)
 
-console.log(f.getData())
+console.log(form.getData())
 > {
   username: 'a username',
   password: 'a password',
@@ -213,68 +186,62 @@ console.log(f.getData())
 }
 ```
 
-#### Form.getUpdates()
+#### form.getUpdates()
 Returns key value pair of updated fields and their corresponding values.
 The data it returns can be used for patching a resource over API.
 
 ```javascript
-class StringField extends Field {
-  validate(value, allValues) {
-    if (!value) throw new ValidationError("This field is required.")
-  }
+const userFormSchema = {
+  name: required(true),
+  address: required(true),
+  username: required(true)
 }
 
-class UserForm extends Form {
-  name = StringField.new()
-  address = StringField.new()
-  username = UsernameField.new()
-}
-
-let f = UserForm.new()
+const form = powerform(userFormSchema)
 let data = {
   name: 'a name',
   address: 'an address'
 }
-f.setData(data)
+form.setData(data)
 
-console.log(f.getUpdates())
+console.log(form.getUpdates())
 > {
   name: 'a name',
   address: 'an address'
 }
 ```
 
-#### Form.setError(errors: object)
+#### form.setError(errors: object)
 Sets error of fields in a form.
 
 ```javascript
-let f = SignupForm.new()
+const form = powerform(schema)
 const errors = {
   username: "Invalid username.",
   password: "Password is too common."
 }
-f.setError(errors)
+form.setError(errors)
 
-console.log(f.username.getError())
+console.log(form.username.getError())
 > "Invalid username."
 
-console.log(f.password.getError())
+console.log(form.password.getError())
 > "Password is too common."
 
-console.log(f.confirmPassword.getError())
+console.log(form.confirmPassword.getError())
 > null
 ```
 
-#### Form.getError()
+#### form.getError()
 Returns key value pair of fields and their corresponding errors.
 
 ```javascript
-let f = SignupForm.new()
-f.password.setData('1234567')
-f.confirmPassword.setData('12')
-f.isValid()
+const form = powerform(schema)
+form.password.setData('1234567')
+form.confirmPassword.setData('12')
+form.isValid()
 
-console.log(f.getError())
+console.log(form.getError())
 > {
   username: "This field is required.",
   password: "This field must be at least 8 characters long.",
@@ -282,54 +249,54 @@ console.log(f.getError())
 }
 ```
 
-#### Form.isDirty()
+#### form.isDirty()
 Returns `true` if value of one of the fields in a form has been updated.
 Returns `false` if non of the fields has been updated.
 
 ```javascript
-let f = SignupForm.new()
+const form = powerform(schema)
 
-console.log(f.isDirty())
+console.log(form.isDirty())
 > false
 
-f.username.setData('a username')
+form.username.setData('a username')
 console.log(f.isDirty())
 > true
 ```
 
-#### Form.makePristine()
+#### form.makePristine()
 Sets initial value to current value in every fields.
 
 ```javascript
-let f = SignupForm.new()
-f.username.setData('a username')
+const form = powerform(schema)
+form.username.setData('a username')
 
-console.log(f.isDirty())
+console.log(form.isDirty())
 > true
 
-f.makePristine()
-console.log(f.isDirty())
+form.makePristine()
+console.log(form.isDirty())
 > false
-console.log(f.username.getData())
+console.log(form.username.getData())
 > 'a username'
 ```
 
-#### Form.reset()
+#### form.reset()
 Resets all the fields of a form.
 
 ```javascript
-let f = SignupForm.new()
-f.username.setData('a username')
-f.password.setData('a password')
-console.log(f.getData())
+const form = powerform(schema)
+form.username.setData('a username')
+form.password.setData('a password')
+console.log(form.getData())
 > {
   username: 'a username',
   password: 'a password',
   confirmPassword: null
 }
 
-f.reset()
-console.log(f.getData())
+form.reset()
+console.log(form.getData())
 > {
   username: null,
   password: null,
@@ -337,26 +304,26 @@ console.log(f.getData())
 }
 ```
 
-#### Form.isValid(skipAttachError?: boolean)
+#### form.isValid(skipAttachError?: boolean)
 Returns `true` if all fields of a form are valid.
 Returns `false` if one of the fields in a form is invalid.
 It sets field errors if the form is invalid.
 
 ```javascript
-let f = SignupForm.new()
-f.password.setData('1234567')
+const form = powerform(schema)
+form.password.setData('1234567')
 
-console.log(f.getError())
+console.log(form.getError())
 > {
   username: null,
   password: null,
   confirmPassword: null
 }
 
-console.log(f.isValid())
+console.log(form.isValid())
 > false
 
-console.log(f.getError())
+console.log(form.getError())
 > {
   username: "This field is required.",
   password: "This field must be at least 8 characters long.",
@@ -366,20 +333,20 @@ console.log(f.getError())
 
 To check form validity without setting the errors pass `skipAttachError` to `Form.isValid`.
 ```javascript
-let f = SignupForm.new()
-f.password.setData('1234567')
+const form = powerform(schema)
+form.password.setData('1234567')
 
-console.log(f.getError())
+console.log(form.getError())
 > {
   username: null,
   password: null,
   confirmPassword: null
 }
 
-console.log(f.isValid(true))
+console.log(form.isValid(true))
 > false
 
-console.log(f.getError())
+console.log(form.getError())
 > {
   username: null,
   password: null,
@@ -388,15 +355,15 @@ console.log(f.getError())
 ```
 
 ### Field
-`Field` should be attached to a form.
-Checkout the examples below.
+Every keys in a schema that is passed to `powerform` is turned into a Field. We do not need to directly instanciate it.
 
-#### Field.new(config?: object)
+#### Field(config?: object| function | [function])
 Creates and returns a field instance.
 
 ##### Config schema
 ```
 {
+  validator: function | [function],
   default?: any,
   debounce?: number,
   onChange(value: any, field: Field)?: function
@@ -404,24 +371,15 @@ Creates and returns a field instance.
 }
 ```
 
-```javascript
-class NumberField extends Field {}
-let f = NumberField.new()
-console.log(f instanceof Field)
-> true
-```
-
 ##### Set default value
 A field can have default value.
 
 ```javascript
-class UserForm extends Form {
-  // assuming UsernameField is defined somewhere
-  username = UsernameField.new({default: 'orange'})
-}
+const form = powerform({
+  username: {validator: required(true), default: 'orange'}
+})
 
-let f = UserForm.new()
-console.log(f.username.getData())
+console.log(form.username.getData())
 > 'orange'
 ```
 
@@ -437,25 +395,21 @@ function logError(data, field) {
   console.log('error: ', error)
 }
 
-class UsernameField extends Field {
-  validate(value, allValues) {
-    if (!value) throw new ValidationError("This field is required.")
+const form = powerform({
+  username: {
+    validator: required(true),
+    default: 'orange',
+    onChange: logData,
+    onError: logError
   }
-}
-
-class UserForm extends Form {
-  // assuming UsernameField is defined somewhere
-  username = UsernameField.new({default: 'orange', onChange: logData, onError: logError})
-}
-
-let f = UserForm.new()
-f.username.isValid()
+})
+form.username.isValid()
 > "error: " "This field is required."
 
-f.username.setData('orange')
+form.username.setData('orange')
 > "data: " "orange"
 
-f.username.isValid()
+form.username.isValid()
 > "error: " null
 ```
 
@@ -463,13 +417,16 @@ f.username.isValid()
 Changes in data can be debounced.
 
 ```javascript
-// reusing above UsernameField and log function
-class UserForm extends Form {
-  username = UsernameField.new(debounce: 1000, onChange: logData)
-}
+const form = powerform({
+  username: {
+    validator: required(true),
+    default: 'orange',
+    onChange: logData,
+    onError: logError
+  }
+})
 
-let f = UserForm.new()
-f.username.setData("banana")
+form.username.setData("banana")
 // after 1 second
 > "data: " "banana"
 ```
@@ -478,15 +435,11 @@ f.username.setData("banana")
 Sets field value.
 
 ```javascript
-class StringField extends Field {}
-
-class UserForm extends Form {
-  name = StringField.new()
-}
-
-let f = UserForm.new()
-f.name.setData('a name')
-console.log(f.name.getData('a name'))
+const form = powerform({
+  name: required(true)
+})
+form.name.setData('a name')
+console.log(form.name.getData())
 > 'a name'
 ```
 
@@ -494,116 +447,79 @@ console.log(f.name.getData('a name'))
 Returns field value.
 
 #### Field.modify(newValue: any, oldValue: any)
-Override this method to modify user input.
+Modifies user's input value.
 Example usage -
 
 - capitalize user name as user types
 - insert space or dash as user types card number
 
 ```javascript
-class NameField extends Field {
-  validate(value, all) {
-    if (!value) throw new ValidationError(`"${this.fieldName}" is required.`)
+const form = powerform({
+  name: {
+    validator: required(true),
+    modify(value) {
+      if (!value) return null
+      return value.replace(/(?:^|\s)\S/g, s => s.toUpperCase())
+    }
   }
+})
 
-  modify(value) {
-    if (!value) return null
-    return value.replace(/(?:^|\s)\S/g, s => s.toUpperCase())
-  }
-}
-
-let nameField = NameField.new()
-nameField.setData('first last')
-console.log(nameField.getData())
+form.name.setData('first last')
+console.log(form.name.getData())
 > 'First Last'
 ```
 
 #### Field.clean(value: any)
-Override this method to do last minute cleaning of data.
-`Form.getData()` uses this method to get clean data.
+Cleans the value.
+`form.getData()` uses this method to get clean data.
 It is useful for situations where value in a view should be different to
 the value in stores.
 
 ```javascript
-Class CardField extends Field {
-  modify(newVal, oldVal) {
-    return newVal.length === 16
-      ? newCard.split("-").join("").replace(/(\d{4})/g, "$1-").replace(/(.)$/, "")
-      : newCard.split("-").join("").replace(/(\d{4})/g, "$1-")
+const form = powerform({
+  card: {
+    validator: required(true),
+    modify(newVal, oldVal) {
+      return newVal.length === 16
+        ? newCard.split("-").join("").replace(/(\d{4})/g, "$1-").replace(/(.)$/, "")
+        : newCard.split("-").join("").replace(/(\d{4})/g, "$1-")
+    },
+    clean(value) {
+      return card.split("-").join("")
+    }
   }
+})
 
-  clean(value) {
-    return card.split("-").join("")
-  }
-}
-
-class AForm extends Form {
-  card = CardField.new()
-}
-
-let aform = AForm.new()
-
-aform.card.setData("1111222233334444")
-console.log(aform.card.getData())
+form.card.setData("1111222233334444")
+console.log(form.card.getData())
 > "1111-2222-3333-4444"
-console.log(aform.getData())
+console.log(form.getData())
 > {card: "1111222233334444"}
 ```
 
-### Field.validate(value: any, allValues: object)
-Implement this method to validate field data.
-It should return an error message in case of invalid value.
-This method is called by `Form.isValid()`.
+### field.validate(value: any, allValues: object)
 
-```javascript
-class PasswordField extends Field {
-  validate(value, allValues) {
-    if(!value) throw new ValidationError(`'${this.fieldName}' is required.`)
-    if (value.length < 8) throw new ValidationError(`'${this.fieldName}' must be at least 8 characters long.`)
-  }
-}
+#### field.isValid(skipAttachError?: boolean)
+Returns `true` if `field.validate()` returns nothing.
+Returns `false` if `field.validate()` returns an error.
 
-class LoginForm extends Form {
-  password = PasswordField.new()
-}
-
-let f = LoginForm.new
-f.password.isValid() // false
-console.log(f.password.getError())
-> "'password' is required."
-
-f.password.setData("1234567")
-f.password.isValid() // false
-console.log(f.password.getError())
-> "'password' must be at least 8 characters long."
-
-f.password.setData("12345678")
-f.password.isValid()
-console.log(f.password.getError())
-> null
-```
-
-#### Field.isValid(skipAttachError?: boolean)
-Returns `true` if `Field.validate()` returns nothing.
-Returns `false` if `Field.validate()` returns an error.
-
-#### Field.setError(error: string)
+#### field.setError(error: string)
 Sets field error.
 
-#### Field.getError()
+#### field.getError()
 Returns field error.
 Call this method after validating the field.
 
-#### Field.isDirty()
+#### field.isDirty()
 Returns `true` if value of a field is changed else returns `false`.
 
-#### Field.makePristine()
+#### field.makePristine()
 Marks a field to be untouched.
 It sets current value as initial value.
 
-#### Field.reset()
+#### field.reset()
 It resets the field.
 Sets initial value as current value.
 
-#### Field.setAndValidate(value: any)
+#### field.setAndValidate(value: any)
 Sets and validates a field. It internally calls `Field.setData()` and `Field.validate()`.
