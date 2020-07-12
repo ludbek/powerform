@@ -6,9 +6,6 @@ Logo by [Anand](https://www.behance.net/mukhiyaanad378)
 
 ## Showcase
 
-- [Mithril](https://codesandbox.io/s/nr4lxn4ovm)
-- [React](https://codesandbox.io/s/625pjy4q5w)
-
 ## Breaking changes
 v4 introduces significant changes which are not backward compatible with v3.
 Please checkout the [change log](CHANGE_LOG.txt).
@@ -43,17 +40,17 @@ form.password.setData("apassword")
 form.confirmPassword.setData("bpassword")
 
 // per field validation
-console.log(form.username.isValid())
+console.log(form.username.validate())
 > true
-console.log(form.password.isValid())
+console.log(form.password.validate())
 > true
-console.log(form.confirmPassword.isValid())
+console.log(form.confirmPassword.validate())
 > false
 console.log(form.confirmPassword.getError())
 > "Passwords do not match."
 
 // validate all the fields at once
-console.log(form.isValid())
+console.log(form.validate())
 > false
 console.log(form.getError())
 > { username: undefined,
@@ -119,7 +116,7 @@ form.username.setData('a username')
   password: null,
   confirmPassword: null
 }
-form.password.isValid()
+form.password.validate()
 // logs changes to error
 > {
   username: null,
@@ -140,7 +137,7 @@ const loginSchema = {
 }
 const form = powerform(loginSchema, {stopOnError: true})
 
-console.log(form.isValid())
+console.log(form.validate())
 >> false
 
 console.log(form.getError())
@@ -239,7 +236,7 @@ Returns key value pair of fields and their corresponding errors.
 const form = powerform(schema)
 form.password.setData('1234567')
 form.confirmPassword.setData('12')
-form.isValid()
+form.validate()
 
 console.log(form.getError())
 > {
@@ -304,54 +301,25 @@ console.log(form.getData())
 }
 ```
 
-#### form.isValid(skipAttachError?: boolean)
+#### form.isValid()
 Returns `true` if all fields of a form are valid.
 Returns `false` if one of the fields in a form is invalid.
-It sets field errors if the form is invalid.
+Unlike `form.validate()` it does not set the error.
 
 ```javascript
 const form = powerform(schema)
 form.password.setData('1234567')
-
-console.log(form.getError())
-> {
-  username: null,
-  password: null,
-  confirmPassword: null
-}
 
 console.log(form.isValid())
 > false
 
 console.log(form.getError())
 > {
-  username: "This field is required.",
-  password: "This field must be at least 8 characters long.",
-  confirmPassword: "Passwords do not match."
-}
-```
-
-To check form validity without setting the errors pass `skipAttachError` to `Form.isValid`.
-```javascript
-const form = powerform(schema)
-form.password.setData('1234567')
-
-console.log(form.getError())
-> {
   username: null,
   password: null,
   confirmPassword: null
 }
 
-console.log(form.isValid(true))
-> false
-
-console.log(form.getError())
-> {
-  username: null,
-  password: null,
-  confirmPassword: null
-}
 ```
 
 ### Field
@@ -403,13 +371,13 @@ const form = powerform({
     onError: logError
   }
 })
-form.username.isValid()
+form.username.validate()
 > "error: " "This field is required."
 
 form.username.setData('orange')
 > "data: " "orange"
 
-form.username.isValid()
+form.username.validate()
 > "error: " null
 ```
 
@@ -499,9 +467,8 @@ console.log(form.getData())
 
 ### field.validate(value: any, allValues: object)
 
-#### field.isValid(skipAttachError?: boolean)
-Returns `true` if `field.validate()` returns nothing.
-Returns `false` if `field.validate()` returns an error.
+#### field.isValid()
+Returns `true` or `false` based upon the validity.
 
 #### field.setError(error: string)
 Sets field error.

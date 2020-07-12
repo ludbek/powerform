@@ -151,14 +151,10 @@ class Field {
     return this.previousValue !== this.currentValue
   }
 
-  makePrestine() {
+  makePristine() {
     this.previousValue = clone(this.currentValue)
     this.initialValue = clone(this.currentValue)
     this.setError(null)
-  }
-
-  makePristine() {
-    this.makePrestine()
   }
 
   reset() {
