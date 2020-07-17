@@ -2493,9 +2493,9 @@ locate-path@^2.0.0:
     path-exists "^3.0.0"
 
 lodash@^4.17.14, lodash@^4.17.4:
-  version "4.17.15"
-  resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.15.tgz#b447f6670a0455bbfeedd11392eff330ea097548"
-  integrity sha512-8xOcRHvCjnocdS5cpwXQXVzmmh5e5+saE2QGoeQmbKmRS6J3VQppPOIt0MnmE+4xlZoumy0GPG0D0MVIQbNA1A==
+  version "4.17.19"
+  resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.19.tgz#e48ddedbe30b3321783c5b4301fbd353bc1e4a4b"
+  integrity sha512-JNvd8XER9GQX0v2qJgsaN/mzFCNA5BRe/j8JN9d+tWyGLSodKQHKFicdwNYzWwI3wjRnaKPsGj1XkBjx/F96DQ==
 
 longest@^1.0.1:
   version "1.0.1"
@@ -3901,10 +3901,10 @@ validate-npm-package-license@^3.0.1:
     spdx-correct "^3.0.0"
     spdx-expression-parse "^3.0.0"
 
-validatex@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/validatex/-/validatex-1.0.0.tgz#2a685c833dd7010cf42c5f0c23c60b9d5301624c"
-  integrity sha512-Yh/FKw3d7eYvZK8YMgVO93d95WSXUW5rbUJrr1IY3cTKKGpm5UDPSe0v5nc3FVuEFpBK7MhPfHqSdAHFzq13uw==
+validatex@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/validatex/-/validatex-1.0.1.tgz#cbc7b44c4deda28b5118550da5ff532d9348ba45"
+  integrity sha512-dfj6i/djKfsL1e5P78DRO99a8umj/y+TaAzECIM+DAclke8fed01abo/0B3lcIf67Xw4JSidPQpv7/gIlhvKoQ==
 
 verror@1.10.0:
   version "1.10.0"
