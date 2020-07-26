@@ -4,17 +4,20 @@
 
 Logo by [Anand](https://www.behance.net/mukhiyaanad378)
 
+
+## Introduction
+A tiny super portable form model which can be used in apps with or without frameworks like [React](https://github.com/facebook/react).
+
 ## Showcase
 [Vanilla JS](https://codesandbox.io/s/powerform-vanilla-js-ug2sx)
 
 [React](https://codesandbox.io/s/powerform-react-17gqu)
 
+[Mithril](https://codesandbox.io/s/powerform-mithril-pdrl1?file=/src/index.js)
+
 ## Breaking changes
 v4 introduces significant changes which are not backward compatible with v3.
 Please checkout the [change log](CHANGE_LOG.txt).
-
-## Introduction
-A tiny form model which can be used in apps with or without frameworks like [Mithril](https://github.com/MithrilJS/mithril.js/), [React](https://github.com/facebook/react), etc.
 
 ## Installation
 ### yarn
