@@ -50,7 +50,7 @@ class Field {
       : clone(this.config.default)
     // will call onChange callback if exists
     this.setData(this.defaultValue, true)
-    this.makePrestine()
+    this.makePristine()
   }
 
   clean(newVal) {
@@ -239,17 +239,13 @@ class Form {
     return false
   }
 
-  makePrestine() {
+  makePristine() {
     this.toggleGetNotified()
     this.fieldNames.forEach((field) => {
-      this[field].makePrestine()
+      this[field].makePristine()
     })
     this.toggleGetNotified()
     this.triggerOnError()
-  }
-
-  makePristine() {
-    this.makePrestine()
   }
 
   reset() {
