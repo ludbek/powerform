@@ -9,7 +9,9 @@
     "format": "prettier --write \"src/**/*.ts\" \"./*.json\"",
     "lint": "tslint -p tsconfig.json"
   },
-  "files": ["lib/**/*"],
+  "files": [
+    "lib/**/*"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ludbek/powerform.git"
@@ -18,10 +20,14 @@
     "url": "https://github.com/ludbek/powerform/issues"
   },
   "homepage": "https://github.com/ludbek/powerform#readme",
-  "keywords": ["form", "mithril", "react"],
+  "keywords": [
+    "form",
+    "mithril",
+    "react"
+  ],
   "author": "ludbek",
   "license": "ISC",
-  "dependencies": { },
+  "dependencies": {},
   "devDependencies": {
     "@types/jest": "^26.0.24",
     "jest": "^27.0.6",
