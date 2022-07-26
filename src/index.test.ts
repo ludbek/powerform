@@ -101,48 +101,49 @@ describe("field.getValue()", () => {
   });
 });
 
-// describe("field.validate()", () => {
-//   it("returns true on positive validation", () => {
-//     const { fields } = powerform({ fruit: "" }, { fruit: str });
-//     fields.fruit.setData("apple");
+describe("field.validate()", () => {
+  it("returns true on positive validation", () => {
+    const { fields } = new Form({
+      fruit: str(),
+    });
+    fields.fruit.setValue("apple");
 
-//     expect(fields.fruit.validate()).toEqual(true);
-//   });
+    expect(fields.fruit.validate()).toEqual(true);
+  });
 
-//   it("returns false on negative validation", () => {
-//     const { fields } = powerform({ fruit: "" }, { fruit: str });
-//     fields.fruit.setData("");
+  it("returns false on negative validation", () => {
+    const { fields } = new Form({
+      fruit: str(),
+    });
+    fields.fruit.setValue(1);
 
-//     expect(fields.fruit.validate()).toEqual(false);
-//   });
+    expect(fields.fruit.validate()).toEqual(false);
+  });
 
-//   it("sets error", () => {
-//     const { fields } = powerform({ fruit: "" }, { fruit: str });
-//     fields.fruit.validate();
+  it("sets error", () => {
+    const { fields } = new Form({
+      fruit: str(),
+    });
+    fields.fruit.setValue(1);
+    fields.fruit.validate();
 
-//     expect(fields.fruit.getError()).toEqual("This field is required");
-//   });
+    expect(fields.fruit.getError()).toEqual("Expected a string, got number");
+  });
 
-//   it("can validate in relation to other form fields if exists", () => {
-//     const { fields } = powerform(
-//       {
-//         password: "",
-//         confirmPassword: "",
-//       },
-//       {
-//         password: str,
-//         confirmPassword: o(str, equals("password")),
-//       }
-//     );
+  it("can validate in relation to other form fields if exists", () => {
+    const { fields } = new Form({
+      password: str(),
+      confirmPassword: str(equals("password")),
+    });
 
-//     fields.password.setData("apple");
-//     fields.confirmPassword.setData("banana");
-//     fields.confirmPassword.validate();
-//     expect(fields.confirmPassword.getError()).toEqual(
-//       `Must be equal to \"password\"`
-//     );
-//   });
-// });
+    fields.password.setValue("apple");
+    fields.confirmPassword.setValue("banana");
+    fields.confirmPassword.validate();
+    expect(fields.confirmPassword.getError()).toEqual(
+      `Must be equal to \"password\"`
+    );
+  });
+});
 
 // describe("field.isValid()", () => {
 //   const initialValues = { fruit: "" };

@@ -45,10 +45,6 @@ export class Field<T> {
     this.validators = validators;
   }
 
-  stringify(val: any) {
-    return typeof val === "string" ? val : JSON.stringify(val);
-  }
-
   optional() {
     const optionalDecoder = optional(this.decoder);
     return new Field<Optional<T>>(
@@ -58,7 +54,7 @@ export class Field<T> {
   }
 
   initValue(val: any) {
-    const strVal = this.stringify(val);
+    const strVal = JSON.stringify(val);
     this.initialValue =
       this.previousValue =
       this.currentValue =
@@ -86,38 +82,37 @@ export class Field<T> {
 
   triggerOnChange() {
     const callback = this.changeHandler;
-    const [val, err] = this.decoder(this.currentValue);
-    if (err !== "") {
-      return;
-    }
+    const val = JSON.parse(this.currentValue);
     callback && callback(val);
     this.form && this.form.triggerOnChange();
   }
 
   setValue(val: any, skipTrigger?: boolean) {
-    const strVal = this.stringify(val);
+    const strVal = JSON.stringify(val);
     if (this.currentValue === strVal) return;
     this.previousValue = this.currentValue;
-    this.currentValue = this.inputHandler
-      ? this.inputHandler(strVal, this.previousValue)
-      : strVal;
+    // input handlers should deal with actual value
+    // not a strigified version
+    this.currentValue = JSON.stringify(
+      this.inputHandler ? this.inputHandler(val, this.previousValue) : val
+    );
 
     if (skipTrigger) return;
     this.triggerOnChange();
   }
 
   getRaw(): string {
-    return this.currentValue;
+    return JSON.parse(this.currentValue);
   }
 
   getValue(): T {
-    const [val, err] = this.decoder(this.currentValue);
+    const [val, err] = this.decoder(JSON.parse(this.currentValue));
     if (err !== "") throw new DecodeError(`Invalid value at ${this.fieldName}`);
     return val;
   }
 
   _validate(): string | undefined {
-    const [parsedVal, err] = this.decoder(this.currentValue);
+    const [parsedVal, err] = this.decoder(JSON.parse(this.currentValue));
     if (err !== "") {
       return err;
     }
@@ -139,7 +134,7 @@ export class Field<T> {
 
   validate(): boolean {
     const err = this._validate();
-    if (err == undefined) {
+    if (err === undefined) {
       this.setError("");
       return true;
     }
