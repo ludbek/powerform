@@ -1,6 +1,6 @@
-const STOP_VALIDATION_ERROR_NAME = "StopValidationError";
+const STOP_VALIDATION_ERROR_NAME = "StopDecodeError";
 
-class ValidationError extends Error {}
+class DecodeError extends Error {}
 
 class StopValidationError extends Error {
   constructor() {
@@ -9,20 +9,16 @@ class StopValidationError extends Error {
   }
 }
 
-const isEqual = (val1: unknown, val2: unknown): boolean => {
-  return JSON.stringify(val1) === JSON.stringify(val2);
-};
-
 type Optional<T> = T | undefined;
 function optional<T>(decoder: Decoder<T>) {
-  return (val: unknown): [Optional<T>, Error] => {
+  return (val: string): [Optional<T>, Error] => {
     if (val === "") return [undefined, ""];
     return decoder(val);
   };
 }
 
 type Error = string;
-type Decoder<T> = (val: unknown) => [T, Error];
+type Decoder<T> = (val: string) => [T, Error];
 type ChangeHandler<T> = (val: T) => void;
 type InputHandler = (val: string, preVal: string) => string;
 type ErrorHandler = (error: string) => void;
@@ -100,7 +96,7 @@ export class Field<T> {
 
   setValue(val: any, skipTrigger?: boolean) {
     const strVal = this.stringify(val);
-    if (isEqual(this.currentValue, strVal)) return;
+    if (this.currentValue === strVal) return;
     this.previousValue = this.currentValue;
     this.currentValue = this.inputHandler
       ? this.inputHandler(strVal, this.previousValue)
@@ -116,8 +112,7 @@ export class Field<T> {
 
   getValue(): T {
     const [val, err] = this.decoder(this.currentValue);
-    if (err !== "")
-      throw new ValidationError(`Invalid value at ${this.fieldName}`);
+    if (err !== "") throw new DecodeError(`Invalid value at ${this.fieldName}`);
     return val;
   }
 
@@ -376,3 +371,27 @@ export type Context<T> = {
 
 type NoUndefined<T> = T extends undefined ? never : T;
 export type Validator<T> = (val: T, ctx?: Context<T>) => string | undefined;
+
+export function strDecoder(val: string): [string, Error] {
+  if (typeof val !== "string")
+    return ["", `Expected a string, got ${typeof val}`];
+  return [val, ""];
+}
+
+export function numDecoder(val: string): [number, Error] {
+  const num = JSON.parse(val);
+  if (typeof num !== "number")
+    return [NaN, `Expected a number, got ${typeof num}`];
+  return [num, ""];
+}
+
+export function boolDecoder(val: string): [boolean, Error] {
+  const bool = JSON.parse(val);
+  if (typeof bool !== "boolean")
+    return [false, `Expected a boolean, got ${typeof bool}`];
+  return [bool, ""];
+}
+
+export function str(...validators: Validator<string>[]) {
+  return new Field(strDecoder, ...validators);
+}
