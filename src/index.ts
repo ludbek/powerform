@@ -19,7 +19,7 @@ export class Field<T> {
   errorHandler?: ErrorHandler;
   fieldName: string = "";
   form?: any;
-  private error: string = "";
+  private _error: string = "";
 
   // html input field value is always string no matter
   // what its type is, type is only for UI
@@ -72,15 +72,14 @@ export class Field<T> {
 
   triggerOnError() {
     const callback = this.errorHandler;
-    callback && callback(this.getError());
+    callback && callback(this.error);
 
     if (this.form) this.form.triggerOnError();
   }
 
   triggerOnChange() {
     const callback = this.changeHandler;
-    const val = JSON.parse(this.currentValue);
-    callback && callback(val);
+    callback && callback(this.raw);
     this.form && this.form.triggerOnChange();
   }
 
@@ -98,11 +97,11 @@ export class Field<T> {
     this.triggerOnChange();
   }
 
-  getRaw(): T {
+  get raw(): T {
     return JSON.parse(this.currentValue);
   }
 
-  getValue(): T {
+  get value(): T {
     const [val, err] = this.decoder(JSON.parse(this.currentValue));
     if (err !== "") throw new DecodeError(`Invalid value at ${this.fieldName}`);
     return val;
@@ -121,7 +120,7 @@ export class Field<T> {
       const err = v(parsedVal as NoUndefined<T>, {
         prevValue: preValue as NoUndefined<T>,
         fieldName: this.fieldName,
-        all: this.form ? this.form.getValue() : {},
+        all: this.form ? this.form.value : {},
       });
       if (err != undefined) {
         return err;
@@ -146,15 +145,15 @@ export class Field<T> {
   }
 
   setError(error: string, skipTrigger?: boolean) {
-    if (this.error === error) return;
-    this.error = error;
+    if (this._error === error) return;
+    this._error = error;
 
     if (skipTrigger) return;
     this.triggerOnError();
   }
 
-  getError(): string {
-    return this.error;
+  get error(): string {
+    return this._error;
   }
 
   isDirty() {
@@ -174,7 +173,7 @@ export class Field<T> {
   setAndValidate(value: T) {
     this.setValue(value);
     this.validate();
-    return this.getError();
+    return this.error;
   }
 }
 
@@ -245,28 +244,28 @@ export class Form<T> {
 
   triggerOnChange(): void {
     const callback = this.changeHandler;
-    this.getNotified && callback && callback(this.getRaw());
+    this.getNotified && callback && callback(this.raw);
   }
 
   triggerOnError(): void {
     const callback = this.errorHandler;
-    this.getNotified && callback && callback(this.getError());
+    this.getNotified && callback && callback(this.error);
   }
 
-  getValue(): T {
+  get value(): T {
     const data = {} as T;
     let fieldName: keyof typeof this.fields;
     for (fieldName in this.fields) {
-      data[fieldName] = this.fields[fieldName].getValue();
+      data[fieldName] = this.fields[fieldName].value;
     }
     return data;
   }
 
-  getRaw(): Values<T> {
+  get raw(): Values<T> {
     const data = {} as Values<T>;
     let fieldName: keyof typeof this.fields;
     for (fieldName in this.fields) {
-      data[fieldName] = this.fields[fieldName].getRaw();
+      data[fieldName] = this.fields[fieldName].raw;
     }
     return data;
   }
@@ -276,7 +275,7 @@ export class Form<T> {
     let fieldName: keyof typeof this.fields;
     for (fieldName in this.fields) {
       if (this.fields[fieldName].isDirty()) {
-        data[fieldName] = this.fields[fieldName].getValue();
+        data[fieldName] = this.fields[fieldName].value;
       }
     }
     return data;
@@ -294,11 +293,11 @@ export class Form<T> {
     this.triggerOnError();
   }
 
-  getError(): Errors<T> {
+  get error(): Errors<T> {
     const errors = {} as Errors<T>;
     let fieldName: keyof typeof this.fields;
     for (fieldName in this.fields) {
-      errors[fieldName] = this.fields[fieldName].getError();
+      errors[fieldName] = this.fields[fieldName].error;
     }
     return errors;
   }

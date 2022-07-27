@@ -43,8 +43,8 @@ describe("field.constructor()", () => {
     }
     const fruitField = str(isApple);
     fruitField.setAndValidate("banana");
-    expect(fruitField.getError()).toEqual("Expected an apple");
-    expect(fruitField.getValue()).toEqual("banana");
+    expect(fruitField.error).toEqual("Expected an apple");
+    expect(fruitField.value).toEqual("banana");
   });
 });
 
@@ -54,13 +54,13 @@ describe("field.setValue", () => {
     const field = str();
     field.setValue(value);
 
-    expect(field.getValue()).toEqual(value);
+    expect(field.value).toEqual(value);
   });
 
   it("calls onInput and sets value returned by it", () => {
     const field = str().onInput(capitalize);
     field.setValue("red apple");
-    expect(field.getValue()).toEqual("Red Apple");
+    expect(field.value).toEqual("Red Apple");
   });
 
   it("calls onChange callback if exists", () => {
@@ -97,7 +97,7 @@ describe("field.getValue()", () => {
     const fruit = str();
     fruit.setValue(value);
 
-    expect(fruit.getValue()).toEqual(value);
+    expect(fruit.value).toEqual(value);
   });
 });
 
@@ -127,7 +127,7 @@ describe("field.validate()", () => {
     fields.fruit.setValue(1);
     fields.fruit.validate();
 
-    expect(fields.fruit.getError()).toEqual("Expected a string, got number");
+    expect(fields.fruit.error).toEqual("Expected a string, got number");
   });
 
   it("can validate in relation to other form fields if exists", () => {
@@ -139,7 +139,7 @@ describe("field.validate()", () => {
     fields.password.setValue("apple");
     fields.confirmPassword.setValue("banana");
     fields.confirmPassword.validate();
-    expect(fields.confirmPassword.getError()).toEqual(
+    expect(fields.confirmPassword.error).toEqual(
       `Must be equal to \"password\"`
     );
   });
@@ -167,7 +167,7 @@ describe("field.isValid()", () => {
     fields.fruit.setValue(1);
 
     expect(fields.fruit.isValid()).toEqual(false);
-    expect(fields.fruit.getError()).toEqual("");
+    expect(fields.fruit.error).toEqual("");
   });
 });
 
@@ -177,7 +177,7 @@ describe("field.setError()", () => {
     const { fields } = new Form(schema);
     const errMsg = "Nice error !!!";
     fields.fruit.setError(errMsg);
-    expect(fields.fruit.getError()).toEqual(errMsg);
+    expect(fields.fruit.error).toEqual(errMsg);
   });
 
   it("calls onError callback if exists", () => {
@@ -189,7 +189,6 @@ describe("field.setError()", () => {
     const errMsg = "Nice error !!!";
     fields.fruit.setError(errMsg);
     expect(spy.mock.calls.length).toEqual(1);
-    // expect(spy.mock.calls[0]).toMatchSnapshot();
   });
 
   it("wont call onError callback if 'skipError' is true", () => {
@@ -209,7 +208,7 @@ describe("field.getError()", () => {
     const { fields } = new Form({ fruit: str() });
     const errMsg = "Nice error !!!";
     fields.fruit.setError(errMsg);
-    expect(fields.fruit.getError()).toEqual(errMsg);
+    expect(fields.fruit.error).toEqual(errMsg);
   });
 });
 
@@ -239,10 +238,10 @@ describe("field.makePristine()", () => {
   it("empties error", () => {
     const { fields } = new Form({ fruit: str() });
     fields.fruit.validate();
-    expect(fields.fruit.getError()).toEqual("This field is required");
+    expect(fields.fruit.error).toEqual("This field is required");
 
     fields.fruit.makePristine();
-    expect(fields.fruit.getError()).toEqual("");
+    expect(fields.fruit.error).toEqual("");
   });
 });
 
@@ -250,10 +249,10 @@ describe("field.reset()", () => {
   it("sets currentValue and previousValue to initialValue", () => {
     const { fields } = new Form({ fruit: str() }).initValue({ fruit: "apple" });
     fields.fruit.setValue("banana");
-    expect(fields.fruit.getValue()).toEqual("banana");
+    expect(fields.fruit.value).toEqual("banana");
 
     fields.fruit.reset();
-    expect(fields.fruit.getValue()).toEqual("apple");
+    expect(fields.fruit.value).toEqual("apple");
   });
 
   it("calls onChange callback", () => {
@@ -262,7 +261,7 @@ describe("field.reset()", () => {
       fruit: str().onChange(spy),
     });
     fields.fruit.setValue("banana");
-    expect(fields.fruit.getValue()).toEqual("banana");
+    expect(fields.fruit.value).toEqual("banana");
 
     fields.fruit.reset();
     expect(spy.mock.calls[1][0]).toEqual("");
@@ -271,10 +270,10 @@ describe("field.reset()", () => {
   it("empties error", () => {
     const { fields } = new Form({ fruit: str() });
     fields.fruit.validate();
-    expect(fields.fruit.getError()).toEqual("This field is required");
+    expect(fields.fruit.error).toEqual("This field is required");
 
     fields.fruit.reset();
-    expect(fields.fruit.getError()).toEqual("");
+    expect(fields.fruit.error).toEqual("");
   });
 });
 
@@ -337,7 +336,7 @@ describe("form.validate", () => {
   it("sets error", () => {
     const form = signupForm();
     form.validate();
-    expect(form.getError()).toEqual({
+    expect(form.error).toEqual({
       confirmPassword: "This field is required",
       name: "This field is required",
       password: "This field is required",
@@ -364,9 +363,9 @@ describe("form.validate", () => {
     const { fields } = form;
     fields.username.setValue("a username");
     expect(form.validate()).toEqual(false);
-    expect(fields.username.getError()).toEqual("");
-    expect(fields.name.getError()).toEqual("This field is required");
-    expect(fields.password.getError()).toEqual("");
+    expect(fields.username.error).toEqual("");
+    expect(fields.name.error).toEqual("This field is required");
+    expect(fields.password.error).toEqual("");
   });
 });
 
@@ -398,7 +397,7 @@ describe("form.isValid", () => {
   it("won't set error", () => {
     const form = signupForm();
     form.isValid();
-    expect(form.getError()).toEqual({
+    expect(form.error).toEqual({
       confirmPassword: "",
       name: "",
       password: "",
@@ -421,7 +420,7 @@ describe("form.setData", () => {
     const data = { price: 1 };
     form.setValue(data);
 
-    expect(form.fields.price.getValue()).toEqual(data.price);
+    expect(form.fields.price.value).toEqual(data.price);
   });
 
   it("wont trigger update event from fields", () => {
@@ -466,8 +465,8 @@ describe("form.setError", () => {
 
     form.setError(errors);
 
-    expect(form.fields.username.getError()).toEqual(errors.username);
-    expect(form.fields.password.getError()).toEqual(errors.password);
+    expect(form.fields.username.error).toEqual(errors.username);
+    expect(form.fields.password.error).toEqual(errors.password);
   });
 
   it("calls onError callback only once", () => {
@@ -498,7 +497,7 @@ describe("form.getError", () => {
       password: "a error",
       confirmPassword: "",
     };
-    expect(form.getError()).toEqual(expected);
+    expect(form.error).toEqual(expected);
   });
 });
 
@@ -541,7 +540,7 @@ describe("form.makePristine", () => {
     });
     form.validate(); // first call
     expect(form.isDirty()).toEqual(true);
-    expect(form.getError()).toEqual({
+    expect(form.error).toEqual({
       confirmPassword: "This field is required",
       name: "This field is required",
       password: "This field is required",
@@ -550,7 +549,7 @@ describe("form.makePristine", () => {
 
     form.makePristine(); // second call
     expect(form.isDirty()).toEqual(false);
-    expect(form.getError()).toEqual({
+    expect(form.error).toEqual({
       confirmPassword: "",
       name: "",
       password: "",
@@ -579,7 +578,7 @@ describe("form.reset", () => {
       password: "",
       confirmPassword: "",
     };
-    expect(form.getRaw()).toEqual(expected);
+    expect(form.raw).toEqual(expected);
     expect(spy.mock.calls.length).toEqual(2);
   });
 
@@ -595,7 +594,7 @@ describe("form.reset", () => {
       password: "",
       confirmPassword: "",
     };
-    expect(form.getError()).toEqual(expected);
+    expect(form.error).toEqual(expected);
     expect(spy.mock.calls.length).toEqual(2);
   });
 });
