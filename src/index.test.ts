@@ -7,6 +7,7 @@ import {
   numDecoder,
   boolDecoder,
   str,
+  num,
 } from "./index";
 
 export function equals<T>(fieldName: string): Validator<T> {
@@ -19,14 +20,6 @@ export function equals<T>(fieldName: string): Validator<T> {
   };
 }
 
-function minLen(len: number) {
-  return (val: string) => {
-    if (val.length < len) {
-      return `Expected the value to be ${len} characters long, but is ${val.length} characters long.`;
-    }
-  };
-}
-
 export const noop = () => {};
 
 function capitalize(val: string) {
@@ -34,15 +27,14 @@ function capitalize(val: string) {
   return val.replace(/(?:^|\s)\S/g, (s) => s.toUpperCase());
 }
 
-const strField = new Field(strDecoder);
-const nameField = new Field(strDecoder).onInput(capitalize);
-
-const signupSchema = {
-  username: strField,
-  name: nameField,
-  password: strField,
-  confirmPassword: new Field(strDecoder, equals("password")),
-};
+function signupForm() {
+  return new Form({
+    username: str(),
+    name: str().onInput(capitalize),
+    password: str(),
+    confirmPassword: str(equals("password")),
+  });
+}
 
 describe("field.constructor()", () => {
   it("sets the decoder and validators", () => {
@@ -294,441 +286,373 @@ describe("field.setAndValidate()", () => {
   });
 });
 
-// describe("powerform", () => {
-//   const initialValues = {
-//     username: "",
-//     name: "",
-//     password: "",
-//     confirmPassword: "",
-//   };
-//   it("returns form instance", () => {
-//     const form = powerform(initialValues, signupSchema);
-//     expect(form instanceof Form).toEqual(true);
-//   });
+describe("powerform", () => {
+  it("returns form instance", () => {
+    const form = signupForm();
+    expect(form instanceof Form).toEqual(true);
+  });
 
-//   it("attaches self to each field", () => {
-//     const form = powerform(initialValues, signupSchema);
-//     const { fields } = form;
-//     expect(fields.username.parent).toBe(form);
-//     expect(fields.password.parent).toBe(form);
-//     expect(fields.confirmPassword.parent).toBe(form);
-//   });
+  it("attaches self to each field", () => {
+    const form = signupForm();
+    const { fields } = form;
+    expect(fields.username.form).toBe(form);
+    expect(fields.password.form).toBe(form);
+    expect(fields.confirmPassword.form).toBe(form);
+  });
 
-//   it("attaches field name to each field", () => {
-//     const form = powerform(initialValues, signupSchema);
-//     const { fields } = form;
-//     expect(fields.username.fieldName).toEqual("username");
-//     expect(fields.password.fieldName).toEqual("password");
-//     expect(fields.confirmPassword.fieldName).toEqual("confirmPassword");
-//   });
-// });
+  it("attaches field name to each field", () => {
+    const form = signupForm();
+    const { fields } = form;
+    expect(fields.username.fieldName).toEqual("username");
+    expect(fields.password.fieldName).toEqual("password");
+    expect(fields.confirmPassword.fieldName).toEqual("confirmPassword");
+  });
+});
 
-// describe("form.validate", () => {
-//   it("returns true if all the fields are valid", () => {
-//     const form = powerform(signupSchema);
-//     const data = {
-//       username: "ausername",
-//       name: "a name",
-//       password: "apassword",
-//       confirmPassword: "apassword",
-//     };
-//     form.setData(data);
-//     expect(form.validate()).toEqual(true);
-//   });
+describe("form.validate", () => {
+  it("returns true if all the fields are valid", () => {
+    const form = signupForm();
+    const data = {
+      username: "ausername",
+      name: "a name",
+      password: "apassword",
+      confirmPassword: "apassword",
+    };
+    form.setValue(data);
+    expect(form.validate()).toEqual(true);
+  });
 
-//   it("returns false if any of the field is invalid", () => {
-//     const form = powerform(signupSchema);
-//     const data = {
-//       username: "ausername",
-//       name: "a name",
-//       password: "apassword",
-//       confirmPassword: undefined,
-//     };
-//     form.setData(data);
-//     expect(form.validate()).toEqual(false);
-//   });
+  it("returns false if any of the field is invalid", () => {
+    const form = signupForm();
+    const data = {
+      username: "ausername",
+      name: "a name",
+      password: "apassword",
+      confirmPassword: "",
+    };
+    form.setValue(data);
+    expect(form.validate()).toEqual(false);
+  });
 
-//   it("sets error", () => {
-//     const form = powerform(signupSchema);
-//     form.validate();
-//     expect(form.getError()).toEqual({
-//       confirmPassword: "This field is required.",
-//       name: "This field is required.",
-//       password: "This field is required.",
-//       username: "This field is required.",
-//     });
-//   });
+  it("sets error", () => {
+    const form = signupForm();
+    form.validate();
+    expect(form.getError()).toEqual({
+      confirmPassword: "This field is required",
+      name: "This field is required",
+      password: "This field is required",
+      username: "This field is required",
+    });
+  });
 
-//   it("calls onError callback", () => {
-//     const config = { onError: jest.fn() };
-//     const form = powerform(signupSchema, config);
-//     form.validate();
+  it("calls onError callback", () => {
+    const spy = jest.fn();
+    const form = signupForm().onError(spy);
+    form.validate();
 
-//     expect(config.onError.mock.calls.length).toEqual(1);
-//     expect(config.onError.mock.calls[0]).toMatchSnapshot();
-//   });
+    expect(spy.mock.calls.length).toEqual(1);
+  });
 
-//   it("respects config.stopOnError", () => {
-//     const schema = {
-//       username: { validator: required(true), index: 1 },
-//       name: { validator: required(true), index: 2 },
-//       password: { validator: required(true), index: 3 },
-//     };
-//     const config = { stopOnError: true };
-//     const form = powerform(schema, config);
-//     form.username.setData("a username");
-//     expect(form.validate()).toEqual(false);
-//     expect(form.username.getError()).toEqual(null);
-//     expect(form.name.getError()).toEqual("This field is required.");
-//     expect(form.password.getError()).toEqual(null);
-//   });
-// });
+  it("respects config.stopOnError", () => {
+    const schema = {
+      username: str(),
+      name: str(),
+      password: str(),
+    };
+    const config = { stopOnError: true };
+    const form = new Form(schema, config);
+    const { fields } = form;
+    fields.username.setValue("a username");
+    expect(form.validate()).toEqual(false);
+    expect(fields.username.getError()).toEqual("");
+    expect(fields.name.getError()).toEqual("This field is required");
+    expect(fields.password.getError()).toEqual("");
+  });
+});
 
-// // describe("form.isValid", () => {
-// //   it("returns true if all the fields are valid", () => {
-// //     const form = powerform(signupSchema)
-// //     const data = {
-// //       username: 'ausername',
-// //       name: 'a name',
-// //       password: 'apassword',
-// //       confirmPassword: 'apassword'
-// //     }
-// //     form.setData(data)
-// //     expect(form.isValid()).toEqual(true)
-// //   })
+describe("form.isValid", () => {
+  it("returns true if all the fields are valid", () => {
+    const form = signupForm();
+    const data = {
+      username: "ausername",
+      name: "a name",
+      password: "apassword",
+      confirmPassword: "apassword",
+    };
+    form.setValue(data);
+    expect(form.isValid()).toEqual(true);
+  });
 
-// //   it("returns false if any of the field is invalid", () => {
-// //     const form = powerform(signupSchema)
-// //     const data = {
-// //       username: 'ausername',
-// //       name: 'a name',
-// //       password: 'apassword',
-// //       confirmPassword: undefined
-// //     }
-// //     form.setData(data)
-// //     expect(form.isValid()).toEqual(false)
-// //   })
+  it("returns false if any of the field is invalid", () => {
+    const form = signupForm();
+    const data = {
+      username: "ausername",
+      name: "a name",
+      password: "apassword",
+      confirmPassword: "",
+    };
+    form.setValue(data);
+    expect(form.isValid()).toEqual(false);
+  });
 
-// //   it("won't set error", () => {
-// //     const form = powerform(signupSchema)
-// //     form.isValid()
-// //     expect(form.getError()).toEqual({
-// //       "confirmPassword": null,
-// //       "name": null,
-// //       "password": null,
-// //       "username": null,
-// //     })
-// //   })
+  it("won't set error", () => {
+    const form = signupForm();
+    form.isValid();
+    expect(form.getError()).toEqual({
+      confirmPassword: "",
+      name: "",
+      password: "",
+      username: "",
+    });
+  });
 
-// //   it("won't call onError callback", () => {
-// //     const config = {onError: jest.fn()}
-// //     const form = powerform(signupSchema, config)
-// //     form.isValid()
+  it("won't call onError callback", () => {
+    const spy = jest.fn();
+    const form = signupForm().onError(spy);
+    form.isValid();
 
-// //     expect(config.onError.mock.calls.length).toEqual(0)
-// //   })
-// // })
+    expect(spy.mock.calls.length).toEqual(0);
+  });
+});
 
-// // describe("form.setData", () => {
-// //   it("sets data of each field", () => {
-// //     const form = powerform(signupSchema)
-// //     const data = {
-// //       username: 'ausername',
-// //       password: 'apassword'
-// //     }
-// //     form.setData(data)
+describe("form.setData", () => {
+  it("sets data of each field", () => {
+    const form = new Form({ price: num() });
+    const data = { price: 1 };
+    form.setValue(data);
 
-// //     expect(form.username.getData()).toEqual(data.username)
-// //     expect(form.password.getData()).toEqual(data.password)
-// //   })
+    expect(form.fields.price.getValue()).toEqual(data.price);
+  });
 
-// //   it("wont trigger update event from fields", () => {
-// //     const config = {
-// //       onChange: jest.fn()
-// //     }
-// //     const form = powerform(signupSchema, config)
-// //     const data = {
-// //       username: 'ausername',
-// //       name: 'A Name',
-// //       password: 'apassword',
-// //       confirmPassword: 'apassword'
-// //     }
-// //     form.setData(data)
+  it("wont trigger update event from fields", () => {
+    const spy = jest.fn();
+    const form = signupForm().onChange(spy);
+    const data = {
+      username: "ausername",
+      name: "A Name",
+      password: "apassword",
+      confirmPassword: "apassword",
+    };
+    form.setValue(data);
 
-// //     expect(config.onChange.mock.calls.length).toEqual(1)
-// //     expect(config.onChange.mock.calls[0][0]).toEqual(data)
-// //   })
-// // })
+    expect(spy.mock.calls.length).toEqual(1);
+    expect(spy.mock.calls[0][0]).toEqual(data);
+  });
+});
 
-// // describe("form.getData", () => {
-// //   it("returns clean data from every fields", () => {
-// //     const afield = {
-// //       validator: required(true),
-// //       clean (value) {
-// //         return value.toUpperCase()
-// //       }
-// //     }
+describe("form.getUpdates", () => {
+  it("returns key value pair of updated fields and their value", () => {
+    const form = signupForm();
+    form.fields.username.setValue("ausername");
+    form.fields.password.setValue("apassword");
 
-// //     const schema = {
-// //       afield,
-// //       username: required(true),
-// //       password: required(true)
-// //     }
-// //     const form = powerform(schema)
+    const expected = {
+      username: "ausername",
+      password: "apassword",
+    };
+    expect(form.getUpdates()).toEqual(expected);
+  });
+});
 
-// //     form.afield.setData("apple")
-// //     form.username.setData("ausername")
+describe("form.setError", () => {
+  it("sets error on each field", () => {
+    const form = signupForm();
+    const errors = {
+      name: "",
+      username: "a error",
+      password: "a error",
+      confirmPassword: "",
+    };
 
-// //     const expected = {
-// //       username: "ausername",
-// //       password: null,
-// //       afield: "APPLE"
-// //     }
-// //     expect(form.getData()).toEqual(expected)
-// //   })
-// // })
+    form.setError(errors);
 
-// // describe("form.getUpdates", () => {
-// //   it("returns key value pair of updated fields and their value", () => {
-// //     const form = powerform(signupSchema)
-// //     form.username.setData("ausername")
-// //     form.password.setData("apassword")
+    expect(form.fields.username.getError()).toEqual(errors.username);
+    expect(form.fields.password.getError()).toEqual(errors.password);
+  });
 
-// //     const expected = {
-// //       username: "ausername",
-// //       password: "apassword"
-// //     }
-// //     expect(form.getUpdates()).toEqual(expected)
-// //   })
-// // })
+  it("calls onError callback only once", () => {
+    const spy = jest.fn();
+    const form = signupForm().onError(spy);
+    const errors = {
+      name: "",
+      username: "a error",
+      password: "a error",
+      confirmPassword: "",
+    };
+    form.setError(errors);
 
-// // describe("form.setError", () => {
-// //   it("sets error on each field", () => {
-// //     const form = powerform(signupSchema)
-// //     const errors = {
-// //       username: 'a error',
-// //       password: 'a error'
-// //     }
+    expect(spy.mock.calls.length).toEqual(1);
+    expect(spy.mock.calls[0]).toEqual([errors]);
+  });
+});
 
-// //     form.setError(errors)
+describe("form.getError", () => {
+  it("returns errors from every fields", () => {
+    const form = signupForm();
+    form.fields.username.setError("a error");
+    form.fields.password.setError("a error");
 
-// //     expect(form.username.getError()).toEqual(errors.username)
-// //     expect(form.password.getError()).toEqual(errors.password)
-// //   })
+    const expected = {
+      username: "a error",
+      name: "",
+      password: "a error",
+      confirmPassword: "",
+    };
+    expect(form.getError()).toEqual(expected);
+  });
+});
 
-// //   it("calls onError callback only once", () => {
-// //     const config = {
-// //       onError: jest.fn()
-// //     }
-// //     const form = powerform(signupSchema, config)
-// //     const errors = {
-// //       username: 'a error',
-// //       password: 'a error'
-// //     }
-// //     form.setError(errors)
+describe("form.isDirty", () => {
+  it("returns true if any field's data has changed", () => {
+    const form = signupForm();
+    form.fields.username.setValue("ausername");
+    expect(form.isDirty()).toEqual(true);
+  });
 
-// //     expect(config.onError.mock.calls.length).toEqual(1)
-// //     expect(config.onError.mock.calls[0]).toMatchSnapshot()
-// //   })
-// // })
+  it("returns false if non of the field's data has changed", () => {
+    const form = signupForm();
+    expect(form.isDirty()).toEqual(false);
+  });
+});
 
-// // describe("form.getError", () => {
-// //   it("returns errors from every fields", () => {
-// //     const form = powerform(signupSchema)
-// //     form.username.setError("a error")
-// //     form.password.setError("a error")
+describe("form.makePristine", () => {
+  it("makes all the fields prestine", () => {
+    const form = signupForm();
+    const data = {
+      name: "",
+      username: "ausername",
+      password: "apassword",
+      confirmPassword: "password confirmation",
+    };
+    form.setValue(data);
+    expect(form.isDirty()).toEqual(true);
+    form.makePristine();
+    expect(form.isDirty()).toEqual(false);
+  });
 
-// //     const expected = {
-// //       username: "a error",
-// //       name: null,
-// //       password: "a error",
-// //       confirmPassword: null
-// //     }
-// //     expect(form.getError()).toEqual(expected)
-// //   })
-// // })
+  it("empties all the error fields and calls onError callback only once", () => {
+    const spy = jest.fn();
+    const form = signupForm().onError(spy);
+    form.setValue({
+      name: "",
+      password: "",
+      username: "ausername",
+      confirmPassword: "",
+    });
+    form.validate(); // first call
+    expect(form.isDirty()).toEqual(true);
+    expect(form.getError()).toEqual({
+      confirmPassword: "This field is required",
+      name: "This field is required",
+      password: "This field is required",
+      username: "",
+    });
 
-// // describe("form.isDirty", () => {
-// //   it("returns true if any field's data has changed", () => {
-// //     const form = powerform(signupSchema)
-// //     form.username.setData('ausername')
-// //     expect(form.isDirty()).toEqual(true)
-// //   })
+    form.makePristine(); // second call
+    expect(form.isDirty()).toEqual(false);
+    expect(form.getError()).toEqual({
+      confirmPassword: "",
+      name: "",
+      password: "",
+      username: "",
+    });
+    expect(spy.mock.calls.length).toEqual(2);
+  });
+});
 
-// //   it("returns false if non of the field's data has changed", () => {
-// //     const form = powerform(signupSchema)
-// //     expect(form.isDirty()).toEqual(false)
-// //   })
-// // })
+describe("form.reset", () => {
+  it("resets all the fields and calls onChange callback only once", () => {
+    const spy = jest.fn();
+    const form = signupForm().onChange(spy);
+    const data = {
+      username: "ausername",
+      name: "a name",
+      password: "apassword",
+      confirmPassword: "password confirmation",
+    };
+    form.setValue(data); // first trigger
+    form.reset(); // second trigger
 
-// // describe("form.makePristine", () => {
-// //   it("makes all the fields prestine", () => {
-// //     const form = powerform(signupSchema)
-// //     const data = {
-// //       username: 'ausername',
-// //       password: 'apassword',
-// //       confirmPassword: 'password confirmation'
-// //     }
-// //     form.setData(data)
-// //     expect(form.isDirty()).toEqual(true)
-// //     form.makePristine()
-// //     expect(form.isDirty()).toEqual(false)
-// //   })
+    const expected = {
+      username: "",
+      name: "",
+      password: "",
+      confirmPassword: "",
+    };
+    expect(form.getRaw()).toEqual(expected);
+    expect(spy.mock.calls.length).toEqual(2);
+  });
 
-// //   it("empties all the error fields and calls onError callback only once", () => {
-// //     const config = {
-// //       onError: jest.fn()
-// //     }
-// //     const form = powerform(signupSchema, config)
-// //     const data = {
-// //       username: 'ausername'
-// //     }
-// //     form.setData(data)
-// //     form.validate() // first call
-// //     expect(form.isDirty()).toEqual(true)
-// //     expect(form.getError()).toEqual({
-// //       "confirmPassword": "This field is required.",
-// //       "name": "This field is required.",
-// //       "password": "This field is required.",
-// //       "username": null
-// //     })
+  it("resets all the errors and calls onError callback only once", () => {
+    const spy = jest.fn();
+    const form = signupForm().onError(spy);
+    form.validate(); // 1st trigger
+    form.reset(); // 2nd triggter
 
-// //     form.makePristine() // second call
-// //     expect(form.isDirty()).toEqual(false)
-// //     expect(form.getError()).toEqual({
-// //       "confirmPassword": null,
-// //       "name": null,
-// //       "password": null,
-// //       "username": null
-// //     })
-// //     expect(form.getData()).toEqual({
-// //       "confirmPassword": null,
-// //       "name": null,
-// //       "password": null,
-// //       "username": "ausername"
-// //     })
-// //     expect(config.onError.mock.calls.length).toEqual(2)
-// //   })
-// // })
+    const expected = {
+      username: "",
+      name: "",
+      password: "",
+      confirmPassword: "",
+    };
+    expect(form.getError()).toEqual(expected);
+    expect(spy.mock.calls.length).toEqual(2);
+  });
+});
 
-// // describe("form.reset", () => {
-// //   it("resets all the fields and calls onChange callback only once", () => {
-// //     const config = {
-// //       onChange: jest.fn()
-// //     }
-// //     const form = powerform(signupSchema, config)
-// //     const data = {
-// //       username: 'ausername',
-// //       name: 'a name',
-// //       password: 'apassword',
-// //       confirmPassword: 'password confirmation'
-// //     }
-// //     form.setData(data) // first trigger
-// //     form.reset() // second trigger
+describe("form.triggerOnChange", () => {
+  it("calls callback with value", () => {
+    const spy = jest.fn();
+    const form = signupForm().onChange(spy);
+    const data = {
+      username: "ausername",
+      password: "",
+      name: "",
+      confirmPassword: "",
+    };
+    form.setValue(data);
+    form.triggerOnChange();
+    expect(spy.mock.calls.length).toEqual(2);
+    expect(spy.mock.calls[1]).toEqual([data]);
+  });
 
-// //     const expected = {
-// //       username: null,
-// //       name: null,
-// //       password: null,
-// //       confirmPassword: null
-// //     }
-// //     expect(form.getData()).toEqual(expected)
-// //     expect(config.onChange.mock.calls.length).toEqual(2)
-// //   })
+  it("won't call onChange callback if 'getNotified' is false", () => {
+    const spy = jest.fn();
+    const form = signupForm().onChange(spy);
+    form.setValue({
+      username: "ausername",
+      password: "",
+      name: "",
+      confirmPassword: "",
+    });
+    form.toggleGetNotified();
+    form.triggerOnChange();
+    expect(spy.mock.calls.length).toEqual(1);
+  });
+});
 
-// //   it("resets all the errors and calls onError callback only once", () => {
-// //     const config = {
-// //       onError: jest.fn()
-// //     }
-// //     const form = powerform(signupSchema, config)
-// //     form.validate() // 1st trigger
-// //     form.reset() // 2nd triggter
+describe("form.triggerOnError", () => {
+  it("calls callback with value and form instance", () => {
+    const spy = jest.fn();
+    const form = signupForm().onError(spy);
+    const errors = {
+      username: "an error",
+      name: "",
+      password: "",
+      confirmPassword: "",
+    };
+    form.setError(errors);
+    form.triggerOnError();
+    expect(spy.mock.calls.length).toEqual(2);
+    expect(spy.mock.calls[1]).toEqual([errors]);
+  });
 
-// //     const expected = {
-// //       username: null,
-// //       name: null,
-// //       password: null,
-// //       confirmPassword: null
-// //     }
-// //     expect(form.getError()).toEqual(expected)
-// //     expect(config.onError.mock.calls.length).toEqual(2)
-// //   })
-// // })
-
-// // describe("form.triggerOnChange", () => {
-// //   it("calls callback with value and form instance", () => {
-// //     const config = {
-// //       onChange: jest.fn()
-// //     }
-// //     const form = powerform(signupSchema, config)
-// //     form.setData({username: 'ausername'})
-// //     form.triggerOnChange()
-// //     expect(config.onChange.mock.calls.length).toEqual(2)
-// //     expect(config.onChange.mock.calls[1]).toMatchSnapshot()
-// //   })
-
-// //   it("won't call onChange callback if 'getNotified' is false", () => {
-// //     const config = {
-// //       onChange: jest.fn()
-// //     }
-// //     const form = powerform(signupSchema, config)
-// //     form.setData({username: 'ausername'})
-// //     form.toggleGetNotified()
-// //     form.triggerOnChange()
-// //     expect(config.onChange.mock.calls.length).toEqual(1)
-// //   })
-// // })
-
-// // describe("form.triggerOnError", () => {
-// //   it("calls callback with value and form instance", () => {
-// //     const config = {
-// //       onError: jest.fn()
-// //     }
-// //     const form = powerform(signupSchema, config)
-// //     form.setError({username: 'an error'})
-// //     form.triggerOnError()
-// //     expect(config.onError.mock.calls.length).toEqual(2)
-// //     expect(config.onError.mock.calls[1]).toMatchSnapshot()
-// //   })
-
-// //   it("won't call onError callback if 'getNotified' is false", () => {
-// //     const config = {
-// //       onError: jest.fn()
-// //     }
-// //     const form = powerform(signupSchema, config)
-// //     form.validate()
-// //     form.toggleGetNotified()
-// //     form.triggerOnError()
-// //     expect(config.onError.mock.calls.length).toEqual(1)
-// //   })
-// // })
-
-// // describe("Usage", () => {
-// //   it('works with normal validation', () => {
-// //     const data = {
-// //       username: 'a username',
-// //       name: 'a name'
-// //     }
-// //     const form = powerform(signupSchema, {data})
-
-// //     var expected = {
-// //       username: 'a username',
-// //       name: 'A Name',
-// //       password: null,
-// //       confirmPassword: null
-// //     }
-// //     expect(form.getData()).toEqual(expected)
-
-// //     expect(form.validate()).toEqual(false)
-// //     var expected = {
-// //       username: null,
-// //       name: null,
-// //       password: 'This field is required.',
-// //       confirmPassword: 'This field is required.'
-// //     }
-// //     expect(form.getError()).toEqual(expected)
-
-// //     form.setData({password: 'a password', confirmPassword: 'a password'})
-// //     expect(form.isValid()).toEqual(true)
-// //   })
-// // })
+  it("won't call onError callback if 'getNotified' is false", () => {
+    const spy = jest.fn();
+    const form = signupForm().onError(spy);
+    form.validate();
+    form.toggleGetNotified();
+    form.triggerOnError();
+    expect(spy.mock.calls.length).toEqual(1);
+  });
+});

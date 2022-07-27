@@ -1,13 +1,4 @@
-const STOP_VALIDATION_ERROR_NAME = "StopDecodeError";
-
 class DecodeError extends Error {}
-
-class StopValidationError extends Error {
-  constructor() {
-    super();
-    this.name = STOP_VALIDATION_ERROR_NAME;
-  }
-}
 
 type Optional<T> = T | undefined;
 function optional<T>(decoder: Decoder<T>) {
@@ -107,7 +98,7 @@ export class Field<T> {
     this.triggerOnChange();
   }
 
-  getRaw(): string {
+  getRaw(): T {
     return JSON.parse(this.currentValue);
   }
 
@@ -198,12 +189,21 @@ export const defaultConfig = {
   multipleErrors: false,
   stopOnError: false,
 };
+type FormConfig = {
+  multipleErrors?: boolean;
+  stopOnError?: boolean;
+};
+
+type FormErrorHandler<T> = (errors: Errors<T>) => void;
+type FormChangeHandler<T> = (values: Values<T>) => void;
 export class Form<T> {
   getNotified: boolean = true;
+  errorHandler?: FormErrorHandler<T>;
+  changeHandler?: FormChangeHandler<T>;
 
   constructor(
     public fields: Schema<T>,
-    private config: Config<T> = defaultConfig
+    private config: FormConfig = defaultConfig
   ) {
     for (const fieldName in fields) {
       fields[fieldName].form = this;
@@ -218,11 +218,21 @@ export class Form<T> {
     return this;
   }
 
+  onError(handler: FormErrorHandler<T>) {
+    this.errorHandler = handler;
+    return this;
+  }
+
+  onChange(handler: FormChangeHandler<T>) {
+    this.changeHandler = handler;
+    return this;
+  }
+
   toggleGetNotified() {
     this.getNotified = !this.getNotified;
   }
 
-  setValue(data: T, skipTrigger: boolean) {
+  setValue(data: T, skipTrigger?: boolean) {
     this.toggleGetNotified();
     let prop: keyof typeof data;
     for (prop in data) {
@@ -234,13 +244,13 @@ export class Form<T> {
   }
 
   triggerOnChange(): void {
-    const callback = this.config.onChange;
-    this.getNotified && callback && callback(this.getValue(), this);
+    const callback = this.changeHandler;
+    this.getNotified && callback && callback(this.getRaw());
   }
 
   triggerOnError(): void {
-    const callback = this.config.onError;
-    this.getNotified && callback && callback(this.getError(), this);
+    const callback = this.errorHandler;
+    this.getNotified && callback && callback(this.getError());
   }
 
   getValue(): T {
@@ -248,6 +258,15 @@ export class Form<T> {
     let fieldName: keyof typeof this.fields;
     for (fieldName in this.fields) {
       data[fieldName] = this.fields[fieldName].getValue();
+    }
+    return data;
+  }
+
+  getRaw(): Values<T> {
+    const data = {} as Values<T>;
+    let fieldName: keyof typeof this.fields;
+    for (fieldName in this.fields) {
+      data[fieldName] = this.fields[fieldName].getRaw();
     }
     return data;
   }
@@ -263,7 +282,7 @@ export class Form<T> {
     return data;
   }
 
-  setError(errors: Errors<T>, skipTrigger: boolean) {
+  setError(errors: Errors<T>, skipTrigger?: boolean) {
     this.toggleGetNotified();
     let prop: keyof typeof errors;
     for (prop in errors) {
@@ -317,26 +336,19 @@ export class Form<T> {
     let status: boolean = true;
     this.toggleGetNotified();
 
-    try {
-      let fieldName: keyof typeof this.fields;
-      for (fieldName in this.fields) {
-        let validity: boolean;
-        if (skipAttachError) {
-          validity = this.fields[fieldName].isValid();
-        } else {
-          validity = this.fields[fieldName].validate();
-        }
-        if (!validity && this.config.stopOnError) {
-          throw new StopValidationError();
-        }
-        status = validity && status;
-      }
-    } catch (err) {
-      if (err instanceof StopValidationError) {
-        status = false;
+    let fieldName: keyof typeof this.fields;
+    for (fieldName in this.fields) {
+      let validity: boolean;
+      if (skipAttachError) {
+        validity = this.fields[fieldName].isValid();
       } else {
-        throw err;
+        validity = this.fields[fieldName].validate();
       }
+      if (!validity && this.config.stopOnError) {
+        status = false;
+        break;
+      }
+      status = validity && status;
     }
 
     this.toggleGetNotified();
@@ -399,4 +411,8 @@ export function boolDecoder(val: string): [boolean, Error] {
 
 export function str(...validators: Validator<string>[]) {
   return new Field(strDecoder, ...validators);
+}
+
+export function num(...validators: Validator<number>[]) {
+  return new Field(numDecoder, ...validators);
 }
