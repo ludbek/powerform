@@ -398,6 +398,7 @@ export function numDecoder(val: string): [number, Error] {
   const num = JSON.parse(val);
   if (typeof num !== "number")
     return [NaN, `Expected a number, got ${typeof num}`];
+  if (`${num}` === `${NaN}`) return [NaN, "This field is required"];
   return [num, ""];
 }
 
