@@ -416,3 +416,7 @@ export function str(...validators: Validator<string>[]) {
 export function num(...validators: Validator<number>[]) {
   return new Field(numDecoder, ...validators);
 }
+
+export function bool(...validators: Validator<boolean>[]) {
+  return new Field(boolDecoder, ...validators);
+}
