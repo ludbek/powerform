@@ -32,9 +32,9 @@ export class Field<T> {
 
   // html input field value is always string no matter
   // what its type is, type is only for UI
-  private initialValue: string = "";
-  private previousValue: string = "";
-  private currentValue: string = "";
+  private initialValue: string = '""';
+  private previousValue: string = '""';
+  private currentValue: string = '""';
 
   private validators: Validator<NoUndefined<T>>[];
 
@@ -53,18 +53,24 @@ export class Field<T> {
     );
   }
 
+  // sets initial values
   initValue(val: any) {
-    const strVal = JSON.stringify(val);
     this.initialValue =
       this.previousValue =
       this.currentValue =
-        this.inputHandler
-          ? this.inputHandler(strVal, this.previousValue)
-          : strVal;
+        JSON.stringify(
+          this.inputHandler ? this.inputHandler(val, this.previousValue) : val
+        );
+    return this;
   }
 
   onInput(i: InputHandler) {
     this.inputHandler = i;
+    return this;
+  }
+
+  onError(i: ErrorHandler) {
+    this.errorHandler = i;
     return this;
   }
 
@@ -170,7 +176,7 @@ export class Field<T> {
   }
 
   reset() {
-    this.setValue(this.initialValue);
+    this.setValue(JSON.parse(this.initialValue));
     this.makePristine();
   }
 
@@ -209,6 +215,7 @@ export class Form<T> {
     for (const fieldName in this.fields) {
       this.fields[fieldName].initValue(values[fieldName]);
     }
+    return this;
   }
 
   toggleGetNotified() {
@@ -370,6 +377,9 @@ export type Validator<T> = (val: T, ctx?: Context<T>) => string | undefined;
 export function strDecoder(val: string): [string, Error] {
   if (typeof val !== "string")
     return ["", `Expected a string, got ${typeof val}`];
+  if (val === "") {
+    return ["", `This field is required`];
+  }
   return [val, ""];
 }
 

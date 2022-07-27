@@ -19,6 +19,14 @@ export function equals<T>(fieldName: string): Validator<T> {
   };
 }
 
+function minLen(len: number) {
+  return (val: string) => {
+    if (val.length < len) {
+      return `Expected the value to be ${len} characters long, but is ${val.length} characters long.`;
+    }
+  };
+}
+
 export const noop = () => {};
 
 function capitalize(val: string) {
@@ -145,171 +153,146 @@ describe("field.validate()", () => {
   });
 });
 
-// describe("field.isValid()", () => {
-//   const initialValues = { fruit: "" };
-//   const schema = { fruit: str };
+describe("field.isValid()", () => {
+  const schema = { fruit: str() };
 
-//   it("returns true on positive validation", () => {
-//     const { fields } = powerform(initialValues, schema);
-//     fields.fruit.setData("apple");
+  it("returns true on positive validation", () => {
+    const { fields } = new Form(schema);
+    fields.fruit.setValue("apple");
 
-//     expect(fields.fruit.isValid()).toEqual(true);
-//   });
+    expect(fields.fruit.isValid()).toEqual(true);
+  });
 
-//   it("returns false on negative validation", () => {
-//     const { fields } = powerform(initialValues, schema);
+  it("returns false on negative validation", () => {
+    const { fields } = new Form(schema);
+    fields.fruit.setValue(1);
 
-//     expect(fields.fruit.isValid()).toEqual(false);
-//   });
+    expect(fields.fruit.isValid()).toEqual(false);
+  });
 
-//   it("wont set error", () => {
-//     const { fields } = powerform(initialValues, schema);
+  it("wont set error", () => {
+    const { fields } = new Form(schema);
+    fields.fruit.setValue(1);
 
-//     expect(fields.fruit.isValid()).toEqual(false);
-//     expect(fields.fruit.getError()).toEqual("");
-//   });
+    expect(fields.fruit.isValid()).toEqual(false);
+    expect(fields.fruit.getError()).toEqual("");
+  });
+});
 
-//   it("can validate in relation to other form fields if exists", () => {
-//     const initialValues = { password: "", confirmPassword: "" };
-//     const schema = {
-//       password: str,
-//       confirmPassword: o(str, equals("password")),
-//     };
-//     const { fields } = powerform(initialValues, schema);
+describe("field.setError()", () => {
+  it("sets error", () => {
+    const schema = { fruit: str() };
+    const { fields } = new Form(schema);
+    const errMsg = "Nice error !!!";
+    fields.fruit.setError(errMsg);
+    expect(fields.fruit.getError()).toEqual(errMsg);
+  });
 
-//     fields.password.setData("apple");
-//     fields.confirmPassword.setData("banana");
-//     expect(fields.confirmPassword.isValid()).toEqual(false);
-//   });
-// });
+  it("calls onError callback if exists", () => {
+    const spy = jest.fn();
+    const schema = {
+      fruit: str().onError(spy),
+    };
+    const { fields } = new Form(schema);
+    const errMsg = "Nice error !!!";
+    fields.fruit.setError(errMsg);
+    expect(spy.mock.calls.length).toEqual(1);
+    // expect(spy.mock.calls[0]).toMatchSnapshot();
+  });
 
-// describe("field.setError()", () => {
-//   const initialValues = { fruit: "" };
-//   it("sets error", () => {
-//     const schema = { fruit: str };
-//     const { fields } = powerform(initialValues, schema);
-//     const errMsg = "Nice error !!!";
-//     fields.fruit.setError(errMsg);
-//     expect(fields.fruit.getError()).toEqual(errMsg);
-//   });
+  it("wont call onError callback if 'skipError' is true", () => {
+    const spy = jest.fn();
+    const schema = {
+      fruit: str().onError(spy),
+    };
+    const { fields } = new Form(schema);
+    const errMsg = "Nice error !!!";
+    fields.fruit.setError(errMsg, true);
+    expect(spy.mock.calls.length).toEqual(0);
+  });
+});
 
-//   it("calls onError callback if exists", () => {
-//     const spy = jest.fn();
-//     const schema = {
-//       fruit: {
-//         validator: str,
-//         onError: spy,
-//       },
-//     };
-//     const { fields } = powerform(initialValues, schema);
-//     const errMsg = "Nice error !!!";
-//     fields.fruit.setError(errMsg);
-//     expect(spy.mock.calls.length).toEqual(1);
-//     // expect(spy.mock.calls[0]).toMatchSnapshot();
-//   });
+describe("field.getError()", () => {
+  it("returns error", () => {
+    const { fields } = new Form({ fruit: str() });
+    const errMsg = "Nice error !!!";
+    fields.fruit.setError(errMsg);
+    expect(fields.fruit.getError()).toEqual(errMsg);
+  });
+});
 
-//   it("wont call onError callback if 'skipError' is true", () => {
-//     const spy = jest.fn();
-//     const schema = {
-//       fruit: {
-//         validator: str,
-//         onError: spy,
-//       },
-//     };
-//     const { fields } = powerform(initialValues, schema);
-//     const errMsg = "Nice error !!!";
-//     fields.fruit.setError(errMsg, true);
-//     expect(spy.mock.calls.length).toEqual(0);
-//   });
-// });
+describe("field.isDirty()", () => {
+  it("returns true for dirty field", () => {
+    const { fields } = new Form({ fruit: str() });
+    fields.fruit.setValue("apple");
+    expect(fields.fruit.isDirty()).toEqual(true);
+  });
 
-// describe("field.getError()", () => {
-//   it("returns error", () => {
-//     const { fields } = powerform({ fruit: "" }, { fruit: str });
-//     const errMsg = "Nice error !!!";
-//     fields.fruit.setError(errMsg);
-//     expect(fields.fruit.getError()).toEqual(errMsg);
-//   });
-// });
+  it("returns false for non dirty field", () => {
+    const { fields } = new Form({ fruit: str() });
+    expect(fields.fruit.isDirty()).toEqual(false);
+  });
+});
 
-// describe("field.isDirty()", () => {
-//   it("returns true for dirty field", () => {
-//     const { fields } = powerform({ fruit: "" }, { fruit: str });
-//     fields.fruit.setData("apple");
-//     expect(fields.fruit.isDirty()).toEqual(true);
-//   });
+describe("field.makePristine()", () => {
+  it("sets previousValue and initialValue to currentValue", () => {
+    const { fields } = new Form({ fruit: str() });
+    fields.fruit.setValue("apple");
+    expect(fields.fruit.isDirty()).toEqual(true);
 
-//   it("returns false for non dirty field", () => {
-//     const { fields } = powerform({ fruit: "" }, { fruit: str });
-//     expect(fields.fruit.isDirty()).toEqual(false);
-//   });
-// });
+    fields.fruit.makePristine();
+    expect(fields.fruit.isDirty()).toEqual(false);
+  });
 
-// describe("field.makePristine()", () => {
-//   it("sets previousValue and initialValue to currentValue", () => {
-//     const { fields } = powerform({ fruit: "" }, { fruit: str });
-//     fields.fruit.setData("apple");
-//     expect(fields.fruit.isDirty()).toEqual(true);
+  it("empties error", () => {
+    const { fields } = new Form({ fruit: str() });
+    fields.fruit.validate();
+    expect(fields.fruit.getError()).toEqual("This field is required");
 
-//     fields.fruit.makePristine();
-//     expect(fields.fruit.isDirty()).toEqual(false);
-//   });
+    fields.fruit.makePristine();
+    expect(fields.fruit.getError()).toEqual("");
+  });
+});
 
-//   it("empties error", () => {
-//     const { fields } = powerform({ fruit: "" }, { fruit: str });
-//     fields.fruit.validate();
-//     expect(fields.fruit.getError()).toEqual("This field is required");
+describe("field.reset()", () => {
+  it("sets currentValue and previousValue to initialValue", () => {
+    const { fields } = new Form({ fruit: str() }).initValue({ fruit: "apple" });
+    fields.fruit.setValue("banana");
+    expect(fields.fruit.getValue()).toEqual("banana");
 
-//     fields.fruit.makePristine();
-//     expect(fields.fruit.getError()).toEqual("");
-//   });
-// });
+    fields.fruit.reset();
+    expect(fields.fruit.getValue()).toEqual("apple");
+  });
 
-// describe("field.reset()", () => {
-//   it("sets currentValue and previousValue to initialValue", () => {
-//     const { fields } = powerform({ fruit: "apple" }, { fruit: str });
-//     fields.fruit.setData("banana");
-//     expect(fields.fruit.getData()).toEqual("banana");
+  it("calls onChange callback", () => {
+    const spy = jest.fn();
+    const { fields } = new Form({
+      fruit: str().onChange(spy),
+    });
+    fields.fruit.setValue("banana");
+    expect(fields.fruit.getValue()).toEqual("banana");
 
-//     fields.fruit.reset();
-//     expect(fields.fruit.getData()).toEqual("apple");
-//   });
+    fields.fruit.reset();
+    expect(spy.mock.calls[1][0]).toEqual("");
+  });
 
-//   it("calls onChange callback", () => {
-//     const spy = jest.fn();
-//     const { fields } = powerform(
-//       { fruit: "apple" },
-//       {
-//         fruit: {
-//           validator: str,
-//           onChange: spy,
-//         },
-//       }
-//     );
-//     fields.fruit.setData("banana");
-//     expect(fields.fruit.getData()).toEqual("banana");
+  it("empties error", () => {
+    const { fields } = new Form({ fruit: str() });
+    fields.fruit.validate();
+    expect(fields.fruit.getError()).toEqual("This field is required");
 
-//     fields.fruit.reset();
-//     expect(spy.mock.calls[1][0]).toEqual("apple");
-//   });
+    fields.fruit.reset();
+    expect(fields.fruit.getError()).toEqual("");
+  });
+});
 
-//   it("empties error", () => {
-//     const { fields } = powerform({ fruit: "" }, { fruit: str });
-//     fields.fruit.validate();
-//     expect(fields.fruit.getError()).toEqual("This field is required");
-
-//     fields.fruit.reset();
-//     expect(fields.fruit.getError()).toEqual("");
-//   });
-// });
-
-// describe("field.setAndValidate()", () => {
-//   it("sets and validates field", () => {
-//     const { fields } = powerform({ fruit: "apple" }, { fruit: str });
-//     const error = fields.fruit.setAndValidate("");
-//     expect(error).toEqual("This field is required");
-//   });
-// });
+describe("field.setAndValidate()", () => {
+  it("sets and validates field", () => {
+    const { fields } = new Form({ fruit: str() });
+    const error = fields.fruit.setAndValidate("");
+    expect(error).toEqual("This field is required");
+  });
+});
 
 // describe("powerform", () => {
 //   const initialValues = {
