@@ -14,7 +14,7 @@
     "./package.json": "./package.json"
   },
   "scripts": {
-    "test": "jest --config jestconfig.json",
+    "test": "jest --coverage",
     "format": "prettier --write \"src/**/*.ts\" \"./*.json\"",
     "lint": "tslint -p tsconfig.json",
     "clean": "rm -rf lib/* deno/lib/*",

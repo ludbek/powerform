@@ -109,6 +109,7 @@ export class Field<T> {
 
   _validate(): string | undefined {
     const [parsedVal, err] = this.decoder(JSON.parse(this.currentValue));
+    console.log("------>", this.fieldName, parsedVal, err);
     if (err !== "") {
       return err;
     }
@@ -120,7 +121,8 @@ export class Field<T> {
       const err = v(parsedVal as NoUndefined<T>, {
         prevValue: preValue as NoUndefined<T>,
         fieldName: this.fieldName,
-        all: this.form ? this.form.value : {},
+        // optimise this step
+        all: this.form ? this.form.raw : {},
       });
       if (err != undefined) {
         return err;
@@ -396,18 +398,21 @@ export function strDecoder(val: string): [string, Error] {
 }
 
 export function numDecoder(val: string): [number, Error] {
-  const num = JSON.parse(val);
-  if (typeof num !== "number")
-    return [NaN, `Expected a number, got ${typeof num}`];
-  if (`${num}` === `${NaN}`) return [NaN, "This field is required"];
-  return [num, ""];
+  if (val === "") return [NaN, "This field is required"];
+  try {
+    return [JSON.parse(val), ""];
+  } catch (e) {
+    return [NaN, `Expected a number, got ${val}`];
+  }
 }
 
 export function boolDecoder(val: string): [boolean, Error] {
-  const bool = JSON.parse(val);
-  if (typeof bool !== "boolean")
-    return [false, `Expected a boolean, got ${typeof bool}`];
-  return [bool, ""];
+  if (val === "") return [false, "This field is required"];
+  try {
+    return [JSON.parse(val), ""];
+  } catch (e) {
+    return [false, `Expected a number, got ${val}`];
+  }
 }
 
 export function str(...validators: Validator<string>[]) {

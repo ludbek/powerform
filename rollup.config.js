@@ -12,7 +12,7 @@ export default [
       },
       {
         file: "lib/index.umd.js",
-        name: "Zod",
+        name: "Powerform",
         format: "umd",
         sourcemap: false,
       },

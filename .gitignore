@@ -5,3 +5,5 @@ node_modules/
 npm-debug.log
 bower_components/
 lib/
+.DS_Store
+coverage/
