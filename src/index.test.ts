@@ -120,7 +120,7 @@ describe("field.validate()", () => {
     fields.fruit.setValue(1);
     fields.fruit.validate();
 
-    expect(fields.fruit.error).toEqual("Expected a string, got number");
+    expect(fields.fruit.error).toEqual("Expected a string, got 1");
   });
 
   it("can validate in relation to other form fields if exists", () => {

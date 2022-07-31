@@ -46,12 +46,9 @@ export class Field<T> {
 
   // sets initial values
   initValue(val: any) {
-    this.initialValue =
-      this.previousValue =
-      this.currentValue =
-        JSON.stringify(
-          this.inputHandler ? this.inputHandler(val, this.previousValue) : val
-        );
+    val = typeof val === "string" ? val : JSON.stringify(val);
+    this.setValue(val, true);
+    this.makePristine();
     return this;
   }
 
@@ -109,7 +106,6 @@ export class Field<T> {
 
   _validate(): string | undefined {
     const [parsedVal, err] = this.decoder(JSON.parse(this.currentValue));
-    console.log("------>", this.fieldName, parsedVal, err);
     if (err !== "") {
       return err;
     }
@@ -389,8 +385,7 @@ type NoUndefined<T> = T extends undefined ? never : T;
 export type Validator<T> = (val: T, ctx?: Context<T>) => string | undefined;
 
 export function strDecoder(val: string): [string, Error] {
-  if (typeof val !== "string")
-    return ["", `Expected a string, got ${typeof val}`];
+  if (typeof val !== "string") return ["", `Expected a string, got ${val}`];
   if (val === "") {
     return ["", `This field is required`];
   }
