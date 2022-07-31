@@ -126,6 +126,7 @@ export class Field<T> {
         return err;
       }
     }
+    return undefined;
   }
 
   validate(): boolean {
@@ -253,8 +254,8 @@ export class Form<T> {
   }
 
   get value(): T {
-    const data = {} as T;
-    let fieldName: keyof typeof this.fields;
+    const data = {} as Values<T>;
+    let fieldName: keyof Values<T>;
     for (fieldName in this.fields) {
       data[fieldName] = this.fields[fieldName].value;
     }
@@ -263,7 +264,7 @@ export class Form<T> {
 
   get raw(): Values<T> {
     const data = {} as Values<T>;
-    let fieldName: keyof typeof this.fields;
+    let fieldName: keyof Values<T>;
     for (fieldName in this.fields) {
       data[fieldName] = this.fields[fieldName].raw;
     }
@@ -272,7 +273,7 @@ export class Form<T> {
 
   getUpdates(): T {
     const data = {} as T;
-    let fieldName: keyof typeof this.fields;
+    let fieldName: keyof Values<T>;
     for (fieldName in this.fields) {
       if (this.fields[fieldName].isDirty()) {
         data[fieldName] = this.fields[fieldName].value;
@@ -295,7 +296,7 @@ export class Form<T> {
 
   get error(): Errors<T> {
     const errors = {} as Errors<T>;
-    let fieldName: keyof typeof this.fields;
+    let fieldName: keyof Values<T>;
     for (fieldName in this.fields) {
       errors[fieldName] = this.fields[fieldName].error;
     }
@@ -303,7 +304,7 @@ export class Form<T> {
   }
 
   isDirty(): boolean {
-    let fieldName: keyof typeof this.fields;
+    let fieldName: keyof Values<T>;
     for (fieldName in this.fields) {
       if (this.fields[fieldName].isDirty()) return true;
     }
@@ -312,7 +313,7 @@ export class Form<T> {
 
   makePristine() {
     this.toggleGetNotified();
-    let fieldName: keyof typeof this.fields;
+    let fieldName: keyof Values<T>;
     for (fieldName in this.fields) {
       this.fields[fieldName].makePristine();
     }
@@ -322,7 +323,7 @@ export class Form<T> {
 
   reset() {
     this.toggleGetNotified();
-    let fieldName: keyof typeof this.fields;
+    let fieldName: keyof Values<T>;
     for (fieldName in this.fields) {
       this.fields[fieldName].reset();
     }
@@ -335,7 +336,7 @@ export class Form<T> {
     let status: boolean = true;
     this.toggleGetNotified();
 
-    let fieldName: keyof typeof this.fields;
+    let fieldName: keyof Values<T>;
     for (fieldName in this.fields) {
       let validity: boolean;
       if (skipAttachError) {

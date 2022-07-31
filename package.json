@@ -2,12 +2,26 @@
   "name": "powerform",
   "version": "5.0.0-alha1",
   "description": "A powerful form model.",
-  "main": "lib/index.js",
+  "main": "./lib/index.js",
+  "types": "./index.d.ts",
+  "module": "./lib/index.mjs",
+  "exports": {
+    ".": {
+      "require": "./lib/index.js",
+      "import": "./lib/index.mjs",
+      "types": "./index.d.ts"
+    },
+    "./package.json": "./package.json"
+  },
   "scripts": {
     "test": "jest --config jestconfig.json",
-    "build": "tsc",
     "format": "prettier --write \"src/**/*.ts\" \"./*.json\"",
-    "lint": "tslint -p tsconfig.json"
+    "lint": "tslint -p tsconfig.json",
+    "clean": "rm -rf lib/* deno/lib/*",
+    "build": "yarn run clean && npm run build:cjs && npm run build:esm",
+    "build:esm": "rollup --config rollup.config.js",
+    "build:cjs": "tsc --p tsconfig.cjs.json",
+    "build:types": "tsc --p tsconfig.types.json"
   },
   "files": [
     "lib/**/*"
@@ -27,12 +41,13 @@
   ],
   "author": "ludbek",
   "license": "ISC",
-  "dependencies": {},
   "devDependencies": {
+    "@rollup/plugin-typescript": "^8.3.3",
     "@types/jest": "^26.0.24",
+    "rollup": "^2.70.1",
+    "ts-jest": "^27.1.3",
     "jest": "^27.0.6",
     "prettier": "^2.3.2",
-    "ts-jest": "^27.0.3",
     "tslint": "^6.1.3",
     "tslint-config-prettier": "^1.18.0",
     "typescript": "^4.7.4"

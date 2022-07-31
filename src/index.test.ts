@@ -1,14 +1,4 @@
-import {
-  Form,
-  Field,
-  Validator,
-  Context,
-  strDecoder,
-  numDecoder,
-  boolDecoder,
-  str,
-  num,
-} from "./index";
+import { Form, Validator, Context, str, num } from "./index";
 
 export function equals<T>(fieldName: string): Validator<T> {
   return (val: T, ctx?: Context<T>) => {
@@ -16,7 +6,9 @@ export function equals<T>(fieldName: string): Validator<T> {
       if (val != ctx.all[fieldName]) {
         return `Must be equal to "${fieldName}"`;
       }
+      return undefined;
     }
+    return undefined;
   };
 }
 
@@ -40,6 +32,7 @@ describe("field.constructor()", () => {
   it("sets the decoder and validators", () => {
     function isApple(val: string) {
       if (val !== "apple") return "Expected an apple";
+      return undefined;
     }
     const fruitField = str(isApple);
     fruitField.setAndValidate("banana");
