@@ -110,7 +110,7 @@ export class Field<T> {
       return err;
     }
     if (parsedVal === undefined) return;
-    const [preValue, ] = this.decoder(this.previousValue);
+    const [preValue] = this.decoder(this.previousValue);
     if (preValue === undefined) return;
 
     for (const v of this.validators) {

@@ -130,9 +130,7 @@ describe("field.validate()", () => {
     fields.password.setValue("apple");
     fields.confirmPassword.setValue("banana");
     fields.confirmPassword.validate();
-    expect(fields.confirmPassword.error).toEqual(
-      `Must be equal to "password"`
-    );
+    expect(fields.confirmPassword.error).toEqual(`Must be equal to "password"`);
   });
 });
 
