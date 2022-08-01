@@ -1,0 +1,88 @@
+<html>
+  <head>
+    <script src="../lib/index.umd.js"></script>
+  </head>
+  <body>
+    <form id="form">
+      <label>Name</label>
+      <input name="name" id="name">
+      <div id="name-error" class="error"></div>
+      <label>Email</label>
+      <input name="email" id="email">
+      <div id="email-error" class="error"></div>
+      <label>Age</label>
+      <input name="age" id="age">
+      <div id="age-error" class="error"></div>
+      <label>Password</label>
+      <input name="password" id="password">
+      <div id="password-error" class="error"></div>
+      <label>Confirm Password</label>
+      <input name="confirmPassword" id="confirmPassword">
+      <div id="confirmPassword-error" class="error"></div>
+      <div>
+        <input type="checkbox" id="tnc" name="tnc">
+        <label for="tnc">Agree terms and conditions</label>
+        <div id="tnc-error" class="error"></div>
+      </div>
+      <button type="submit">Submit</button>
+    </form>
+  </body>
+  <script>
+    function initEl(field) {
+      const name = field.fieldName
+      const inputEl = document.getElementById(name)
+
+      if(field.fieldName === "tnc") {
+        inputEl.addEventListener("input", (e) => {
+          field.setValue(e.target.checked)
+        })
+      }
+      else {
+        inputEl.addEventListener("input", (e) => {
+          field.setValue(e.target.value)
+        })
+      }
+
+      inputEl.addEventListener("change", (e) => {
+        field.validate()
+      })
+
+      const errorEl = document.getElementById(`${name}-error`)
+      field.onError((error) => {
+        errorEl.innerHTML = field.error
+      })
+    }
+
+    function confirmPassword(val, ctx) {
+      if (val !== ctx?.all?.password) {
+        return "Passwords must be equal."
+      }
+    }
+
+    function isTrue(val) {
+      if (!val) return "Please accept T&C"
+    }
+
+    const form = new Powerform.Form({
+      name: Powerform.str(),
+      email: Powerform.str(),
+      age: Powerform.num(),
+      password: Powerform.str(),
+      confirmPassword: Powerform.str(confirmPassword),
+      tnc: Powerform.bool(isTrue),
+    })
+
+    for(const [_, field] of Object.entries(form.fields)) {
+      initEl(field)
+    }
+
+    const formDom = document.getElementById("form")
+    formDom.addEventListener("submit", (e) => {
+      e.preventDefault()
+      if(form.validate()) {
+        console.log("Valid form gonna submit the value:", form.value)
+      }
+    })
+
+  </script>
+</html>
