@@ -12,8 +12,6 @@ export function equals<T>(fieldName: string): Validator<T> {
   };
 }
 
-export const noop = () => {};
-
 function capitalize(val: string) {
   if (val === "") return val;
   return val.replace(/(?:^|\s)\S/g, (s) => s.toUpperCase());
@@ -133,7 +131,7 @@ describe("field.validate()", () => {
     fields.confirmPassword.setValue("banana");
     fields.confirmPassword.validate();
     expect(fields.confirmPassword.error).toEqual(
-      `Must be equal to \"password\"`
+      `Must be equal to "password"`
     );
   });
 });

@@ -17,15 +17,15 @@ export class Field<T> {
   changeHandler?: ChangeHandler<T>;
   inputHandler?: InputHandler;
   errorHandler?: ErrorHandler;
-  fieldName: string = "";
+  fieldName = "";
   form?: any;
-  private _error: string = "";
+  private _error = "";
 
   // html input field value is always string no matter
   // what its type is, type is only for UI
-  private initialValue: string = '""';
-  private previousValue: string = '""';
-  private currentValue: string = '""';
+  private initialValue = '""';
+  private previousValue = '""';
+  private currentValue = '""';
 
   private validators: Validator<NoUndefined<T>>[];
 
@@ -110,7 +110,7 @@ export class Field<T> {
       return err;
     }
     if (parsedVal === undefined) return;
-    const [preValue, _] = this.decoder(this.previousValue);
+    const [preValue, ] = this.decoder(this.previousValue);
     if (preValue === undefined) return;
 
     for (const v of this.validators) {
@@ -140,7 +140,7 @@ export class Field<T> {
 
   isValid(): boolean {
     const err = this._validate();
-    return !Boolean(err);
+    return !err;
   }
 
   setError(error: string, skipTrigger?: boolean) {
@@ -195,7 +195,7 @@ type FormConfig = {
 type FormErrorHandler<T> = (errors: Errors<T>) => void;
 type FormChangeHandler<T> = (values: Values<T>) => void;
 export class Form<T> {
-  getNotified: boolean = true;
+  getNotified = true;
   errorHandler?: FormErrorHandler<T>;
   changeHandler?: FormChangeHandler<T>;
 
@@ -331,7 +331,7 @@ export class Form<T> {
   }
 
   _validate(skipAttachError: boolean) {
-    let status: boolean = true;
+    let status = true;
     this.toggleGetNotified();
 
     let fieldName: keyof Values<T>;
