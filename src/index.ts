@@ -11,11 +11,11 @@ function optional<T>(decoder: Decoder<T>) {
 type Error = string;
 type Decoder<T> = (val: string) => [T, Error];
 type ChangeHandler<T> = (val: T) => void;
-type InputHandler = (val: string, preVal: string) => string;
+type Modifer = (val: string, preVal: string) => string;
 type ErrorHandler = (error: string) => void;
 export class Field<T> {
   changeHandler?: ChangeHandler<T>;
-  inputHandler?: InputHandler;
+  modifier?: Modifer;
   errorHandler?: ErrorHandler;
   fieldName = "";
   form?: any;
@@ -52,8 +52,8 @@ export class Field<T> {
     return this;
   }
 
-  onInput(i: InputHandler) {
-    this.inputHandler = i;
+  addModifier(i: Modifer) {
+    this.modifier = i;
     return this;
   }
 
@@ -87,7 +87,7 @@ export class Field<T> {
     // input handlers should deal with actual value
     // not a strigified version
     this.currentValue = JSON.stringify(
-      this.inputHandler ? this.inputHandler(val, this.previousValue) : val
+      this.modifier ? this.modifier(val, this.previousValue) : val
     );
 
     if (skipTrigger) return;
@@ -386,9 +386,6 @@ export type Validator<T> = (val: T, ctx?: Context<T>) => string | undefined;
 
 export function strDecoder(val: string): [string, Error] {
   if (typeof val !== "string") return ["", `Expected a string, got ${val}`];
-  if (val === "") {
-    return ["", `This field is required`];
-  }
   return [val, ""];
 }
 
@@ -406,7 +403,7 @@ export function boolDecoder(val: string): [boolean, Error] {
   try {
     return [JSON.parse(val), ""];
   } catch (e) {
-    return [false, `Expected a number, got ${val}`];
+    return [false, `Expected a boolean, got ${val}`];
   }
 }
 

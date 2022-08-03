@@ -1,6 +1,11 @@
 import { Form, Validator, Context, str, num } from "./index";
 
-export function equals<T>(fieldName: string): Validator<T> {
+function nonEmpty(val: string): string | undefined {
+  if (val === "") return "This field is required"
+  return undefined
+}
+
+function equals<T>(fieldName: string): Validator<T> {
   return (val: T, ctx?: Context<T>) => {
     if (ctx !== undefined) {
       if (val != ctx.all[fieldName]) {
@@ -19,10 +24,10 @@ function capitalize(val: string) {
 
 function signupForm() {
   return new Form({
-    username: str(),
-    name: str().onInput(capitalize),
-    password: str(),
-    confirmPassword: str(equals("password")),
+    username: str(nonEmpty),
+    name: str(nonEmpty).addModifier(capitalize),
+    password: str(nonEmpty),
+    confirmPassword: str(nonEmpty, equals("password")),
   });
 }
 
@@ -48,8 +53,8 @@ describe("field.setValue", () => {
     expect(field.value).toEqual(value);
   });
 
-  it("calls onInput and sets value returned by it", () => {
-    const field = str().onInput(capitalize);
+  it("calls addModifier and sets value returned by it", () => {
+    const field = str().addModifier(capitalize);
     field.setValue("red apple");
     expect(field.value).toEqual("Red Apple");
   });
@@ -225,7 +230,7 @@ describe("field.makePristine()", () => {
   });
 
   it("empties error", () => {
-    const { fields } = new Form({ fruit: str() });
+    const { fields } = new Form({ fruit: str(nonEmpty) });
     fields.fruit.validate();
     expect(fields.fruit.error).toEqual("This field is required");
 
@@ -257,7 +262,7 @@ describe("field.reset()", () => {
   });
 
   it("empties error", () => {
-    const { fields } = new Form({ fruit: str() });
+    const { fields } = new Form({ fruit: str(nonEmpty) });
     fields.fruit.validate();
     expect(fields.fruit.error).toEqual("This field is required");
 
@@ -268,7 +273,7 @@ describe("field.reset()", () => {
 
 describe("field.setAndValidate()", () => {
   it("sets and validates field", () => {
-    const { fields } = new Form({ fruit: str() });
+    const { fields } = new Form({ fruit: str(nonEmpty) });
     const error = fields.fruit.setAndValidate("");
     expect(error).toEqual("This field is required");
   });
@@ -343,9 +348,9 @@ describe("form.validate", () => {
 
   it("respects config.stopOnError", () => {
     const schema = {
-      username: str(),
-      name: str(),
-      password: str(),
+      username: str(nonEmpty),
+      name: str(nonEmpty),
+      password: str(nonEmpty),
     };
     const config = { stopOnError: true };
     const form = new Form(schema, config);
