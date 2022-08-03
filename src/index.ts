@@ -1,9 +1,9 @@
 class DecodeError extends Error {}
 
-type Optional<T> = T | undefined;
+type Optional<T> = T | null;
 function optional<T>(decoder: Decoder<T>) {
   return (val: string): [Optional<T>, Error] => {
-    if (val === "") return [undefined, ""];
+    if (val === "") return [null, ""];
     return decoder(val);
   };
 }
@@ -27,11 +27,11 @@ export class Field<T> {
   private previousValue = '""';
   private currentValue = '""';
 
-  private validators: Validator<NoUndefined<T>>[];
+  private validators: Validator<NotNull<T>>[];
 
   constructor(
     private decoder: Decoder<T>,
-    ...validators: Validator<NoUndefined<T>>[]
+    ...validators: Validator<NotNull<T>>[]
   ) {
     this.validators = validators;
   }
@@ -40,7 +40,7 @@ export class Field<T> {
     const optionalDecoder = optional(this.decoder);
     return new Field<Optional<T>>(
       optionalDecoder,
-      ...(this.validators as Validator<NoUndefined<T>>[])
+      ...(this.validators as Validator<NotNull<T>>[])
     );
   }
 
@@ -114,8 +114,8 @@ export class Field<T> {
     if (preValue === undefined) return;
 
     for (const v of this.validators) {
-      const err = v(parsedVal as NoUndefined<T>, {
-        prevValue: preValue as NoUndefined<T>,
+      const err = v(parsedVal as NotNull<T>, {
+        prevValue: preValue as NotNull<T>,
         fieldName: this.fieldName,
         // optimise this step
         all: this.form ? this.form.raw : {},
@@ -381,7 +381,7 @@ export type Context<T> = {
   all: Record<string, any>;
 };
 
-type NoUndefined<T> = T extends undefined ? never : T;
+type NotNull<T> = T extends null ? never : T;
 export type Validator<T> = (val: T, ctx?: Context<T>) => string | undefined;
 
 export function strDecoder(val: string): [string, Error] {
